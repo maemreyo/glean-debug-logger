@@ -1,0 +1,36 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+    open-pull-requests-limit: 10
+    labels:
+      - 'dependencies'
+      - 'npm'
+    commit-message:
+      prefix: 'chore(deps)'
+      include: 'scope'
+    ignore:
+      # Ignore some dependency updates for major versions
+      - dependency-name: 'react'
+        update-types: ['version-update:semver-major']
+    groups:
+      # Group dev dependencies together
+      dev-dependencies:
+        patterns:
+          - '@types/*'
+          - '@commitlint/*'
+          - '@semantic-release/*'
+          - 'eslint*'
+          - 'prettier*'
+          - 'typescript*'
+          - 'vitest*'
+          - 'tsup*'
+      # Group testing dependencies
+      test-dependencies:
+        patterns:
+          - '@testing-library/*'
+          - 'vitest*'

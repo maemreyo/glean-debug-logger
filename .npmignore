@@ -1,0 +1,63 @@
+# Source files (already in dist)
+src/
+*.ts
+*.tsx
+!*.d.ts
+
+# Build configs
+tsconfig.json
+tsup.config.ts
+vite.config.ts
+vitest.config.ts
+
+# Development files
+.test/
+tests/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__/
+__mocks__/
+coverage/
+
+# Documentation
+docs/
+examples/
+AGENTS.md
+RELEASE.md
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# CI/CD
+.github/
+.git/
+.gitignore
+.gitattributes
+
+# Editor files
+.vscode/
+.idea/
+.editorconfig
+.eslintrc*
+.prettierrc*
+.cspell.json
+
+# Misc
+.DS_Store
+*.log
+*.local
+.env
+.env.*
+!.env.example
+
+# Package manager lockfiles (dev only)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Other
+.sisyphus/
+node_modules/

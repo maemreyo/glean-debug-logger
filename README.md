@@ -1,5 +1,13 @@
 # @zaob/glean-debug-logger
 
+[![npm version](https://badge.fury.io/js/%40zaob%2Fglean-debug-logger.svg)](https://www.npmjs.com/package/@zaob/glean-debug-logger)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/maemreyo/glean-debug-logger/actions/workflows/ci.yml/badge.svg)](https://github.com/maemreyo/glean-debug-logger/actions/workflows/ci.yml)
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-17%2B-61DAFB)](https://react.dev/)
+[![minzipped](https://badgen.net/bundlephobia/minzip/@zaob/glean-debug-logger)](https://bundlephobia.com/result?p=@zaob/glean-debug-logger)
+
 A production-ready React/Next.js debug logging library that captures console logs, network requests (Fetch + XHR), exports with smart filenames, and supports server upload.
 
 ## Features
