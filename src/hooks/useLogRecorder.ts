@@ -4,13 +4,15 @@ import type {
   LogEntry,
   LogMetadata,
   UseLogRecorderReturn,
+  DownloadOptions,
 } from '../types';
-import {
-  sanitizeData,
-  generateSessionId,
-  generateFilename,
-  collectMetadata,
-} from '../utils';
+
+declare global {
+  interface Window {
+    showDirectoryPicker: () => Promise<FileSystemDirectoryHandle>;
+  }
+}
+import { sanitizeData, generateSessionId, generateFilename, collectMetadata } from '../utils';
 
 const DEFAULT_CONFIG: LogRecorderConfig = {
   maxLogs: 1000,
@@ -19,6 +21,7 @@ const DEFAULT_CONFIG: LogRecorderConfig = {
   captureConsole: true,
   captureFetch: true,
   captureXHR: true,
+  enableDirectoryPicker: false, // Enable directory picker for downloads (Chrome 86+, Edge 86+ only)
   sanitizeKeys: ['password', 'token', 'apiKey', 'secret', 'authorization', 'creditCard'],
   excludeUrls: [],
   fileNameTemplate: '{env}_{userId}_{sessionId}_{timestamp}',
@@ -30,7 +33,9 @@ const DEFAULT_CONFIG: LogRecorderConfig = {
   uploadOnError: false,
 };
 
-export function useLogRecorder(customConfig: Partial<LogRecorderConfig> = {}): UseLogRecorderReturn {
+export function useLogRecorder(
+  customConfig: Partial<LogRecorderConfig> = {}
+): UseLogRecorderReturn {
   const config = { ...DEFAULT_CONFIG, ...customConfig };
   const logsRef = useRef<LogEntry[]>([]);
   const isInitialized = useRef(false);
@@ -270,7 +275,6 @@ export function useLogRecorder(customConfig: Partial<LogRecorderConfig> = {}): U
         };
 
         xhr.send = function (body: Document | XMLHttpRequestBodyInit | null) {
-
           if (url && !shouldExcludeUrl(url)) {
             let parsedBody: unknown = null;
             if (body) {
@@ -338,7 +342,8 @@ export function useLogRecorder(customConfig: Partial<LogRecorderConfig> = {}): U
       };
 
       Object.setPrototypeOf(MyXMLHttpRequest.prototype, OriginalXHR.prototype);
-      (window as { XMLHttpRequest: typeof OriginalXHR }).XMLHttpRequest = MyXMLHttpRequest as unknown as typeof OriginalXHR;
+      (window as { XMLHttpRequest: typeof OriginalXHR }).XMLHttpRequest =
+        MyXMLHttpRequest as unknown as typeof OriginalXHR;
 
       cleanupFns.push(() => {
         window.XMLHttpRequest = OriginalXHR;
@@ -367,56 +372,106 @@ export function useLogRecorder(customConfig: Partial<LogRecorderConfig> = {}): U
     };
   }, []);
 
+  function supportsFileSystemAccess(): boolean {
+    return 'showDirectoryPicker' in window;
+  }
+
+  async function saveToDirectory(content: string, filename: string): Promise<void> {
+    const dirHandle = await window.showDirectoryPicker();
+    const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(content);
+    await writable.close();
+  }
+
   const downloadLogs = useCallback(
-    (format: 'json' | 'txt' = 'json', customFilename?: string | null): string | null => {
+    (
+      format: 'json' | 'txt' = 'json',
+      customFilename?: string | null,
+      options?: DownloadOptions
+    ): string | null => {
       if (typeof window === 'undefined') return null;
 
-      try {
-        updateMetadata();
-        const filename = customFilename || generateFilename(format, {}, config);
+      const executeDownload = async (): Promise<string | null> => {
+        try {
+          updateMetadata();
+          const filename = customFilename || generateFilename(format, {}, config);
 
-        let content: string;
-        let mimeType: string;
+          let content: string;
+          let mimeType: string;
 
-        if (format === 'json') {
-          const output = config.includeMetadata
-            ? { metadata: metadataRef.current, logs: logsRef.current }
-            : logsRef.current;
-          content = safeStringify(output);
-          mimeType = 'application/json';
-        } else {
-          const metaHeader = config.includeMetadata
-            ? `${'='.repeat(80)}\nMETADATA\n${'='.repeat(80)}\n${safeStringify(metadataRef.current)}\n${'='.repeat(80)}\n\n`
-            : '';
-          content =
-            metaHeader +
-            logsRef.current
-              .map((log) => `[${log.time}] ${log.type}\n${safeStringify(log)}\n${'='.repeat(80)}`)
-              .join('\n');
-          mimeType = 'text/plain';
+          if (format === 'json') {
+            const output = config.includeMetadata
+              ? { metadata: metadataRef.current, logs: logsRef.current }
+              : logsRef.current;
+            content = safeStringify(output);
+            mimeType = 'application/json';
+          } else {
+            const metaHeader = config.includeMetadata
+              ? `${'='.repeat(80)}\nMETADATA\n${'='.repeat(80)}\n${safeStringify(metadataRef.current)}\n${'='.repeat(80)}\n\n`
+              : '';
+            content =
+              metaHeader +
+              logsRef.current
+                .map((log) => `[${log.time}] ${log.type}\n${safeStringify(log)}\n${'='.repeat(80)}`)
+                .join('\n');
+            mimeType = 'text/plain';
+          }
+
+          // Check if should show picker
+          const showPicker = options?.showPicker || config.enableDirectoryPicker;
+
+          if (showPicker && supportsFileSystemAccess()) {
+            try {
+              await saveToDirectory(content, filename);
+              return filename;
+            } catch (err) {
+              if (err instanceof DOMException) {
+                if (err.name === 'AbortError') {
+                  // User cancelled - silent return
+                  return null;
+                }
+                if (err.name === 'NotAllowedError') {
+                  // Permission denied - log error for UI to handle
+                  console.error('[useLogRecorder] Directory permission denied');
+                  // Fall through to standard download
+                }
+              }
+              // Other errors or permission denied - fall through to standard download
+            }
+          }
+
+          // Fallback: standard download (EXACTLY as before)
+          const blob = new Blob([content], { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          return filename;
+        } catch {
+          console.error('[useLogRecorder] Failed to download logs');
+          return null;
         }
+      };
 
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      executeDownload().catch((err) => {
+        console.error('[useLogRecorder] Download error:', err);
+      });
 
-        return filename;
-      } catch {
-        console.error('[useLogRecorder] Failed to download logs');
-        return null;
-      }
+      return null;
     },
     [config, safeStringify, updateMetadata]
   );
 
   const uploadLogs = useCallback(
-    async (customEndpoint?: string | null): Promise<{ success: boolean; data?: unknown; error?: string }> => {
+    async (
+      customEndpoint?: string | null
+    ): Promise<{ success: boolean; data?: unknown; error?: string }> => {
       const endpoint = customEndpoint || config.uploadEndpoint;
 
       if (!endpoint) {

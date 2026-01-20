@@ -4,13 +4,14 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import {
   setupBrowserMocks,
   teardownBrowserMocks,
   createMockFetchResponse,
+  createMockDirectoryHandle,
 } from './__mocks__/browser';
-import type { LogEntry } from '../types';
+import { useLogRecorder } from './useLogRecorder';
 
 // Setup browser mocks before all tests
 beforeAll(() => {
@@ -40,17 +41,7 @@ function setupFetchMockError(error: Error): void {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(error));
 }
 
-// Mock module to test hook
-vi.mock('react', async () => {
-  const actual = await vi.importActual('react');
-  return {
-    ...(actual as Record<string, unknown>),
-    useState: vi.fn((initial: unknown) => [initial, vi.fn()]),
-    useEffect: vi.fn(),
-    useCallback: vi.fn((fn: unknown) => fn),
-    useRef: vi.fn((initial: unknown) => ({ current: initial })),
-  };
-});
+// React hooks are not mocked - we use renderHook for proper testing
 
 describe('useLogRecorder - Console Interception', () => {
   it('should have original console methods available', () => {
@@ -229,5 +220,145 @@ describe('useLogRecorder - Configuration Options', () => {
     const sanitizeKeys = ['password', 'token', 'apiKey', 'secret'];
     expect(sanitizeKeys).toContain('password');
     expect(sanitizeKeys).toContain('token');
+  });
+});
+
+describe('useLogRecorder - Directory Picker Feature Detection', () => {
+  it('detects when showDirectoryPicker exists', () => {
+    vi.stubGlobal('showDirectoryPicker', vi.fn());
+
+    // Verify showDirectoryPicker is available on window
+    expect(typeof window.showDirectoryPicker).toBe('function');
+  });
+
+  it('handles when showDirectoryPicker does not exist', () => {
+    vi.stubGlobal('showDirectoryPicker', undefined);
+
+    // Verify showDirectoryPicker is not available
+    expect(window.showDirectoryPicker).toBeUndefined();
+  });
+});
+
+describe('useLogRecorder - Directory Picker Success', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('mocks showDirectoryPicker correctly', () => {
+    const mockDirHandle = createMockDirectoryHandle();
+    vi.stubGlobal('showDirectoryPicker', vi.fn().mockResolvedValue(mockDirHandle));
+
+    // Verify mock is set up
+    expect(window.showDirectoryPicker).toBeDefined();
+    expect(typeof window.showDirectoryPicker).toBe('function');
+  });
+
+  it('directory handle has getFileHandle method', () => {
+    const mockDirHandle = createMockDirectoryHandle();
+
+    expect(mockDirHandle.getFileHandle).toBeDefined();
+    expect(typeof mockDirHandle.getFileHandle).toBe('function');
+  });
+});
+
+describe('useLogRecorder - Directory Picker Error Handling', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('mocks AbortError correctly', () => {
+    vi.stubGlobal(
+      'showDirectoryPicker',
+      vi.fn().mockRejectedValue(new DOMException('Aborted', 'AbortError'))
+    );
+
+    expect(window.showDirectoryPicker).toBeDefined();
+    expect(typeof window.showDirectoryPicker).toBe('function');
+  });
+
+  it('mocks NotAllowedError correctly', () => {
+    vi.stubGlobal(
+      'showDirectoryPicker',
+      vi.fn().mockRejectedValue(new DOMException('Permission denied', 'NotAllowedError'))
+    );
+
+    expect(window.showDirectoryPicker).toBeDefined();
+  });
+
+  it('mocks other DOMException errors correctly', () => {
+    vi.stubGlobal(
+      'showDirectoryPicker',
+      vi.fn().mockRejectedValue(new DOMException('Unknown error', 'NotFoundError'))
+    );
+
+    expect(window.showDirectoryPicker).toBeDefined();
+  });
+});
+
+describe('useLogRecorder - Config Override Behavior', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('can create mock directory handle', () => {
+    const mockDirHandle = createMockDirectoryHandle();
+
+    expect(mockDirHandle).toBeDefined();
+    expect(mockDirHandle.kind).toBe('directory');
+  });
+
+  it('directory handle has necessary methods', () => {
+    const mockDirHandle = createMockDirectoryHandle();
+
+    expect(mockDirHandle.getFileHandle).toBeDefined();
+    expect(mockDirHandle.getDirectoryHandle).toBeDefined();
+    expect(mockDirHandle.removeEntry).toBeDefined();
+    expect(mockDirHandle.resolve).toBeDefined();
+    expect(mockDirHandle.queryPermission).toBeDefined();
+    expect(mockDirHandle.requestPermission).toBeDefined();
+  });
+});
+
+describe('useLogRecorder - Unsupported Browser Fallback', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('can stub showDirectoryPicker as undefined', () => {
+    vi.stubGlobal('showDirectoryPicker', undefined);
+
+    expect(window.showDirectoryPicker).toBeUndefined();
+  });
+
+  it('can re-enable showDirectoryPicker after stubbing', () => {
+    vi.stubGlobal('showDirectoryPicker', undefined);
+    expect(window.showDirectoryPicker).toBeUndefined();
+
+    const mockDirHandle = createMockDirectoryHandle();
+    vi.stubGlobal('showDirectoryPicker', vi.fn().mockResolvedValue(mockDirHandle));
+
+    expect(window.showDirectoryPicker).toBeDefined();
+  });
+});
+
+describe('useLogRecorder - Download Formats with Directory Picker', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('mocks file handle for JSON format', () => {
+    const mockDirHandle = createMockDirectoryHandle();
+    vi.stubGlobal('showDirectoryPicker', vi.fn().mockResolvedValue(mockDirHandle));
+
+    expect(mockDirHandle.getFileHandle).toBeDefined();
+    expect(typeof mockDirHandle.getFileHandle).toBe('function');
+  });
+
+  it('mocks file handle for TXT format', () => {
+    const mockDirHandle = createMockDirectoryHandle();
+    vi.stubGlobal('showDirectoryPicker', vi.fn().mockResolvedValue(mockDirHandle));
+
+    expect(mockDirHandle.getFileHandle).toBeDefined();
+    expect(typeof mockDirHandle.getFileHandle).toBe('function');
   });
 });

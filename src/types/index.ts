@@ -122,6 +122,8 @@ export interface LogMetadata {
 export interface LogRecorderConfig {
   maxLogs: number;
   enablePersistence: boolean;
+  /** Enable directory picker for downloads (Chrome 86+, Edge 86+ only) */
+  enableDirectoryPicker?: boolean;
   persistenceKey: string;
   captureConsole: boolean;
   captureFetch: boolean;
@@ -139,8 +141,14 @@ export interface LogRecorderConfig {
 
 // Hook Return Type
 export interface UseLogRecorderReturn {
-  downloadLogs: (format?: 'json' | 'txt', customFilename?: string | null) => string | null;
-  uploadLogs: (customEndpoint?: string | null) => Promise<{ success: boolean; data?: unknown; error?: string }>;
+  downloadLogs: (
+    format?: 'json' | 'txt',
+    customFilename?: string | null,
+    options?: DownloadOptions
+  ) => string | null;
+  uploadLogs: (
+    customEndpoint?: string | null
+  ) => Promise<{ success: boolean; data?: unknown; error?: string }>;
   clearLogs: () => void;
   getLogs: () => LogEntry[];
   getLogCount: () => number;
@@ -173,4 +181,10 @@ export interface UploadPayload {
   metadata: LogMetadata;
   logs: LogEntry[];
   fileName: string;
+}
+
+/** Options for downloadLogs function */
+export interface DownloadOptions {
+  /** Show directory picker instead of default download location */
+  showPicker?: boolean;
 }

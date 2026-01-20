@@ -65,6 +65,161 @@ const createMockAnchorElement = (): {
   };
 };
 
+// Storage for mock file handles and permission states
+const mockFileHandles = new Map<string, ReturnType<typeof createMockFileHandle>>();
+const mockPermissionStates = new Map<string, PermissionState>();
+
+/**
+ * Create a mock FileSystemWritableFileStream
+ */
+const createMockWritableStream = (
+  filename: string
+): {
+  write: SpyInstance;
+  close: SpyInstance;
+  closed: boolean;
+} => {
+  let closed = false;
+  return {
+    write: vi.fn((data: string | Uint8Array | Blob) => {
+      // Store the data for testing
+      const fileHandle = mockFileHandles.get(filename);
+      if (fileHandle) {
+        fileHandle.content =
+          typeof data === 'string'
+            ? data
+            : data instanceof Uint8Array
+              ? new TextDecoder().decode(data)
+              : '';
+      }
+    }),
+    close: vi.fn(() => {
+      closed = true;
+    }),
+    get closed() {
+      return closed;
+    },
+  };
+};
+
+/**
+ * Create a mock FileSystemFileHandle
+ */
+export function createMockFileHandle(
+  name: string,
+  content = ''
+): {
+  kind: 'file';
+  name: string;
+  content: string;
+  createWritable: SpyInstance;
+  getFile: SpyInstance;
+  isSameEntry: SpyInstance;
+} {
+  const handle = {
+    kind: 'file' as const,
+    name,
+    content,
+    createWritable: vi.fn(async () => {
+      return createMockWritableStream(name);
+    }),
+    getFile: vi.fn(async () => {
+      return new File([content], name, { type: 'text/plain' });
+    }),
+    isSameEntry: vi.fn(async () => false),
+  };
+  mockFileHandles.set(name, handle);
+  return handle;
+}
+
+/**
+ * Create a mock FileSystemDirectoryHandle
+ */
+export function createMockDirectoryHandle(
+  name = 'mock-directory',
+  permissionState: PermissionState = 'granted'
+): {
+  kind: 'directory';
+  name: string;
+  getFileHandle: SpyInstance;
+  getDirectoryHandle: SpyInstance;
+  removeEntry: SpyInstance;
+  resolve: SpyInstance;
+  queryPermission: SpyInstance;
+  requestPermission: SpyInstance;
+} {
+  return {
+    kind: 'directory' as const,
+    name,
+    getFileHandle: vi.fn(async (fileName: string, options?: { create: boolean }) => {
+      if (mockFileHandles.has(fileName)) {
+        return mockFileHandles.get(fileName)!;
+      }
+      if (options?.create) {
+        return createMockFileHandle(fileName);
+      }
+      throw new Error(`File not found: ${fileName}`);
+    }),
+    getDirectoryHandle: vi.fn(async (dirName: string, options?: { create: boolean }) => {
+      if (options?.create) {
+        return createMockDirectoryHandle(dirName);
+      }
+      throw new Error(`Directory not found: ${dirName}`);
+    }),
+    removeEntry: vi.fn(async (name: string) => {
+      mockFileHandles.delete(name);
+    }),
+    resolve: vi.fn(async () => []),
+    queryPermission: vi.fn(async () => permissionState),
+    requestPermission: vi.fn(async () => {
+      mockPermissionStates.set(name, 'granted');
+      return 'granted';
+    }),
+  };
+}
+
+/**
+ * Create a mock showDirectoryPicker function
+ */
+export function createMockDirectoryPicker(
+  directoryHandle?: ReturnType<typeof createMockDirectoryHandle>
+): SpyInstance {
+  return vi.fn(async () => {
+    return directoryHandle || createMockDirectoryHandle();
+  });
+}
+
+/**
+ * Helper to get mock file handle content
+ */
+export function getMockFileContent(filename: string): string {
+  const handle = mockFileHandles.get(filename);
+  return handle?.content ?? '';
+}
+
+/**
+ * Helper to clear all mock file handles
+ */
+export function clearMockFileHandles(): void {
+  mockFileHandles.clear();
+  mockPermissionStates.clear();
+}
+
+/**
+ * Helper to set mock permission state for a directory
+ */
+export function setMockPermissionState(handleName: string, state: PermissionState): void {
+  mockPermissionStates.set(handleName, state);
+}
+
+/**
+ * Helper to reset File System Access API mocks
+ */
+export function resetFileSystemMocks(): void {
+  clearMockFileHandles();
+  vi.stubGlobal('showDirectoryPicker', createMockDirectoryPicker());
+}
+
 /**
  * Setup all browser mocks before each test
  */
@@ -165,6 +320,9 @@ export function setupBrowserMocks(): void {
     Element.prototype.appendChild = vi.fn();
     Element.prototype.removeChild = vi.fn();
   }
+
+  clearMockFileHandles();
+  vi.stubGlobal('showDirectoryPicker', createMockDirectoryPicker());
 }
 
 /**
