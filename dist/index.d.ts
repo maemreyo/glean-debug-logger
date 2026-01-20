@@ -84,6 +84,8 @@ interface LogMetadata {
 interface LogRecorderConfig {
     maxLogs: number;
     enablePersistence: boolean;
+    /** Enable directory picker for downloads (Chrome 86+, Edge 86+ only) */
+    enableDirectoryPicker?: boolean;
     persistenceKey: string;
     captureConsole: boolean;
     captureFetch: boolean;
@@ -99,7 +101,7 @@ interface LogRecorderConfig {
     uploadOnError: boolean;
 }
 interface UseLogRecorderReturn {
-    downloadLogs: (format?: 'json' | 'txt', customFilename?: string | null) => string | null;
+    downloadLogs: (format?: 'json' | 'txt', customFilename?: string | null, options?: DownloadOptions) => string | null;
     uploadLogs: (customEndpoint?: string | null) => Promise<{
         success: boolean;
         data?: unknown;
@@ -121,7 +123,17 @@ interface UploadPayload {
     logs: LogEntry[];
     fileName: string;
 }
+/** Options for downloadLogs function */
+interface DownloadOptions {
+    /** Show directory picker instead of default download location */
+    showPicker?: boolean;
+}
 
+declare global {
+    interface Window {
+        showDirectoryPicker: () => Promise<FileSystemDirectoryHandle>;
+    }
+}
 declare function useLogRecorder(customConfig?: Partial<LogRecorderConfig>): UseLogRecorderReturn;
 
 interface DebugPanelProps {
@@ -166,4 +178,4 @@ declare function generateSessionId(): string;
 declare function generateFilename(format?: 'json' | 'txt', customData?: Record<string, string | number>, options?: FilenameOptions): string;
 declare function generateExportFilename(metadata: LogMetadata, format?: 'json' | 'txt'): string;
 
-export { type ConsoleLevel, type ConsoleLogEntry, DebugPanel, DebugPanelMinimal, type ExportOutput, type FetchErrorEntry, type FetchRequestEntry, type FetchResponseEntry, type FilenameOptions, type FilenamePlaceholder, type LogEntry, type LogMetadata, type LogRecorderConfig, type LogType, type SanitizeOptions, type UploadPayload, type UseLogRecorderReturn, type XHRErrorEntry, type XHRRequestEntry, type XHRResponseEntry, collectMetadata, generateExportFilename, generateFilename, generateSessionId, getBrowserInfo, sanitizeData, sanitizeFilename, useLogRecorder };
+export { type ConsoleLevel, type ConsoleLogEntry, DebugPanel, DebugPanelMinimal, type DownloadOptions, type ExportOutput, type FetchErrorEntry, type FetchRequestEntry, type FetchResponseEntry, type FilenameOptions, type FilenamePlaceholder, type LogEntry, type LogMetadata, type LogRecorderConfig, type LogType, type SanitizeOptions, type UploadPayload, type UseLogRecorderReturn, type XHRErrorEntry, type XHRRequestEntry, type XHRResponseEntry, collectMetadata, generateExportFilename, generateFilename, generateSessionId, getBrowserInfo, sanitizeData, sanitizeFilename, useLogRecorder };
