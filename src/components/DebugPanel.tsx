@@ -1,7 +1,38 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLogRecorder } from '../hooks/useLogRecorder';
+import {
+  toggleButtonStyles,
+  badgeStyles,
+  errorBadgeStyles,
+  panelStyles,
+  headerStyles,
+  headerTitleStyles,
+  headerSubtitleStyles,
+  closeButtonStyles,
+  statsGridStyles,
+  statItemStyles,
+  statValueStyles,
+  statLabelStyles,
+  errorValueStyles,
+  networkErrorValueStyles,
+  detailsStyles,
+  summaryStyles,
+  sessionInfoStyles,
+  actionsStyles,
+  actionGroupStyles,
+  labelStyles,
+  buttonRowStyles,
+  primaryButtonStyles,
+  secondaryButtonStyles,
+  uploadButtonStyles,
+  dangerButtonStyles,
+  successMessageStyles,
+  errorMessageStyles,
+  footerStyles,
+  footerTipStyles,
+} from './DebugPanel.styles';
 
 interface DebugPanelProps {
   user?: {
@@ -35,6 +66,11 @@ export function DebugPanel({
     message: string;
   } | null>(null);
 
+  // Refs for focus management
+  const panelRef = useRef<HTMLDivElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
   const { downloadLogs, uploadLogs, clearLogs, getLogCount, getMetadata, sessionId } =
     useLogRecorder({
       fileNameTemplate,
@@ -59,10 +95,16 @@ export function DebugPanel({
         e.preventDefault();
         setIsOpen((prev) => !prev);
       }
+      // Close panel on Escape when open
+      if (e.key === 'Escape' && isOpen) {
+        e.preventDefault();
+        setIsOpen(false);
+        toggleButtonRef.current?.focus();
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     if (metadata.errorCount >= 5 && uploadEndpoint) {
@@ -165,160 +207,87 @@ export function DebugPanel({
 
   if (!shouldShow) return null;
 
+  const openPanel = () => {
+    setIsOpen(true);
+    // Focus will be handled by useEffect
+  };
+
+  const closePanel = () => {
+    setIsOpen(false);
+    toggleButtonRef.current?.focus();
+  };
+
   return (
     <>
       <button
-        onClick={() => setIsOpen((prev) => !prev)}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          zIndex: 9998,
-          padding: '12px 20px',
-          background: '#1f2937',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-        }}
-        title="Press Ctrl+Shift+D to toggle"
+        ref={toggleButtonRef}
+        type="button"
+        onClick={openPanel}
+        className={toggleButtonStyles}
+        aria-label={isOpen ? 'Close debug panel' : 'Open debug panel (Ctrl+Shift+D)'}
+        aria-expanded={isOpen}
+        aria-controls="debug-panel"
       >
         <span>🐛 Debug</span>
         <span
-          style={{
-            background: metadata.errorCount > 0 ? '#ef4444' : '#374151',
-            padding: '2px 8px',
-            borderRadius: '12px',
-            fontSize: '12px',
-          }}
+          className={
+            logCount > 0 ? (metadata.errorCount > 0 ? errorBadgeStyles : badgeStyles) : badgeStyles
+          }
         >
           {logCount}
         </span>
         {metadata.errorCount > 0 && (
-          <span
-            style={{
-              background: '#ef4444',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              fontSize: '12px',
-            }}
-          >
-            {metadata.errorCount} err
-          </span>
+          <span className={errorBadgeStyles}>{metadata.errorCount} err</span>
         )}
       </button>
 
       {isOpen && (
         <div
-          style={{
-            position: 'fixed',
-            bottom: '100px',
-            right: '20px',
-            zIndex: 9999,
-            background: '#fff',
-            borderRadius: '12px',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-            width: '384px',
-            maxHeight: '600px',
-            overflow: 'auto',
-            border: '1px solid #e5e7eb',
-          }}
+          ref={panelRef}
+          id="debug-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Debug Logger Panel"
+          className={panelStyles}
         >
-          <div
-            style={{
-              background: 'linear-gradient(to right, #1f2937, #111827)',
-              color: '#fff',
-              padding: '16px',
-              borderRadius: '12px 12px 0 0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
+          <div className={headerStyles}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>Debug Logger</h3>
-              <p style={{ margin: '4px 0 0', fontSize: '12px', opacity: 0.8 }}>
-                Session: {sessionId.substring(0, 20)}...
-              </p>
+              <h3 className={headerTitleStyles}>Debug Logger</h3>
+              <p className={headerSubtitleStyles}>Session: {sessionId.substring(0, 20)}...</p>
             </div>
             <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#fff',
-                fontSize: '20px',
-                cursor: 'pointer',
-                padding: '4px 8px',
-              }}
+              ref={closeButtonRef}
+              type="button"
+              onClick={closePanel}
+              className={closeButtonStyles}
+              aria-label="Close debug panel"
             >
               ✕
             </button>
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '8px',
-              padding: '12px',
-              background: '#f9fafb',
-              borderBottom: '1px solid #e5e7eb',
-            }}
-          >
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#111827' }}>{logCount}</div>
-              <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Logs</div>
+          <div className={statsGridStyles}>
+            <div className={statItemStyles}>
+              <div className={statValueStyles}>{logCount}</div>
+              <div className={statLabelStyles}>Total Logs</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#dc2626' }}>
-                {metadata.errorCount}
-              </div>
-              <div style={{ fontSize: '12px', color: '#6b7280' }}>Errors</div>
+            <div className={statItemStyles}>
+              <div className={`${statValueStyles} ${errorValueStyles}`}>{metadata.errorCount}</div>
+              <div className={statLabelStyles}>Errors</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#ea580c' }}>
+            <div className={statItemStyles}>
+              <div className={`${statValueStyles} ${networkErrorValueStyles}`}>
                 {metadata.networkErrorCount}
               </div>
-              <div style={{ fontSize: '12px', color: '#6b7280' }}>Net Errors</div>
+              <div className={statLabelStyles}>Net Errors</div>
             </div>
           </div>
 
-          <details
-            style={{
-              padding: '12px',
-              borderBottom: '1px solid #e5e7eb',
-              background: '#f9fafb',
-            }}
-          >
-            <summary
-              style={{
-                cursor: 'pointer',
-                fontWeight: 600,
-                color: '#374151',
-                fontSize: '14px',
-                listStyle: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
+          <details className={detailsStyles}>
+            <summary className={summaryStyles} role="button" aria-expanded="false">
               <span>📊</span> Session Info
             </summary>
-            <div
-              style={{
-                marginTop: '8px',
-                fontSize: '12px',
-                color: '#4b5563',
-                lineHeight: 1.6,
-              }}
-            >
+            <div className={sessionInfoStyles}>
               <div>
                 <strong>User:</strong> {metadata.userId || 'Anonymous'}
               </div>
@@ -337,80 +306,33 @@ export function DebugPanel({
             </div>
           </details>
 
-          <div
-            style={{
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-            }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>
-                Download Logs
-              </label>
-              <div style={{ display: 'flex', gap: '8px' }}>
+          <div className={actionsStyles}>
+            <div className={actionGroupStyles}>
+              <span className={labelStyles}>Download Logs</span>
+              <div className={buttonRowStyles}>
                 <button
+                  type="button"
                   onClick={() => handleDownload('json')}
-                  style={{
-                    flex: 1,
-                    padding: '10px 16px',
-                    background: '#2563eb',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.background = '#1d4ed8')}
-                  onMouseOut={(e) => (e.currentTarget.style.background = '#2563eb')}
+                  className={primaryButtonStyles}
+                  aria-label="Download logs as JSON"
                 >
                   📥 JSON
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleDownload('txt')}
-                  style={{
-                    flex: 1,
-                    padding: '10px 16px',
-                    background: '#2563eb',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.background = '#1d4ed8')}
-                  onMouseOut={(e) => (e.currentTarget.style.background = '#2563eb')}
+                  className={primaryButtonStyles}
+                  aria-label="Download logs as text file"
                 >
                   📄 TXT
                 </button>
               </div>
               <button
+                type="button"
                 onClick={handleSaveToDirectory}
                 disabled={!('showDirectoryPicker' in window)}
-                style={{
-                  width: '100%',
-                  padding: '10px 16px',
-                  background: !('showDirectoryPicker' in window) ? '#9ca3af' : '#7c3aed',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: !('showDirectoryPicker' in window) ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  transition: 'background 0.2s',
-                  opacity: !('showDirectoryPicker' in window) ? 0.6 : 1,
-                }}
-                onMouseOver={(e) => {
-                  if ('showDirectoryPicker' in window) e.currentTarget.style.background = '#6d28d9';
-                }}
-                onMouseOut={(e) => {
-                  if ('showDirectoryPicker' in window) e.currentTarget.style.background = '#7c3aed';
-                }}
+                className={secondaryButtonStyles}
+                aria-label="Save logs to directory"
                 title={
                   'showDirectoryPicker' in window
                     ? 'Chọn thư mục để lưu file'
@@ -422,37 +344,15 @@ export function DebugPanel({
             </div>
 
             {uploadEndpoint && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    color: '#374151',
-                  }}
-                >
-                  Upload to Server
-                </label>
+              <div className={actionGroupStyles}>
+                <span className={labelStyles}>Upload to Server</span>
                 <button
+                  type="button"
                   onClick={handleUpload}
                   disabled={isUploading}
-                  style={{
-                    width: '100%',
-                    padding: '10px 16px',
-                    background: isUploading ? '#9ca3af' : '#16a34a',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: isUploading ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseOver={(e) => {
-                    if (!isUploading) e.currentTarget.style.background = '#15803d';
-                  }}
-                  onMouseOut={(e) => {
-                    if (!isUploading) e.currentTarget.style.background = '#16a34a';
-                  }}
+                  className={uploadButtonStyles}
+                  aria-label={isUploading ? 'Uploading logs...' : 'Upload logs to server'}
+                  aria-busy={isUploading}
                 >
                   {isUploading ? '⏳ Uploading...' : '☁️ Upload Logs'}
                 </button>
@@ -461,14 +361,11 @@ export function DebugPanel({
 
             {uploadStatus && (
               <div
-                style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  background: uploadStatus.type === 'success' ? '#dcfce7' : '#fee2e2',
-                  color: uploadStatus.type === 'success' ? '#166534' : '#991b1b',
-                  border: `1px solid ${uploadStatus.type === 'success' ? '#86efac' : '#fca5a5'}`,
-                }}
+                role="status"
+                aria-live="polite"
+                className={
+                  uploadStatus.type === 'success' ? successMessageStyles : errorMessageStyles
+                }
               >
                 {uploadStatus.message}
               </div>
@@ -476,56 +373,33 @@ export function DebugPanel({
 
             {directoryStatus && (
               <div
-                style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  background: directoryStatus.type === 'success' ? '#dcfce7' : '#fee2e2',
-                  color: directoryStatus.type === 'success' ? '#166534' : '#991b1b',
-                  border: `1px solid ${directoryStatus.type === 'success' ? '#86efac' : '#fca5a5'}`,
-                }}
+                role="status"
+                aria-live="polite"
+                className={
+                  directoryStatus.type === 'success' ? successMessageStyles : errorMessageStyles
+                }
               >
                 {directoryStatus.message}
               </div>
             )}
 
             <button
+              type="button"
               onClick={() => {
                 if (confirm('Clear all logs? This cannot be undone.')) {
                   clearLogs();
                   setUploadStatus(null);
                 }
               }}
-              style={{
-                width: '100%',
-                padding: '10px 16px',
-                background: '#dc2626',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 600,
-                transition: 'background 0.2s',
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.background = '#b91c1c')}
-              onMouseOut={(e) => (e.currentTarget.style.background = '#dc2626')}
+              className={dangerButtonStyles}
+              aria-label="Clear all logs"
             >
               🗑️ Clear All Logs
             </button>
           </div>
 
-          <div
-            style={{
-              padding: '12px',
-              background: '#f9fafb',
-              borderTop: '1px solid #e5e7eb',
-              borderRadius: '0 0 12px 12px',
-              fontSize: '12px',
-              color: '#6b7280',
-            }}
-          >
-            <div style={{ marginBottom: '4px' }}>
+          <div className={footerStyles}>
+            <div className={footerTipStyles}>
               <strong>💡 Tip:</strong> Press{' '}
               <kbd
                 style={{
@@ -539,10 +413,10 @@ export function DebugPanel({
               </kbd>{' '}
               to toggle
             </div>
-            <div style={{ marginBottom: '4px' }}>
+            <div className={footerTipStyles}>
               <strong>💾 Auto-save:</strong> Logs persist across page refreshes
             </div>
-            <div>
+            <div className={footerTipStyles}>
               <strong>🔒 Security:</strong> Sensitive data is auto-redacted
             </div>
           </div>

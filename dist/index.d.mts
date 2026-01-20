@@ -99,6 +99,8 @@ interface LogRecorderConfig {
     includeMetadata: boolean;
     uploadEndpoint: string | null;
     uploadOnError: boolean;
+    /** Number of consecutive errors before auto-upload triggers */
+    uploadOnErrorCount?: number;
 }
 interface UseLogRecorderReturn {
     downloadLogs: (format?: 'json' | 'txt', customFilename?: string | null, options?: DownloadOptions) => string | null;
@@ -129,11 +131,6 @@ interface DownloadOptions {
     showPicker?: boolean;
 }
 
-declare global {
-    interface Window {
-        showDirectoryPicker: () => Promise<FileSystemDirectoryHandle>;
-    }
-}
 declare function useLogRecorder(customConfig?: Partial<LogRecorderConfig>): UseLogRecorderReturn;
 
 interface DebugPanelProps {

@@ -1,11 +1,356 @@
-'use strict';var react=require('react'),jsxRuntime=require('react/jsx-runtime');// @ts-nocheck
-var Z=["password","token","apiKey","secret","authorization","creditCard","cardNumber","cvv","ssn"];function H(s,t={}){let o=t.keys||Z;if(!s||typeof s!="object")return s;let h=Array.isArray(s)?[...s]:{...s},S=p=>{if(!p||typeof p!="object")return p;for(let y in p)if(Object.prototype.hasOwnProperty.call(p,y)){let v=y.toLowerCase();o.some(m=>v.includes(m.toLowerCase()))?p[y]="***REDACTED***":p[y]!==null&&typeof p[y]=="object"&&(p[y]=S(p[y]));}return p};return S(h)}function F(s){return s.replace(/[^a-z0-9_\-]/gi,"_").replace(/_+/g,"_").replace(/^_|_$/g,"")}function q(){if(typeof navigator>"u")return "unknown";let s=navigator.userAgent;return s.includes("Edg")?"edge":s.includes("Chrome")?"chrome":s.includes("Firefox")?"firefox":s.includes("Safari")?"safari":"unknown"}function Q(s,t,o,h){if(typeof window>"u")return {sessionId:s,environment:t,userId:o,timestamp:new Date().toISOString(),userAgent:"",browser:"unknown",platform:"",language:"",screenResolution:"0x0",viewport:"0x0",url:"",referrer:"",timezone:"",logCount:h,errorCount:0,networkErrorCount:0};let S=typeof window.screen<"u"?`${window.screen.width}x${window.screen.height}`:"0x0",p=typeof window.innerWidth<"u"&&typeof window.innerHeight<"u"?`${window.innerWidth}x${window.innerHeight}`:"0x0";return {sessionId:s,environment:t,userId:o,timestamp:new Date().toISOString(),userAgent:navigator.userAgent,browser:q(),platform:navigator.platform,language:navigator.language,screenResolution:S,viewport:p,url:window.location.href,referrer:document.referrer,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,logCount:h,errorCount:0,networkErrorCount:0}}function V(){return `session_${Date.now()}_${Math.random().toString(36).substring(2,11)}`}function j(s="json",t={},o={}){let{fileNameTemplate:h="{env}_{userId}_{sessionId}_{timestamp}",environment:S="development",userId:p="anonymous",sessionId:y="unknown"}=o,v=new Date().toISOString().replace(/[:.]/g,"-").split(".")[0],g=new Date().toISOString().split("T")[0],m=new Date().toLocaleTimeString("en-US",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"}).replace(/:/g,"-"),L=o.browser||q(),R=o.platform||(typeof navigator<"u"?navigator.platform:"unknown"),T=(o.url||(typeof window<"u"?window.location.pathname.replace(/\//g,"_"):"unknown")).split("?")[0]||"unknown",z=String(o.errorCount??t.errorCount??0),P=String(o.logCount??t.logCount??0),M=h.replace("{env}",F(S)).replace("{userId}",F(p??"anonymous")).replace("{sessionId}",F(y??"unknown")).replace("{timestamp}",v).replace("{date}",g).replace("{time}",m).replace(/\{errorCount\}/g,z).replace(/\{logCount\}/g,P).replace("{browser}",F(L)).replace("{platform}",F(R)).replace("{url}",F(T));for(let[_,U]of Object.entries(t))M=M.replace(`{${_}}`,String(U));return `${M}.${s}`}function le(s,t="json"){let o=s.url.split("?")[0]||"unknown";return j(t,{},{environment:s.environment,userId:s.userId,sessionId:s.sessionId,browser:s.browser,platform:s.platform,url:o,errorCount:s.errorCount,logCount:s.logCount})}var te={maxLogs:1e3,enablePersistence:true,persistenceKey:"debug_logs",captureConsole:true,captureFetch:true,captureXHR:true,enableDirectoryPicker:false,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:[],fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:"development",userId:null,sessionId:null,includeMetadata:true,uploadEndpoint:null,uploadOnError:false};function $(s={}){let t={...te,...s},o=react.useRef([]),h=react.useRef(false),S=react.useRef(t.sessionId||V()),p=react.useRef(Q(S.current,t.environment,t.userId,0)),[y,v]=react.useState(0),g=react.useCallback(r=>{let i=new Set;return JSON.stringify(r,(c,n)=>{if(typeof n=="object"&&n!==null){if(i.has(n))return "[Circular]";i.add(n);}return n})},[]),m=react.useCallback(r=>{if(o.current.push(r),o.current.length>t.maxLogs&&o.current.shift(),v(o.current.length),t.enablePersistence&&typeof window<"u")try{localStorage.setItem(t.persistenceKey,g(o.current));}catch{console.warn("[useLogRecorder] Failed to persist logs");}},[t.maxLogs,t.enablePersistence,t.persistenceKey,g]),L=react.useCallback(()=>{if(t.enablePersistence&&typeof window<"u")try{let r=localStorage.getItem(t.persistenceKey);r&&(o.current=JSON.parse(r),v(o.current.length));}catch{console.warn("[useLogRecorder] Failed to load persisted logs");}},[t.enablePersistence,t.persistenceKey]),R=react.useCallback(r=>t.excludeUrls.some(i=>r.includes(i)),[t.excludeUrls]);react.useEffect(()=>{if(typeof window>"u"||h.current)return;h.current=true,L();let r=[];if(t.captureConsole){let i={log:console.log,error:console.error,warn:console.warn,info:console.info,debug:console.debug},c=(n,d)=>{try{let e=d.map(l=>{if(typeof l=="object")try{return g(l)}catch{return String(l)}return String(l)}).join(" ");m({type:"CONSOLE",level:n.toUpperCase(),time:new Date().toISOString(),data:e.substring(0,5e3)});}catch{}};Object.keys(i).forEach(n=>{let d=i[n];console[n]=(...e)=>{c(n,e),d.apply(console,e);};}),r.push(()=>{Object.keys(i).forEach(n=>{console[n]=i[n];});});}if(t.captureFetch&&typeof window<"u"){let i=window.fetch;window.fetch=async(...c)=>{let[n,d]=c,e=typeof n=="string"?n:n.url||"";if(R(e))return i(...c);let l=Date.now(),E=Math.random().toString(36).substring(7);try{let x=null;if(d?.body)try{x=typeof d.body=="string"?JSON.parse(d.body):d.body,x=H(x,{keys:t.sanitizeKeys});}catch{x=String(d.body).substring(0,1e3);}m({type:"FETCH_REQ",id:E,url:e,method:d?.method||"GET",headers:H(d?.headers,{keys:t.sanitizeKeys}),body:x,time:new Date().toISOString()});let D=await i(...c),O=D.clone(),w=null;try{D.headers.get("content-type")?.includes("application/json")?(w=await O.json(),w=H(w,{keys:t.sanitizeKeys})):w=(await O.text()).substring(0,1e3);}catch{w="[Unable to parse response]";}return m({type:"FETCH_RES",id:E,url:e,status:D.status,statusText:D.statusText,duration:`${Date.now()-l}ms`,body:w,time:new Date().toISOString()}),D}catch(x){throw m({type:"FETCH_ERR",id:E,url:e,error:x instanceof Error?x.toString():String(x),duration:`${Date.now()-l}ms`,time:new Date().toISOString()}),x}},r.push(()=>{window.fetch=i;});}if(t.captureXHR&&typeof window<"u"){let i=window.XMLHttpRequest,c=function(){let n=new i,d=Math.random().toString(36).substring(7),e,l,E=Date.now(),x=n.open,D=n.send,O=n.setRequestHeader,w={};return n.setRequestHeader=function(f,k){return w[f]=k,O.call(n,f,k)},n.open=function(f,k,I=true){return e=f,l=k,R(k),x.call(n,f,k,I)},n.send=function(f){if(l&&!R(l)){let k=null;if(f)try{k=typeof f=="string"?JSON.parse(f):f,k=H(k,{keys:t.sanitizeKeys});}catch{k=String(f).substring(0,1e3);}m({type:"XHR_REQ",id:d,url:l||"unknown",method:e||"GET",headers:H(w,{keys:t.sanitizeKeys}),body:k,time:new Date().toISOString()}),n.addEventListener("load",function(){let I=null;try{n.getResponseHeader("content-type")?.includes("application/json")?(I=JSON.parse(n.responseText),I=H(I,{keys:t.sanitizeKeys})):I=n.responseText.substring(0,1e3);}catch{I="[Unable to parse response]";}m({type:"XHR_RES",id:d,url:l||"unknown",status:n.status,statusText:n.statusText,duration:`${Date.now()-E}ms`,body:I,time:new Date().toISOString()});}),n.addEventListener("error",function(){m({type:"XHR_ERR",id:d,url:l||"unknown",error:"Network request failed",duration:`${Date.now()-E}ms`,time:new Date().toISOString()});});}return D.call(n,f)},Object.setPrototypeOf(n,i.prototype),n};Object.setPrototypeOf(c.prototype,i.prototype),window.XMLHttpRequest=c,r.push(()=>{window.XMLHttpRequest=i;});}return ()=>{r.forEach(i=>i()),h.current=false;}},[t,m,L,R,g]);let b=react.useCallback(()=>{let r=o.current.filter(c=>c.type==="CONSOLE"&&c.level==="ERROR").length,i=o.current.filter(c=>c.type==="FETCH_ERR"||c.type==="XHR_ERR").length;p.current={...p.current,logCount:o.current.length,errorCount:r,networkErrorCount:i};},[]);function T(){return "showDirectoryPicker"in window}async function z(r,i){let d=await(await(await window.showDirectoryPicker()).getFileHandle(i,{create:true})).createWritable();await d.write(r),await d.close();}let P=react.useCallback((r="json",i,c)=>(typeof window>"u"||(async()=>{try{b();let d=i||j(r,{},t),e,l;if(r==="json"){let w=t.includeMetadata?{metadata:p.current,logs:o.current}:o.current;e=g(w),l="application/json";}else e=(t.includeMetadata?`${"=".repeat(80)}
+'use strict';var react=require('react'),goober=require('goober'),jsxRuntime=require('react/jsx-runtime');// @ts-nocheck
+var Oe=["password","token","apiKey","secret","authorization","creditCard","cardNumber","cvv","ssn"];function X(i,e={}){let r=e.keys||Oe;if(!i||typeof i!="object")return i;let n=Array.isArray(i)?[...i]:{...i},c=l=>{if(!l||typeof l!="object")return l;for(let t in l)if(Object.prototype.hasOwnProperty.call(l,t)){let u=t.toLowerCase();r.some(h=>u.includes(h.toLowerCase()))?l[t]="***REDACTED***":l[t]!==null&&typeof l[t]=="object"&&(l[t]=c(l[t]));}return l};return c(n)}function D(i){return i.replace(/[^a-z0-9_\-]/gi,"_").replace(/_+/g,"_").replace(/^_|_$/g,"")}function G(){if(typeof navigator>"u")return "unknown";let i=navigator.userAgent;return i.includes("Edg")?"edge":i.includes("Chrome")?"chrome":i.includes("Firefox")?"firefox":i.includes("Safari")?"safari":"unknown"}function ye(i,e,r,n){if(typeof window>"u")return {sessionId:i,environment:e,userId:r,timestamp:new Date().toISOString(),userAgent:"",browser:"unknown",platform:"",language:"",screenResolution:"0x0",viewport:"0x0",url:"",referrer:"",timezone:"",logCount:n,errorCount:0,networkErrorCount:0};let c=typeof window.screen<"u"?`${window.screen.width}x${window.screen.height}`:"0x0",l=typeof window.innerWidth<"u"&&typeof window.innerHeight<"u"?`${window.innerWidth}x${window.innerHeight}`:"0x0";return {sessionId:i,environment:e,userId:r,timestamp:new Date().toISOString(),userAgent:navigator.userAgent,browser:G(),platform:navigator.platform,language:navigator.language,screenResolution:c,viewport:l,url:window.location.href,referrer:document.referrer,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,logCount:n,errorCount:0,networkErrorCount:0}}function he(){return `session_${Date.now()}_${Math.random().toString(36).substring(2,11)}`}function z(i="json",e={},r={}){let{fileNameTemplate:n="{env}_{userId}_{sessionId}_{timestamp}",environment:c="development",userId:l="anonymous",sessionId:t="unknown"}=r,u=new Date().toISOString().replace(/[:.]/g,"-").split(".")[0],f=new Date().toISOString().split("T")[0],h=new Date().toLocaleTimeString("en-US",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"}).replace(/:/g,"-"),x=r.browser||G(),R=r.platform||(typeof navigator<"u"?navigator.platform:"unknown"),v=(r.url||(typeof window<"u"?window.location.pathname.replace(/\//g,"_"):"unknown")).split("?")[0]||"unknown",k=String(r.errorCount??e.errorCount??0),C=String(r.logCount??e.logCount??0),N=n.replace("{env}",D(c)).replace("{userId}",D(l??"anonymous")).replace("{sessionId}",D(t??"unknown")).replace("{timestamp}",u).replace("{date}",f).replace("{time}",h).replace(/\{errorCount\}/g,k).replace(/\{logCount\}/g,C).replace("{browser}",D(x)).replace("{platform}",D(R)).replace("{url}",D(v));for(let[I,T]of Object.entries(e))N=N.replace(`{${I}}`,String(T));return `${N}.${i}`}function je(i,e="json"){let r=i.url.split("?")[0]||"unknown";return z(e,{},{environment:i.environment,userId:i.userId,sessionId:i.sessionId,browser:i.browser,platform:i.platform,url:r,errorCount:i.errorCount,logCount:i.logCount})}var $=class{constructor(){this.originalConsole={log:console.log.bind(console),error:console.error.bind(console),warn:console.warn.bind(console),info:console.info.bind(console),debug:console.debug.bind(console)},this.callbacks=[];}attach(){Object.keys(this.originalConsole).forEach(e=>{let r=this.originalConsole[e];console[e]=(...n)=>{this.callbacks.forEach(c=>{c(e,n);}),r(...n);};});}detach(){Object.keys(this.originalConsole).forEach(e=>{console[e]=this.originalConsole[e];});}onLog(e){this.callbacks.push(e);}};var _=class{constructor(e={}){this.originalFetch=window.fetch.bind(window),this.onRequest=[],this.onResponse=[],this.onError=[],this.excludeUrls=(e.excludeUrls||[]).map(r=>new RegExp(r));}attach(){window.fetch=async(...e)=>{let[r,n]=e,c=r.toString();if(this.excludeUrls.some(t=>t.test(c)))return this.originalFetch(...e);let l=Date.now();this.onRequest.forEach(t=>t(c,n||{}));try{let t=await this.originalFetch(...e),u=t.clone(),f=Date.now()-l,h;try{h=await u.text();}catch{h="[Unable to read response body]";}return this.onResponse.forEach(x=>x(c,t.status,f)),t}catch(t){throw this.onError.forEach(u=>u(c,t)),t}};}detach(){window.fetch=this.originalFetch;}onFetchRequest(e){this.onRequest.push(e);}onFetchResponse(e){this.onResponse.push(e);}onFetchError(e){this.onError.push(e);}};var j=class{constructor(e={}){this.originalXHR=window.XMLHttpRequest,this.onRequest=[],this.onResponse=[],this.onError=[],this.requestTracker=new WeakMap,this.excludeUrls=(e.excludeUrls||[]).map(r=>new RegExp(r));}attach(){let e=this.originalXHR,r=this,n=function(){let t=new e;return r.requestTracker.set(t,{method:"",url:"",headers:{},body:null,startTime:Date.now()}),t};n.prototype=e.prototype,Object.setPrototypeOf(n.prototype,e.prototype);let c=e.prototype.open;n.prototype.open=function(t,u){let f=r.requestTracker.get(this);if(f){if(f.method=t,f.url=u,r.excludeUrls.some(h=>h.test(u)))return c.apply(this,[t,u]);for(let h of r.onRequest)h(f);}return c.apply(this,[t,u])};let l=e.prototype.send;n.prototype.send=function(t){let u=r.requestTracker.get(this);return u&&(u.body=t,this.onload=()=>{let f=Date.now()-u.startTime;for(let h of r.onResponse)h(u,this.status,f);},this.onerror=()=>{for(let f of r.onError)f(u,new Error("XHR Error"));}),l.apply(this,[t])},window.XMLHttpRequest=n;}detach(){window.XMLHttpRequest=this.originalXHR;}onXHRRequest(e){this.onRequest.push(e);}onXHRResponse(e){this.onResponse.push(e);}onXHRError(e){this.onError.push(e);}};var M=class{static isSupported(){return this.supported===null&&(this.supported=typeof window<"u"&&"showDirectoryPicker"in window),this.supported}static async saveToDirectory(e,r,n="application/json"){if(!this.isSupported())throw new Error("File System Access API not supported");try{let t=await(await(await window.showDirectoryPicker()).getFileHandle(r,{create:!0})).createWritable();await t.write(e),await t.close();}catch(c){if(c.name==="AbortError")return;throw c}}static download(e,r,n="application/json"){let c=new Blob([e],{type:n}),l=URL.createObjectURL(c),t=document.createElement("a");t.href=l,t.download=r,document.body.appendChild(t),t.click(),document.body.removeChild(t),URL.revokeObjectURL(l);}static async downloadWithFallback(e,r,n="application/json"){if(this.isSupported())try{await this.saveToDirectory(e,r,n);return}catch(c){if(c.name==="AbortError")return}this.download(e,r,n);}};M.supported=null;var Me={maxLogs:1e3,enablePersistence:true,persistenceKey:"debug_logs",captureConsole:true,captureFetch:true,captureXHR:true,enableDirectoryPicker:false,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:[],fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:"development",userId:null,sessionId:null,includeMetadata:true,uploadEndpoint:null,uploadOnError:false,uploadOnErrorCount:5};function U(i={}){let e={...Me,...i},r=react.useRef({maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount});react.useEffect(()=>{r.current={maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount};},[e]);let n=react.useRef([]),c=react.useRef(e.sessionId||he()),l=react.useRef(ye(c.current,e.environment,e.userId,0)),[t,u]=react.useState(0),f=react.useRef(0),h=react.useRef(false),x=react.useCallback(b=>{let s=new Set;return JSON.stringify(b,(o,a)=>{if(typeof a=="object"&&a!==null){if(s.has(a))return "[Circular]";s.add(a);}return a})},[]),R=react.useMemo(()=>new $,[]),S=react.useMemo(()=>new _({excludeUrls:e.excludeUrls}),[e.excludeUrls]),v=react.useMemo(()=>new j({excludeUrls:e.excludeUrls}),[e.excludeUrls]),k=react.useCallback(b=>{let s=r.current;n.current.push(b),n.current.length>s.maxLogs&&n.current.shift(),u(n.current.length),b.type==="CONSOLE"?b.level==="ERROR"?f.current++:f.current=0:b.type==="FETCH_ERR"||b.type==="XHR_ERR"?f.current++:f.current=0;let o=s.uploadOnErrorCount??5;if(f.current>=o&&s.uploadEndpoint){let a={metadata:{...l.current,logCount:n.current.length},logs:n.current,fileName:z("json",{},e)};fetch(s.uploadEndpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:x(a)}).catch(()=>{}),f.current=0;}if(s.enablePersistence&&typeof window<"u")try{localStorage.setItem(s.persistenceKey,x(n.current));}catch{console.warn("[useLogRecorder] Failed to persist logs");}},[x]),C=react.useCallback(()=>{let b=n.current.filter(o=>o.type==="CONSOLE").reduce((o,a)=>a.level==="ERROR"?o+1:o,0),s=n.current.filter(o=>o.type==="FETCH_ERR"||o.type==="XHR_ERR").length;l.current={...l.current,logCount:n.current.length,errorCount:b,networkErrorCount:s};},[]);react.useEffect(()=>{if(typeof window>"u"||h.current)return;if(h.current=true,e.enablePersistence)try{let s=localStorage.getItem(e.persistenceKey);s&&(n.current=JSON.parse(s),u(n.current.length));}catch{console.warn("[useLogRecorder] Failed to load persisted logs");}let b=[];if(e.captureConsole&&(R.attach(),R.onLog((s,o)=>{let a=o.map(y=>{if(typeof y=="object")try{return x(y)}catch{return String(y)}return String(y)}).join(" ");k({type:"CONSOLE",level:s.toUpperCase(),time:new Date().toISOString(),data:a.substring(0,5e3)});}),b.push(()=>R.detach())),e.captureFetch){let s=new Map;S.onFetchRequest((o,a)=>{let y=Math.random().toString(36).substring(7),w=null;if(a?.body)try{w=typeof a.body=="string"?JSON.parse(a.body):a.body,w=X(w,{keys:e.sanitizeKeys});}catch{w=String(a.body).substring(0,1e3);}s.set(y,{url:o,method:a?.method||"GET",headers:X(a?.headers,{keys:e.sanitizeKeys}),body:w}),k({type:"FETCH_REQ",id:y,url:o,method:a?.method||"GET",headers:X(a?.headers,{keys:e.sanitizeKeys}),body:w,time:new Date().toISOString()});}),S.onFetchResponse((o,a,y)=>{for(let[w,H]of s.entries())if(H.url===o){s.delete(w),k({type:"FETCH_RES",id:w,url:o,status:a,statusText:"",duration:`${y}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});break}}),S.onFetchError((o,a)=>{for(let[y,w]of s.entries())if(w.url===o){s.delete(y),k({type:"FETCH_ERR",id:y,url:o,error:a.toString(),duration:"[unknown]ms",time:new Date().toISOString()});break}}),S.attach(),b.push(()=>S.detach());}return e.captureXHR&&(v.onXHRRequest(s=>{k({type:"XHR_REQ",id:Math.random().toString(36).substring(7),url:s.url,method:s.method,headers:s.headers,body:s.body,time:new Date().toISOString()});}),v.onXHRResponse((s,o,a)=>{k({type:"XHR_RES",id:Math.random().toString(36).substring(7),url:s.url,status:o,statusText:"",duration:`${a}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});}),v.onXHRError((s,o)=>{k({type:"XHR_ERR",id:Math.random().toString(36).substring(7),url:s.url,error:o.message,duration:"[unknown]ms",time:new Date().toISOString()});}),v.attach(),b.push(()=>v.detach())),()=>{b.forEach(s=>s()),h.current=false;}},[e,k,x,R,S,v]);let N=react.useCallback((b="json",s)=>{if(typeof window>"u")return null;C();let o=s||z(b,{},e),a,y;if(b==="json"){let w=e.includeMetadata?{metadata:l.current,logs:n.current}:n.current;a=x(w),y="application/json";}else a=(e.includeMetadata?`${"=".repeat(80)}
 METADATA
 ${"=".repeat(80)}
-${g(p.current)}
+${x(l.current)}
 ${"=".repeat(80)}
 
-`:"")+o.current.map(f=>`[${f.time}] ${f.type}
-${g(f)}
+`:"")+n.current.map(H=>`[${H.time}] ${H.type}
+${x(H)}
 ${"=".repeat(80)}`).join(`
-`),l="text/plain";if((c?.showPicker||t.enableDirectoryPicker)&&T())try{return await z(e,d),d}catch(w){if(w instanceof DOMException){if(w.name==="AbortError")return null;w.name==="NotAllowedError"&&console.error("[useLogRecorder] Directory permission denied");}}let x=new Blob([e],{type:l}),D=URL.createObjectURL(x),O=document.createElement("a");return O.href=D,O.download=d,document.body.appendChild(O),O.click(),document.body.removeChild(O),URL.revokeObjectURL(D),d}catch{return console.error("[useLogRecorder] Failed to download logs"),null}})().catch(d=>{console.error("[useLogRecorder] Download error:",d);}),null),[t,g,b]),M=react.useCallback(async r=>{let i=r||t.uploadEndpoint;if(!i)return {success:false,error:"No endpoint configured"};try{b();let c={metadata:p.current,logs:o.current,fileName:j("json",{},t)},n=await fetch(i,{method:"POST",headers:{"Content-Type":"application/json"},body:g(c)});if(!n.ok)throw new Error(`Upload failed: ${n.status}`);return {success:!0,data:await n.json()}}catch(c){let n=c instanceof Error?c.message:"Unknown error";return console.error("[useLogRecorder] Failed to upload logs:",c),{success:false,error:n}}},[t.uploadEndpoint,g,b]),_=react.useCallback(()=>{if(o.current=[],v(0),t.enablePersistence&&typeof window<"u")try{localStorage.removeItem(t.persistenceKey);}catch{console.warn("[useLogRecorder] Failed to clear persisted logs");}},[t.enablePersistence,t.persistenceKey]),U=react.useCallback(()=>[...o.current],[]),X=react.useCallback(()=>y,[y]),N=react.useCallback(()=>(b(),{...p.current}),[b]);return {downloadLogs:P,uploadLogs:M,clearLogs:_,getLogs:U,getLogCount:X,getMetadata:N,sessionId:S.current}}function ne({user:s,environment:t="production",uploadEndpoint:o,fileNameTemplate:h="{env}_{date}_{time}_{userId}_{errorCount}errors",maxLogs:S=2e3,showInProduction:p=false}){let[y,v]=react.useState(false),[g,m]=react.useState(false),[L,R]=react.useState(null),[b,T]=react.useState(null),{downloadLogs:z,uploadLogs:P,clearLogs:M,getLogCount:_,getMetadata:U,sessionId:X}=$({fileNameTemplate:h,environment:t,userId:s?.id||s?.email||"guest",includeMetadata:true,uploadEndpoint:o,maxLogs:S,captureConsole:true,captureFetch:true,captureXHR:true,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:["/api/analytics","google-analytics.com","facebook.com","vercel.com"]}),N=_(),r=U();react.useEffect(()=>{let e=l=>{l.ctrlKey&&l.shiftKey&&l.key==="D"&&(l.preventDefault(),v(E=>!E));};return window.addEventListener("keydown",e),()=>window.removeEventListener("keydown",e)},[]),react.useEffect(()=>{if(r.errorCount>=5&&o){let e=async()=>{try{await P();}catch{console.warn("[DebugPanel] Failed to auto-upload logs");}};return window.addEventListener("error",e),()=>window.removeEventListener("error",e)}},[r.errorCount,o,P]);let i=react.useCallback(async()=>{m(true),R(null);try{let e=await P();e.success?(R({type:"success",message:`Uploaded successfully! ${e.data?JSON.stringify(e.data):""}`}),e.data&&typeof e.data=="object"&&"url"in e.data&&await navigator.clipboard.writeText(String(e.data.url))):R({type:"error",message:`Upload failed: ${e.error}`});}catch(e){R({type:"error",message:`Error: ${e instanceof Error?e.message:"Unknown error"}`});}finally{m(false);}},[P]),c=react.useCallback(e=>{let l=z(e);l&&R({type:"success",message:`Downloaded: ${l}`});},[z]),n=react.useCallback(async()=>{T(null);try{if(!("showDirectoryPicker"in window)){T({type:"error",message:"T\xEDnh n\u0103ng ch\u1EC9 h\u1ED7 tr\u1EE3 Chrome/Edge"});return}await z("json",void 0,{showPicker:!0})&&T({type:"success",message:"\u0110\xE3 l\u01B0u v\xE0o th\u01B0 m\u1EE5c"});}catch{T({type:"error",message:"Kh\xF4ng th\u1EC3 l\u01B0u. Vui l\xF2ng th\u1EED l\u1EA1i ho\u1EB7c ch\u1ECDn v\u1ECB tr\xED kh\xE1c."});}},[z]);return react.useEffect(()=>{if(b){let e=setTimeout(()=>{T(null);},3e3);return ()=>clearTimeout(e)}},[b]),p||t==="development"||s?.role==="admin"?jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsxs("button",{onClick:()=>v(e=>!e),style:{position:"fixed",bottom:"20px",right:"20px",zIndex:9998,padding:"12px 20px",background:"#1f2937",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,display:"flex",alignItems:"center",gap:"8px",boxShadow:"0 4px 12px rgba(0,0,0,0.3)"},title:"Press Ctrl+Shift+D to toggle",children:[jsxRuntime.jsx("span",{children:"\u{1F41B} Debug"}),jsxRuntime.jsx("span",{style:{background:r.errorCount>0?"#ef4444":"#374151",padding:"2px 8px",borderRadius:"12px",fontSize:"12px"},children:N}),r.errorCount>0&&jsxRuntime.jsxs("span",{style:{background:"#ef4444",padding:"2px 8px",borderRadius:"12px",fontSize:"12px"},children:[r.errorCount," err"]})]}),y&&jsxRuntime.jsxs("div",{style:{position:"fixed",bottom:"100px",right:"20px",zIndex:9999,background:"#fff",borderRadius:"12px",boxShadow:"0 10px 40px rgba(0,0,0,0.2)",width:"384px",maxHeight:"600px",overflow:"auto",border:"1px solid #e5e7eb"},children:[jsxRuntime.jsxs("div",{style:{background:"linear-gradient(to right, #1f2937, #111827)",color:"#fff",padding:"16px",borderRadius:"12px 12px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"},children:[jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("h3",{style:{margin:0,fontSize:"18px",fontWeight:700},children:"Debug Logger"}),jsxRuntime.jsxs("p",{style:{margin:"4px 0 0",fontSize:"12px",opacity:.8},children:["Session: ",X.substring(0,20),"..."]})]}),jsxRuntime.jsx("button",{onClick:()=>v(false),style:{background:"transparent",border:"none",color:"#fff",fontSize:"20px",cursor:"pointer",padding:"4px 8px"},children:"\u2715"})]}),jsxRuntime.jsxs("div",{style:{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:"8px",padding:"12px",background:"#f9fafb",borderBottom:"1px solid #e5e7eb"},children:[jsxRuntime.jsxs("div",{style:{textAlign:"center"},children:[jsxRuntime.jsx("div",{style:{fontSize:"24px",fontWeight:700,color:"#111827"},children:N}),jsxRuntime.jsx("div",{style:{fontSize:"12px",color:"#6b7280"},children:"Total Logs"})]}),jsxRuntime.jsxs("div",{style:{textAlign:"center"},children:[jsxRuntime.jsx("div",{style:{fontSize:"24px",fontWeight:700,color:"#dc2626"},children:r.errorCount}),jsxRuntime.jsx("div",{style:{fontSize:"12px",color:"#6b7280"},children:"Errors"})]}),jsxRuntime.jsxs("div",{style:{textAlign:"center"},children:[jsxRuntime.jsx("div",{style:{fontSize:"24px",fontWeight:700,color:"#ea580c"},children:r.networkErrorCount}),jsxRuntime.jsx("div",{style:{fontSize:"12px",color:"#6b7280"},children:"Net Errors"})]})]}),jsxRuntime.jsxs("details",{style:{padding:"12px",borderBottom:"1px solid #e5e7eb",background:"#f9fafb"},children:[jsxRuntime.jsxs("summary",{style:{cursor:"pointer",fontWeight:600,color:"#374151",fontSize:"14px",listStyle:"none",display:"flex",alignItems:"center",gap:"8px"},children:[jsxRuntime.jsx("span",{children:"\u{1F4CA}"})," Session Info"]}),jsxRuntime.jsxs("div",{style:{marginTop:"8px",fontSize:"12px",color:"#4b5563",lineHeight:1.6},children:[jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"User:"})," ",r.userId||"Anonymous"]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Browser:"})," ",r.browser," (",r.platform,")"]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Resolution:"})," ",r.screenResolution]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"URL:"})," ",r.url]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Timezone:"})," ",r.timezone]})]})]}),jsxRuntime.jsxs("div",{style:{padding:"16px",display:"flex",flexDirection:"column",gap:"12px"},children:[jsxRuntime.jsxs("div",{style:{display:"flex",flexDirection:"column",gap:"8px"},children:[jsxRuntime.jsx("label",{style:{fontSize:"14px",fontWeight:600,color:"#374151"},children:"Download Logs"}),jsxRuntime.jsxs("div",{style:{display:"flex",gap:"8px"},children:[jsxRuntime.jsx("button",{onClick:()=>c("json"),style:{flex:1,padding:"10px 16px",background:"#2563eb",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,transition:"background 0.2s"},onMouseOver:e=>e.currentTarget.style.background="#1d4ed8",onMouseOut:e=>e.currentTarget.style.background="#2563eb",children:"\u{1F4E5} JSON"}),jsxRuntime.jsx("button",{onClick:()=>c("txt"),style:{flex:1,padding:"10px 16px",background:"#2563eb",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,transition:"background 0.2s"},onMouseOver:e=>e.currentTarget.style.background="#1d4ed8",onMouseOut:e=>e.currentTarget.style.background="#2563eb",children:"\u{1F4C4} TXT"})]}),jsxRuntime.jsx("button",{onClick:n,disabled:!("showDirectoryPicker"in window),style:{width:"100%",padding:"10px 16px",background:"showDirectoryPicker"in window?"#7c3aed":"#9ca3af",color:"#fff",border:"none",borderRadius:"8px",cursor:"showDirectoryPicker"in window?"pointer":"not-allowed",fontSize:"14px",fontWeight:600,transition:"background 0.2s",opacity:"showDirectoryPicker"in window?1:.6},onMouseOver:e=>{"showDirectoryPicker"in window&&(e.currentTarget.style.background="#6d28d9");},onMouseOut:e=>{"showDirectoryPicker"in window&&(e.currentTarget.style.background="#7c3aed");},title:"showDirectoryPicker"in window?"Ch\u1ECDn th\u01B0 m\u1EE5c \u0111\u1EC3 l\u01B0u file":"T\xEDnh n\u0103ng ch\u1EC9 h\u1ED7 tr\u1EE3 Chrome/Edge",children:"\u{1F4C1} L\u01B0u v\xE0o th\u01B0 m\u1EE5c..."})]}),o&&jsxRuntime.jsxs("div",{style:{display:"flex",flexDirection:"column",gap:"8px"},children:[jsxRuntime.jsx("label",{style:{fontSize:"14px",fontWeight:600,color:"#374151"},children:"Upload to Server"}),jsxRuntime.jsx("button",{onClick:i,disabled:g,style:{width:"100%",padding:"10px 16px",background:g?"#9ca3af":"#16a34a",color:"#fff",border:"none",borderRadius:"8px",cursor:g?"not-allowed":"pointer",fontSize:"14px",fontWeight:600,transition:"background 0.2s"},onMouseOver:e=>{g||(e.currentTarget.style.background="#15803d");},onMouseOut:e=>{g||(e.currentTarget.style.background="#16a34a");},children:g?"\u23F3 Uploading...":"\u2601\uFE0F Upload Logs"})]}),L&&jsxRuntime.jsx("div",{style:{padding:"12px",borderRadius:"8px",fontSize:"14px",background:L.type==="success"?"#dcfce7":"#fee2e2",color:L.type==="success"?"#166534":"#991b1b",border:`1px solid ${L.type==="success"?"#86efac":"#fca5a5"}`},children:L.message}),b&&jsxRuntime.jsx("div",{style:{padding:"12px",borderRadius:"8px",fontSize:"14px",background:b.type==="success"?"#dcfce7":"#fee2e2",color:b.type==="success"?"#166534":"#991b1b",border:`1px solid ${b.type==="success"?"#86efac":"#fca5a5"}`},children:b.message}),jsxRuntime.jsx("button",{onClick:()=>{confirm("Clear all logs? This cannot be undone.")&&(M(),R(null));},style:{width:"100%",padding:"10px 16px",background:"#dc2626",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,transition:"background 0.2s"},onMouseOver:e=>e.currentTarget.style.background="#b91c1c",onMouseOut:e=>e.currentTarget.style.background="#dc2626",children:"\u{1F5D1}\uFE0F Clear All Logs"})]}),jsxRuntime.jsxs("div",{style:{padding:"12px",background:"#f9fafb",borderTop:"1px solid #e5e7eb",borderRadius:"0 0 12px 12px",fontSize:"12px",color:"#6b7280"},children:[jsxRuntime.jsxs("div",{style:{marginBottom:"4px"},children:[jsxRuntime.jsx("strong",{children:"\u{1F4A1} Tip:"})," Press"," ",jsxRuntime.jsx("kbd",{style:{padding:"2px 6px",background:"#e5e7eb",borderRadius:"4px",fontFamily:"monospace"},children:"Ctrl+Shift+D"})," ","to toggle"]}),jsxRuntime.jsxs("div",{style:{marginBottom:"4px"},children:[jsxRuntime.jsx("strong",{children:"\u{1F4BE} Auto-save:"})," Logs persist across page refreshes"]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"\u{1F512} Security:"})," Sensitive data is auto-redacted"]})]})]})]}):null}function se({fileNameTemplate:s="debug_{timestamp}"}){let[t,o]=react.useState(false),{downloadLogs:h,clearLogs:S,getLogCount:p}=$({fileNameTemplate:s}),y=p();return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsxs("button",{onClick:()=>o(v=>!v),style:{position:"fixed",bottom:"20px",right:"20px",zIndex:9999,padding:"12px 20px",background:"#1f2937",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,display:"flex",alignItems:"center",gap:"8px"},children:[jsxRuntime.jsx("span",{children:"\u{1F41B}"}),jsxRuntime.jsx("span",{children:y})]}),t&&jsxRuntime.jsxs("div",{style:{position:"fixed",bottom:"80px",right:"20px",zIndex:9999,background:"#fff",padding:"20px",borderRadius:"8px",boxShadow:"0 4px 12px rgba(0,0,0,0.2)",width:"300px",display:"flex",flexDirection:"column",gap:"12px"},children:[jsxRuntime.jsx("button",{onClick:()=>h("json"),style:{width:"100%",padding:"10px",background:"#2563eb",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Download JSON"}),jsxRuntime.jsx("button",{onClick:()=>{confirm("Clear all logs?")&&S();},style:{width:"100%",padding:"10px",background:"#dc2626",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Clear Logs"}),jsxRuntime.jsx("button",{onClick:()=>o(false),style:{width:"100%",padding:"10px",background:"#6b7280",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Close"})]})]})}exports.DebugPanel=ne;exports.DebugPanelMinimal=se;exports.collectMetadata=Q;exports.generateExportFilename=le;exports.generateFilename=j;exports.generateSessionId=V;exports.getBrowserInfo=q;exports.sanitizeData=H;exports.sanitizeFilename=F;exports.useLogRecorder=$;
+`),y="text/plain";return M.downloadWithFallback(a,o,y),o},[e,x,C]),I=react.useCallback(async b=>{let s=b||e.uploadEndpoint;if(!s)return {success:false,error:"No endpoint configured"};try{C();let o={metadata:l.current,logs:n.current,fileName:z("json",{},e)},a=await fetch(s,{method:"POST",headers:{"Content-Type":"application/json"},body:x(o)});if(!a.ok)throw new Error(`Upload failed: ${a.status}`);return {success:!0,data:await a.json()}}catch(o){let a=o instanceof Error?o.message:"Unknown error";return console.error("[useLogRecorder] Failed to upload logs:",o),{success:false,error:a}}},[e.uploadEndpoint,x,C]),T=react.useCallback(()=>{if(n.current=[],u(0),f.current=0,e.enablePersistence&&typeof window<"u")try{localStorage.removeItem(e.persistenceKey);}catch{console.warn("[useLogRecorder] Failed to clear persisted logs");}},[e.enablePersistence,e.persistenceKey]),Y=react.useCallback(()=>[...n.current],[]),V=react.useCallback(()=>t,[t]),W=react.useCallback(()=>(C(),{...l.current}),[C]);return {downloadLogs:N,uploadLogs:I,clearLogs:T,getLogs:Y,getLogCount:V,getMetadata:W,sessionId:c.current}}var Q=goober.css`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9998;
+  padding: 12px 20px;
+  background: #1f2937;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`,Z=goober.css`
+  background: #374151;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+`,ee=goober.css`
+  background: #ef4444;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+`,te=goober.css`
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  z-index: 9999;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 384px;
+  max-height: 600px;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+`,oe=goober.css`
+  background: linear-gradient(to right, #1f2937, #111827);
+  color: #fff;
+  padding: 16px;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`,we=goober.css`
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+`,ve=goober.css`
+  margin: 4px 0 0;
+  font-size: 12px;
+  opacity: 0.8;
+`,Re=goober.css`
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+`,re=goober.css`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+`,K=goober.css`
+  text-align: center;
+`,F=goober.css`
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+`,B=goober.css`
+  font-size: 12px;
+  color: #6b7280;
+`,Se=goober.css`
+  color: #dc2626;
+`,ke=goober.css`
+  color: #ea580c;
+`,ne=goober.css`
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+`,se=goober.css`
+  cursor: pointer;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+`,ae=goober.css`
+  margin-top: 8px;
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.6;
+
+  & > div {
+    margin-bottom: 4px;
+  }
+
+  strong {
+    color: #374151;
+  }
+`,Ce=goober.css`
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`,ie=goober.css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`,le=goober.css`
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+`,Ee=goober.css`
+  display: flex;
+  gap: 8px;
+`,ce=goober.css`
+  flex: 1;
+  padding: 10px 16px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+`,Le=goober.css`
+  width: 100%;
+  padding: 10px 16px;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &:hover:not(:disabled) {
+    background: #6d28d9;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+`,Ie=goober.css`
+  width: 100%;
+  padding: 10px 16px;
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &:hover:not(:disabled) {
+    background: #15803d;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+`,Te=goober.css`
+  width: 100%;
+  padding: 10px 16px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`,de=goober.css`
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+`,ue=goober.css`
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+`,pe=goober.css`
+  padding: 12px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  border-radius: 0 0 12px 12px;
+  font-size: 12px;
+  color: #6b7280;
+`,q=goober.css`
+  margin-bottom: 4px;
+
+  kbd {
+    padding: 2px 6px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+`;goober.css`
+  @media (prefers-color-scheme: dark) {
+    ${te} {
+      background: #1e293b;
+      border-color: #334155;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    ${oe} {
+      background: linear-gradient(to right, #334155, #0f172a);
+    }
+
+    ${re} {
+      background: #0f172a;
+      border-color: #334155;
+    }
+
+    ${F} {
+      color: #f1f5f9;
+    }
+
+    ${ne} {
+      background: #0f172a;
+      border-color: #334155;
+    }
+
+    ${se} {
+      color: #e2e8f0;
+    }
+
+    ${ae} {
+      color: #94a3b8;
+
+      strong {
+        color: #e2e8f0;
+      }
+    }
+
+    ${pe} {
+      background: #0f172a;
+      border-color: #334155;
+      color: #94a3b8;
+    }
+
+    ${q} kbd {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    ${Q} {
+      background: #334155;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+      &:hover {
+        background: #475569;
+      }
+    }
+  }
+`;function Ue({user:i,environment:e="production",uploadEndpoint:r,fileNameTemplate:n="{env}_{date}_{time}_{userId}_{errorCount}errors",maxLogs:c=2e3,showInProduction:l=false}){let[t,u]=react.useState(false),[f,h]=react.useState(false),[x,R]=react.useState(null),[S,v]=react.useState(null),k=react.useRef(null),C=react.useRef(null),N=react.useRef(null),{downloadLogs:I,uploadLogs:T,clearLogs:Y,getLogCount:V,getMetadata:W,sessionId:b}=U({fileNameTemplate:n,environment:e,userId:i?.id||i?.email||"guest",includeMetadata:true,uploadEndpoint:r,maxLogs:c,captureConsole:true,captureFetch:true,captureXHR:true,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:["/api/analytics","google-analytics.com","facebook.com","vercel.com"]}),s=V(),o=W();react.useEffect(()=>{let m=E=>{E.ctrlKey&&E.shiftKey&&E.key==="D"&&(E.preventDefault(),u(He=>!He)),E.key==="Escape"&&t&&(E.preventDefault(),u(false),C.current?.focus());};return window.addEventListener("keydown",m),()=>window.removeEventListener("keydown",m)},[t]),react.useEffect(()=>{if(o.errorCount>=5&&r){let m=async()=>{try{await T();}catch{console.warn("[DebugPanel] Failed to auto-upload logs");}};return window.addEventListener("error",m),()=>window.removeEventListener("error",m)}},[o.errorCount,r,T]);let a=react.useCallback(async()=>{h(true),R(null);try{let m=await T();m.success?(R({type:"success",message:`Uploaded successfully! ${m.data?JSON.stringify(m.data):""}`}),m.data&&typeof m.data=="object"&&"url"in m.data&&await navigator.clipboard.writeText(String(m.data.url))):R({type:"error",message:`Upload failed: ${m.error}`});}catch(m){R({type:"error",message:`Error: ${m instanceof Error?m.message:"Unknown error"}`});}finally{h(false);}},[T]),y=react.useCallback(m=>{let E=I(m);E&&R({type:"success",message:`Downloaded: ${E}`});},[I]),w=react.useCallback(async()=>{v(null);try{if(!("showDirectoryPicker"in window)){v({type:"error",message:"T\xEDnh n\u0103ng ch\u1EC9 h\u1ED7 tr\u1EE3 Chrome/Edge"});return}await I("json",void 0,{showPicker:!0})&&v({type:"success",message:"\u0110\xE3 l\u01B0u v\xE0o th\u01B0 m\u1EE5c"});}catch{v({type:"error",message:"Kh\xF4ng th\u1EC3 l\u01B0u. Vui l\xF2ng th\u1EED l\u1EA1i ho\u1EB7c ch\u1ECDn v\u1ECB tr\xED kh\xE1c."});}},[I]);if(react.useEffect(()=>{if(S){let m=setTimeout(()=>{v(null);},3e3);return ()=>clearTimeout(m)}},[S]),!(l||e==="development"||i?.role==="admin"))return null;let Ne=()=>{u(true);},De=()=>{u(false),C.current?.focus();};return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsxs("button",{ref:C,type:"button",onClick:Ne,className:Q,"aria-label":t?"Close debug panel":"Open debug panel (Ctrl+Shift+D)","aria-expanded":t,"aria-controls":"debug-panel",children:[jsxRuntime.jsx("span",{children:"\u{1F41B} Debug"}),jsxRuntime.jsx("span",{className:s>0?o.errorCount>0?ee:Z:Z,children:s}),o.errorCount>0&&jsxRuntime.jsxs("span",{className:ee,children:[o.errorCount," err"]})]}),t&&jsxRuntime.jsxs("div",{ref:k,id:"debug-panel",role:"dialog","aria-modal":"true","aria-label":"Debug Logger Panel",className:te,children:[jsxRuntime.jsxs("div",{className:oe,children:[jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("h3",{className:we,children:"Debug Logger"}),jsxRuntime.jsxs("p",{className:ve,children:["Session: ",b.substring(0,20),"..."]})]}),jsxRuntime.jsx("button",{ref:N,type:"button",onClick:De,className:Re,"aria-label":"Close debug panel",children:"\u2715"})]}),jsxRuntime.jsxs("div",{className:re,children:[jsxRuntime.jsxs("div",{className:K,children:[jsxRuntime.jsx("div",{className:F,children:s}),jsxRuntime.jsx("div",{className:B,children:"Total Logs"})]}),jsxRuntime.jsxs("div",{className:K,children:[jsxRuntime.jsx("div",{className:`${F} ${Se}`,children:o.errorCount}),jsxRuntime.jsx("div",{className:B,children:"Errors"})]}),jsxRuntime.jsxs("div",{className:K,children:[jsxRuntime.jsx("div",{className:`${F} ${ke}`,children:o.networkErrorCount}),jsxRuntime.jsx("div",{className:B,children:"Net Errors"})]})]}),jsxRuntime.jsxs("details",{className:ne,children:[jsxRuntime.jsxs("summary",{className:se,role:"button","aria-expanded":"false",children:[jsxRuntime.jsx("span",{children:"\u{1F4CA}"})," Session Info"]}),jsxRuntime.jsxs("div",{className:ae,children:[jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"User:"})," ",o.userId||"Anonymous"]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Browser:"})," ",o.browser," (",o.platform,")"]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Resolution:"})," ",o.screenResolution]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"URL:"})," ",o.url]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Timezone:"})," ",o.timezone]})]})]}),jsxRuntime.jsxs("div",{className:Ce,children:[jsxRuntime.jsxs("div",{className:ie,children:[jsxRuntime.jsx("span",{className:le,children:"Download Logs"}),jsxRuntime.jsxs("div",{className:Ee,children:[jsxRuntime.jsx("button",{type:"button",onClick:()=>y("json"),className:ce,"aria-label":"Download logs as JSON",children:"\u{1F4E5} JSON"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>y("txt"),className:ce,"aria-label":"Download logs as text file",children:"\u{1F4C4} TXT"})]}),jsxRuntime.jsx("button",{type:"button",onClick:w,disabled:!("showDirectoryPicker"in window),className:Le,"aria-label":"Save logs to directory",title:"showDirectoryPicker"in window?"Ch\u1ECDn th\u01B0 m\u1EE5c \u0111\u1EC3 l\u01B0u file":"T\xEDnh n\u0103ng ch\u1EC9 h\u1ED7 tr\u1EE3 Chrome/Edge",children:"\u{1F4C1} L\u01B0u v\xE0o th\u01B0 m\u1EE5c..."})]}),r&&jsxRuntime.jsxs("div",{className:ie,children:[jsxRuntime.jsx("span",{className:le,children:"Upload to Server"}),jsxRuntime.jsx("button",{type:"button",onClick:a,disabled:f,className:Ie,"aria-label":f?"Uploading logs...":"Upload logs to server","aria-busy":f,children:f?"\u23F3 Uploading...":"\u2601\uFE0F Upload Logs"})]}),x&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:x.type==="success"?de:ue,children:x.message}),S&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:S.type==="success"?de:ue,children:S.message}),jsxRuntime.jsx("button",{type:"button",onClick:()=>{confirm("Clear all logs? This cannot be undone.")&&(Y(),R(null));},className:Te,"aria-label":"Clear all logs",children:"\u{1F5D1}\uFE0F Clear All Logs"})]}),jsxRuntime.jsxs("div",{className:pe,children:[jsxRuntime.jsxs("div",{className:q,children:[jsxRuntime.jsx("strong",{children:"\u{1F4A1} Tip:"})," Press"," ",jsxRuntime.jsx("kbd",{style:{padding:"2px 6px",background:"#e5e7eb",borderRadius:"4px",fontFamily:"monospace"},children:"Ctrl+Shift+D"})," ","to toggle"]}),jsxRuntime.jsxs("div",{className:q,children:[jsxRuntime.jsx("strong",{children:"\u{1F4BE} Auto-save:"})," Logs persist across page refreshes"]}),jsxRuntime.jsxs("div",{className:q,children:[jsxRuntime.jsx("strong",{children:"\u{1F512} Security:"})," Sensitive data is auto-redacted"]})]})]})]})}function Pe({fileNameTemplate:i="debug_{timestamp}"}){let[e,r]=react.useState(false),{downloadLogs:n,clearLogs:c,getLogCount:l}=U({fileNameTemplate:i}),t=l();return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsxs("button",{onClick:()=>r(u=>!u),style:{position:"fixed",bottom:"20px",right:"20px",zIndex:9999,padding:"12px 20px",background:"#1f2937",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,display:"flex",alignItems:"center",gap:"8px"},children:[jsxRuntime.jsx("span",{children:"\u{1F41B}"}),jsxRuntime.jsx("span",{children:t})]}),e&&jsxRuntime.jsxs("div",{style:{position:"fixed",bottom:"80px",right:"20px",zIndex:9999,background:"#fff",padding:"20px",borderRadius:"8px",boxShadow:"0 4px 12px rgba(0,0,0,0.2)",width:"300px",display:"flex",flexDirection:"column",gap:"12px"},children:[jsxRuntime.jsx("button",{onClick:()=>n("json"),style:{width:"100%",padding:"10px",background:"#2563eb",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Download JSON"}),jsxRuntime.jsx("button",{onClick:()=>{confirm("Clear all logs?")&&c();},style:{width:"100%",padding:"10px",background:"#dc2626",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Clear Logs"}),jsxRuntime.jsx("button",{onClick:()=>r(false),style:{width:"100%",padding:"10px",background:"#6b7280",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Close"})]})]})}exports.DebugPanel=Ue;exports.DebugPanelMinimal=Pe;exports.collectMetadata=ye;exports.generateExportFilename=je;exports.generateFilename=z;exports.generateSessionId=he;exports.getBrowserInfo=G;exports.sanitizeData=X;exports.sanitizeFilename=D;exports.useLogRecorder=U;

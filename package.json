@@ -69,5 +69,8 @@
   ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "goober": "^2.1.18"
   }
 }

@@ -1,6 +1,9 @@
 {
   "active_plan": "/Users/trung.ngo/Documents/zaob-dev/glean-debug-logger/.sisyphus/plans/logic-ui-improvements.md",
   "started_at": "2026-01-20T14:29:48.823Z",
-  "session_ids": ["ses_424302d7cffe95KOKa9oQvunQt"],
+  "session_ids": [
+    "ses_424302d7cffe95KOKa9oQvunQt",
+    "ses_423d60d82ffeaP9TJN5UW3nbHV"
+  ],
   "plan_name": "logic-ui-improvements"
 }

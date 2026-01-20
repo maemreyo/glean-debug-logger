@@ -137,6 +137,8 @@ export interface LogRecorderConfig {
   includeMetadata: boolean;
   uploadEndpoint: string | null;
   uploadOnError: boolean;
+  /** Number of consecutive errors before auto-upload triggers */
+  uploadOnErrorCount?: number;
 }
 
 // Hook Return Type
