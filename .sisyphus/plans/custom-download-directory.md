@@ -67,13 +67,13 @@ Implement File System Access API integration allowing users to select target dir
 
 ### Definition of Done
 
-- [ ] `npm run test` passes with 0 failures
-- [ ] New tests added for directory picker functionality
-- [ ] Directory button shows on supported browsers only
-- [ ] Permission denied shows error with retry option
-- [ ] User cancellation is silent (no error)
-- [ ] Bundle size increase < 3KB
-- [ ] Backward compatibility: existing `downloadLogs('json')` calls work unchanged
+- [x] `npm run test` passes with 0 failures
+- [x] New tests added for directory picker functionality
+- [x] Directory button shows on supported browsers only
+- [x] Permission denied shows error with retry option
+- [x] User cancellation is silent (no error)
+- [x] Bundle size increase < 3KB
+- [x] Backward compatibility: existing `downloadLogs('json')` calls work unchanged
 
 ### Must Have
 
@@ -179,7 +179,7 @@ Implement File System Access API integration allowing users to select target dir
 
 ## TODOs
 
-- [ ] 1. Update LogRecorderConfig type with enableDirectoryPicker
+- [x] 1. Update LogRecorderConfig type with enableDirectoryPicker
 
   **What to do**:
   - Add `enableDirectoryPicker?: boolean` to `LogRecorderConfig` interface
@@ -208,13 +208,13 @@ Implement File System Access API integration allowing users to select target dir
   - TypeScript strict mode requires proper typing
 
   **Acceptance Criteria**:
-  - [ ] File modified: `src/types/index.ts`
-  - [ ] New property added: `enableDirectoryPicker?: boolean`
-  - [ ] JSDoc comment added for the new property
-  - [ ] TypeScript compilation: `npm run typecheck` passes
+  - [x] File modified: `src/types/index.ts`
+  - [x] New property added: `enableDirectoryPicker?: boolean`
+  - [x] JSDoc comment added for the new property
+  - [x] TypeScript compilation: `npm run typecheck` passes
 
   **Manual Execution Verification**:
-  - [ ] Command: `npm run typecheck` → No errors
+  - [x] Command: `npm run typecheck` → No errors
 
   **Commit**: YES
   - Message: `feat(types): add enableDirectoryPicker config option`
@@ -222,7 +222,7 @@ Implement File System Access API integration allowing users to select target dir
 
 ---
 
-- [ ] 2. Add DownloadOptions interface
+- [x] 2. Add DownloadOptions interface
 
   **What to do**:
   - Create new interface `DownloadOptions`
@@ -251,14 +251,14 @@ Implement File System Access API integration allowing users to select target dir
   - downloadLogs signature shows how options will be used
 
   **Acceptance Criteria**:
-  - [ ] File modified: `src/types/index.ts`
-  - [ ] New interface created: `DownloadOptions`
-  - [ ] New property: `showPicker?: boolean`
-  - [ ] JSDoc comment: "Options for downloadLogs function"
-  - [ ] TypeScript compilation passes
+  - [x] File modified: `src/types/index.ts`
+  - [x] New interface created: `DownloadOptions`
+  - [x] New property: `showPicker?: boolean`
+  - [x] JSDoc comment: "Options for downloadLogs function"
+  - [x] TypeScript compilation passes
 
   **Manual Execution Verification**:
-  - [ ] Command: `npm run typecheck` → No errors
+  - [x] Command: `npm run typecheck` → No errors
 
   **Commit**: YES
   - Message: `feat(types): add DownloadOptions interface`
@@ -266,7 +266,7 @@ Implement File System Access API integration allowing users to select target dir
 
 ---
 
-- [ ] 3. Update DEFAULT_CONFIG with enableDirectoryPicker
+- [x] 3. Update DEFAULT_CONFIG with enableDirectoryPicker
 
   **What to do**:
   - Add `enableDirectoryPicker: false` to DEFAULT_CONFIG object
@@ -294,12 +294,12 @@ Implement File System Access API integration allowing users to select target dir
   - Type interface shows the property name to use
 
   **Acceptance Criteria**:
-  - [ ] File modified: `src/hooks/useLogRecorder.ts`
-  - [ ] New config: `enableDirectoryPicker: false`
-  - [ ] TypeScript compilation passes
+  - [x] File modified: `src/hooks/useLogRecorder.ts`
+  - [x] New config: `enableDirectoryPicker: false`
+  - [x] TypeScript compilation passes
 
   **Manual Execution Verification**:
-  - [ ] Command: `npm run typecheck` → No errors
+  - [x] Command: `npm run typecheck` → No errors
 
   **Commit**: YES
   - Message: `feat(hooks): add enableDirectoryPicker to DEFAULT_CONFIG`
@@ -307,7 +307,7 @@ Implement File System Access API integration allowing users to select target dir
 
 ---
 
-- [ ] 4. Implement directory picker in downloadLogs
+- [x] 4. Implement directory picker in downloadLogs
 
   **What to do**:
   - Create `supportsFileSystemAccess()` utility function
@@ -431,16 +431,16 @@ Implement File System Access API integration allowing users to select target dir
   - useCallback dependencies must include new config option
 
   **Acceptance Criteria**:
-  - [ ] File modified: `src/hooks/useLogRecorder.ts`
-  - [ ] New function: `supportsFileSystemAccess()` added
-  - [ ] New function: `saveToDirectory()` added
-  - [ ] Updated: `downloadLogs` signature with third parameter
-  - [ ] Implemented: File System Access API call
-  - [ ] Implemented: Error handling for AbortError (silent)
-  - [ ] Implemented: Error handling for NotAllowedError (log error)
-  - [ ] Implemented: Fallback to standard download
-  - [ ] Preserved: URL.revokeObjectURL cleanup
-  - [ ] TypeScript compilation passes
+  - [x] File modified: `src/hooks/useLogRecorder.ts`
+  - [x] New function: `supportsFileSystemAccess()` added
+  - [x] New function: `saveToDirectory()` added
+  - [x] Updated: `downloadLogs` signature with third parameter
+  - [x] Implemented: File System Access API call
+  - [x] Implemented: Error handling for AbortError (silent)
+  - [x] Implemented: Error handling for NotAllowedError (log error)
+  - [x] Implemented: Fallback to standard download
+  - [x] Preserved: URL.revokeObjectURL cleanup
+  - [x] TypeScript compilation passes
 
   **Error Cases to Handle**:
   - AbortError: User cancelled picker → return null, no error logged
@@ -450,9 +450,9 @@ Implement File System Access API integration allowing users to select target dir
   - Other errors: Log error, fallback to standard download
 
   **Manual Execution Verification**:
-  - [ ] Command: `npm run typecheck` → No errors
-  - [ ] Manual: Create test component, verify directory picker opens in Chrome
-  - [ ] Manual: Verify fallback to standard download in Firefox
+  - [x] Command: `npm run typecheck` → No errors
+  - [x] Manual: Create test component, verify directory picker opens in Chrome
+  - [x] Manual: Verify fallback to standard download in Firefox
 
   **Commit**: YES
   - Message: `feat(hooks): add directory picker support to downloadLogs`
@@ -460,7 +460,7 @@ Implement File System Access API integration allowing users to select target dir
 
 ---
 
-- [ ] 5. Update browser mocks for testing
+- [x] 5. Update browser mocks for testing
 
   **What to do**:
   - Add `showDirectoryPicker` mock to browser.ts
@@ -550,15 +550,15 @@ Implement File System Access API integration allowing users to select target dir
   - Exports show how to expose helper functions
 
   **Acceptance Criteria**:
-  - [ ] File modified: `src/hooks/__mocks__/browser.ts`
-  - [ ] New mock: `showDirectoryPicker` function
-  - [ ] New mock: `FileSystemDirectoryHandle` object
-  - [ ] New mock: `FileSystemFileHandle` with createWritable
-  - [ ] New helper: `setMockDirectoryPermission(state)` (optional)
-  - [ ] Tests can use these mocks
+  - [x] File modified: `src/hooks/__mocks__/browser.ts`
+  - [x] New mock: `showDirectoryPicker` function
+  - [x] New mock: `FileSystemDirectoryHandle` object
+  - [x] New mock: `FileSystemFileHandle` with createWritable
+  - [x] New helper: `setMockDirectoryPermission(state)` (optional)
+  - [x] Tests can use these mocks
 
   **Manual Execution Verification**:
-  - [ ] Command: `npm run test -- src/hooks/useLogRecorder.test.ts` → Tests use mocks
+  - [x] Command: `npm run test -- src/hooks/useLogRecorder.test.ts` → Tests use mocks
 
   **Commit**: YES
   - Message: `test(mocks): add directory picker mocks for testing`
@@ -566,7 +566,7 @@ Implement File System Access API integration allowing users to select target dir
 
 ---
 
-- [ ] 6. Add "Save to Directory" button in DebugPanel
+- [x] 6. Add "Save to Directory" button in DebugPanel
 
   **What to do**:
   - Add "Save to Directory" button next to existing download buttons
@@ -642,15 +642,15 @@ Implement File System Access API integration allowing users to select target dir
   - Status auto-clear shows timer pattern
 
   **Acceptance Criteria**:
-  - [ ] File modified: `src/components/DebugPanel.tsx`
-  - [ ] New button: "Lưu vào thư mục..." added
-  - [ ] Button disabled: On Firefox/Safari (`!supportsFileSystemAccess()`)
-  - [ ] Tooltip: Explains limitation on unsupported browsers
-  - [ ] New state: `directoryStatus` added (similar to `uploadStatus`)
-  - [ ] Error handling: Shows error message on permission denied
-  - [ ] Auto-clear: Status clears after 3 seconds
-  - [ ] Accessibility: Proper button type, aria-label
-  - [ ] TypeScript compilation passes
+  - [x] File modified: `src/components/DebugPanel.tsx`
+  - [x] New button: "Lưu vào thư mục..." added
+  - [x] Button disabled: On Firefox/Safari (`!supportsFileSystemAccess()`)
+  - [x] Tooltip: Explains limitation on unsupported browsers
+  - [x] New state: `directoryStatus` added (similar to `uploadStatus`)
+  - [x] Error handling: Shows error message on permission denied
+  - [x] Auto-clear: Status clears after 3 seconds
+  - [x] Accessibility: Proper button type, aria-label
+  - [x] TypeScript compilation passes
 
   **Error Display Pattern**:
   - Success: "Đã lưu vào thư mục" (Green)
@@ -658,10 +658,10 @@ Implement File System Access API integration allowing users to select target dir
   - Use same styling as uploadStatus
 
   **Manual Execution Verification**:
-  - [ ] Manual: Button visible in DebugPanel
-  - [ ] Manual: Button disabled in Firefox, enabled in Chrome
-  - [ ] Manual: Clicking opens directory picker in Chrome
-  - [ ] Manual: Permission denied shows error message
+  - [x] Manual: Button visible in DebugPanel
+  - [x] Manual: Button disabled in Firefox, enabled in Chrome
+  - [x] Manual: Clicking opens directory picker in Chrome
+  - [x] Manual: Permission denied shows error message
 
   **Commit**: YES
   - Message: `feat(ui): add Save to Directory button in DebugPanel`
@@ -669,7 +669,7 @@ Implement File System Access API integration allowing users to select target dir
 
 ---
 
-- [ ] 7. Add tests for directory picker functionality
+- [x] 7. Add tests for directory picker functionality
 
   **What to do**:
   - Add tests for `supportsFileSystemAccess()` utility
@@ -787,17 +787,17 @@ Implement File System Access API integration allowing users to select target dir
   - Utils tests show how to structure test cases
 
   **Acceptance Criteria**:
-  - [ ] File modified: `src/hooks/useLogRecorder.test.ts`
-  - [ ] New test: `supportsFileSystemAccess()` returns correct values
-  - [ ] New test: Directory picker saves file successfully
-  - [ ] New test: AbortError returns null (silent cancel)
-  - [ ] New test: NotAllowedError falls back to standard download
-  - [ ] New test: Config override works (showPicker overrides enableDirectoryPicker)
-  - [ ] New test: Unsupported browser uses standard download
-  - [ ] All tests pass: `npm run test -- src/hooks/useLogRecorder.test.ts`
+  - [x] File modified: `src/hooks/useLogRecorder.test.ts`
+  - [x] New test: `supportsFileSystemAccess()` returns correct values
+  - [x] New test: Directory picker saves file successfully
+  - [x] New test: AbortError returns null (silent cancel)
+  - [x] New test: NotAllowedError falls back to standard download
+  - [x] New test: Config override works (showPicker overrides enableDirectoryPicker)
+  - [x] New test: Unsupported browser uses standard download
+  - [x] All tests pass: `npm run test -- src/hooks/useLogRecorder.test.ts`
 
   **Manual Execution Verification**:
-  - [ ] Command: `npm run test -- src/hooks/useLogRecorder.test.ts` → All tests pass
+  - [x] Command: `npm run test -- src/hooks/useLogRecorder.test.ts` → All tests pass
 
   **Commit**: YES
   - Message: `test(hooks): add directory picker tests`
@@ -805,7 +805,7 @@ Implement File System Access API integration allowing users to select target dir
 
 ---
 
-- [ ] 8. Verify bundle size impact
+- [x] 8. Verify bundle size impact
 
   **What to do**:
   - Run build to check bundle size
@@ -813,14 +813,14 @@ Implement File System Access API integration allowing users to select target dir
   - Ensure increase < 3KB
 
   **Acceptance Criteria**:
-  - [ ] Command: `npm run build` completes successfully
-  - [ ] Command: `npm run size` or check dist/ size
-  - [ ] Bundle size increase < 3KB from original (~20KB)
-  - [ ] If > 3KB increase, optimize or reconsider
+  - [x] Command: `npm run build` completes successfully
+  - [x] Command: `npm run size` or check dist/ size
+  - [x] Bundle size increase < 3KB from original (~20KB)
+  - [x] If > 3KB increase, optimize or reconsider
 
   **Manual Execution Verification**:
-  - [ ] Command: `npm run build` → Build successful
-  - [ ] Check: dist/glean-debug-logger.{cjs,esm}.js sizes
+  - [x] Command: `npm run build` → Build successful
+  - [x] Check: dist/glean-debug-logger.{cjs,esm}.js sizes
 
   **Commit**: NO (build verification only)
 
@@ -861,12 +861,12 @@ npm run build
 
 ### Final Checklist
 
-- [ ] All "Must Have" present
-- [ ] All "Must NOT Have" absent
-- [ ] `npm run test` passes with 0 failures
-- [ ] `npm run typecheck` passes
-- [ ] Bundle size increase < 3KB
-- [ ] Directory button shows on Chrome/Edge, disabled on Firefox/Safari
-- [ ] Error handling works for all error types
-- [ ] Backward compatibility maintained
-- [ ] No IndexedDB persistence added
+- [x] All "Must Have" present
+- [x] All "Must NOT Have" absent
+- [x] `npm run test` passes with 0 failures
+- [x] `npm run typecheck` passes
+- [x] Bundle size increase < 3KB
+- [x] Directory button shows on Chrome/Edge, disabled on Firefox/Safari
+- [x] Error handling works for all error types
+- [x] Backward compatibility maintained
+- [x] No IndexedDB persistence added
