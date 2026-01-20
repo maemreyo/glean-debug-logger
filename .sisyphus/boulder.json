@@ -1,9 +1,6 @@
 {
-  "active_plan": "/Users/trung.ngo/Documents/zaob-dev/glean-debug-logger/.sisyphus/plans/package-implementation.md",
-  "started_at": "2026-01-20T07:22:02.597Z",
-  "session_ids": [
-    "ses_425bc0e02ffeW6wQjaJOQ7sRar",
-    "ses_42599efb3ffeDJrcL96yyrTyLE"
-  ],
-  "plan_name": "package-implementation"
+  "active_plan": "/Users/trung.ngo/Documents/zaob-dev/glean-debug-logger/.sisyphus/plans/custom-download-directory.md",
+  "started_at": "2026-01-20T12:51:13.465Z",
+  "session_ids": ["ses_4248a705bffeHmiuGI3O2gLf0a"],
+  "plan_name": "custom-download-directory"
 }
