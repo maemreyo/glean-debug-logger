@@ -1,9 +1,10 @@
 {
-  "active_plan": "/Users/trung.ngo/Documents/zaob-dev/glean-debug-logger/.sisyphus/plans/logic-ui-improvements.md",
-  "started_at": "2026-01-20T14:29:48.823Z",
-  "session_ids": [
-    "ses_424302d7cffe95KOKa9oQvunQt",
-    "ses_423d60d82ffeaP9TJN5UW3nbHV"
-  ],
-  "plan_name": "logic-ui-improvements"
+  "active_plan": "/Users/trung.ngo/Documents/zaob-dev/glean-debug-logger/.sisyphus/plans/storybook-setup.md",
+  "started_at": "2026-01-20T16:43:46.020Z",
+  "completed_at": "2026-01-20T17:45:00.000Z",
+  "session_ids": ["ses_423d60d82ffeaP9TJN5UW3nbHV"],
+  "plan_name": "storybook-setup",
+  "total_tasks": 9,
+  "completed_tasks": 9,
+  "progress": "44/44 checkboxes completed - ALL TASKS DONE"
 }

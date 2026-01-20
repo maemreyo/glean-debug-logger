@@ -1,0 +1,1 @@
+import{j as e}from"./jsx-runtime-CDt2p4po.js";import"./index-GiUgBvb1.js";const o={parameters:{controls:{matchers:{color:/(background|color)$/i,date:/Date$/i}},backgrounds:{default:"light",values:[{name:"light",value:"#ffffff"},{name:"dark",value:"#1e293b"}]}},decorators:[a=>e.jsx("div",{style:{padding:"1rem"},children:e.jsx(a,{})})]};export{o as default};

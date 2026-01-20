@@ -39,7 +39,6 @@ export function DebugPanelMinimal({
           gap: "8px",
         }}
       >
-        <span>🐛</span>
         <span>{logCount}</span>
       </button>
 

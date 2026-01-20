@@ -228,7 +228,7 @@ export function DebugPanel({
         aria-expanded={isOpen}
         aria-controls="debug-panel"
       >
-        <span>🐛 Debug</span>
+        <span>Debug</span>
         <span
           className={
             logCount > 0 ? (metadata.errorCount > 0 ? errorBadgeStyles : badgeStyles) : badgeStyles
@@ -285,7 +285,7 @@ export function DebugPanel({
 
           <details className={detailsStyles}>
             <summary className={summaryStyles} role="button" aria-expanded="false">
-              <span>📊</span> Session Info
+              <span>Session Info</span>
             </summary>
             <div className={sessionInfoStyles}>
               <div>
@@ -316,7 +316,7 @@ export function DebugPanel({
                   className={primaryButtonStyles}
                   aria-label="Download logs as JSON"
                 >
-                  📥 JSON
+                  JSON
                 </button>
                 <button
                   type="button"
@@ -324,7 +324,7 @@ export function DebugPanel({
                   className={primaryButtonStyles}
                   aria-label="Download logs as text file"
                 >
-                  📄 TXT
+                  TXT
                 </button>
               </div>
               <button
@@ -339,7 +339,7 @@ export function DebugPanel({
                     : 'Tính năng chỉ hỗ trợ Chrome/Edge'
                 }
               >
-                📁 Lưu vào thư mục...
+                Lưu vào thư mục...
               </button>
             </div>
 
@@ -354,7 +354,7 @@ export function DebugPanel({
                   aria-label={isUploading ? 'Uploading logs...' : 'Upload logs to server'}
                   aria-busy={isUploading}
                 >
-                  {isUploading ? '⏳ Uploading...' : '☁️ Upload Logs'}
+                  {isUploading ? 'Uploading...' : 'Upload Logs'}
                 </button>
               </div>
             )}
@@ -394,7 +394,7 @@ export function DebugPanel({
               className={dangerButtonStyles}
               aria-label="Clear all logs"
             >
-              🗑️ Clear All Logs
+              Clear All Logs
             </button>
           </div>
 

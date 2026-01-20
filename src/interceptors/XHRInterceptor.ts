@@ -39,8 +39,9 @@ export class XHRInterceptor {
       return xhr;
     } as unknown as typeof XMLHttpRequest;
 
-    MyXMLHttpRequest.prototype = OriginalXHR.prototype;
-    Object.setPrototypeOf(MyXMLHttpRequest.prototype, OriginalXHR.prototype);
+    // Proper prototype chain inheritance without circular reference
+    MyXMLHttpRequest.prototype = Object.create(OriginalXHR.prototype);
+    MyXMLHttpRequest.prototype.constructor = MyXMLHttpRequest;
 
     const originalOpen = OriginalXHR.prototype.open;
     MyXMLHttpRequest.prototype.open = function (method: string, url: string) {
