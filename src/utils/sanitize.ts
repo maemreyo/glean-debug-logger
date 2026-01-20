@@ -63,10 +63,10 @@ export function getBrowserInfo(): string {
 
   const ua = navigator.userAgent;
 
+  if (ua.includes('Edg')) return 'edge';
   if (ua.includes('Chrome')) return 'chrome';
   if (ua.includes('Firefox')) return 'firefox';
   if (ua.includes('Safari')) return 'safari';
-  if (ua.includes('Edge')) return 'edge';
 
   return 'unknown';
 }
@@ -98,6 +98,13 @@ export function collectMetadata(
     };
   }
 
+  const screenRes =
+    typeof window.screen !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : '0x0';
+  const viewportRes =
+    typeof window.innerWidth !== 'undefined' && typeof window.innerHeight !== 'undefined'
+      ? `${window.innerWidth}x${window.innerHeight}`
+      : '0x0';
+
   return {
     sessionId,
     environment,
@@ -107,8 +114,8 @@ export function collectMetadata(
     browser: getBrowserInfo(),
     platform: navigator.platform,
     language: navigator.language,
-    screenResolution: `${window.screen.width}x${window.screen.height}`,
-    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    screenResolution: screenRes,
+    viewport: viewportRes,
     url: window.location.href,
     referrer: document.referrer,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
