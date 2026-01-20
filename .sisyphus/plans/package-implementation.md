@@ -45,13 +45,13 @@ Create a production-ready React debug logging library `@zaob/glean-debug-logger`
 - `examples/` - Backend implementation examples
 
 ### Definition of Done
-- [ ] `npm run build` completes successfully
-- [ ] `npm test` runs with vitest
-- [ ] Bundle size < 20KB
-- [ ] TypeScript types generated (.d.ts)
-- [ ] CJS + ESM formats output
-- [ ] All features from docs/idea.md implemented
-- [ ] Backend examples extracted to examples/ folder
+- [x] `npm run build` completes successfully
+- [x] `npm test` runs with vitest
+- [x] Bundle size < 20KB
+- [x] TypeScript types generated (.d.ts)
+- [x] CJS + ESM formats output
+- [x] All features from docs/idea.md implemented
+- [x] Backend examples extracted to examples/ folder
 
 ### Must Have
 - TypeScript implementation with proper types
@@ -86,10 +86,10 @@ Create a production-ready React debug logging library `@zaob/glean-debug-logger`
 - **QA approach**: Implementation first, tests added after
 
 ### Test Setup Tasks (Included in Plan)
-- [ ] Install vitest + @testing-library/react
-- [ ] Create vitest.config.ts
-- [ ] Add test scripts to package.json
-- [ ] Create example test to verify setup
+- [x] Install vitest + @testing-library/react
+- [x] Create vitest.config.ts
+- [x] Add test scripts to package.json
+- [x] Create example test to verify setup
 
 ### Implementation Testing Strategy
 After implementation, add tests for:
@@ -134,7 +134,7 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
 > Implementation + Test = ONE Task. Never separate.
 > Specify parallelizability for EVERY task.
 
-- [ ] 1. Initialize Project and Install Dependencies
+- [x] 1. Initialize Project and Install Dependencies
 
   **What to do**:
   - Initialize npm project with `npm init -y`
@@ -173,22 +173,22 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - TypeScript/tsup docs: Build configuration best practices
 
   **Acceptance Criteria**:
-  - [ ] Command: `npm init -y` → Creates package.json
-  - [ ] `package.json` exists with correct name: `@zaob/glean-debug-logger`
-  - [ ] Command: `npm install` → Installs all dependencies
-  - [ ] `node_modules/` created with React and dev tools
-  - [ ] Command: `ls node_modules | head -20` → Shows installed packages
+  - [x] Command: `npm init -y` → Creates package.json
+  - [x] `package.json` exists with correct name: `@zaob/glean-debug-logger`
+  - [x] Command: `npm install` → Installs all dependencies
+  - [x] `node_modules/` created with React and dev tools
+  - [x] Command: `ls node_modules | head -20` → Shows installed packages
 
   **Evidence Required**:
-  - [ ] package.json content captured
-  - [ ] npm install output showing successful installation
+  - [x] package.json content captured
+  - [x] npm install output showing successful installation
 
   **Commit**: YES
   - Message: `feat: initialize project with package.json and dependencies`
   - Files: `package.json`, `package-lock.json`, `node_modules/`
   - Pre-commit: `echo "Dependencies installed"`
 
-- [ ] 2. Create TypeScript Configuration (tsconfig.json)
+- [x] 2. Create TypeScript Configuration (tsconfig.json)
 
   **What to do**:
   - Create tsconfig.json with appropriate compiler options
@@ -224,21 +224,21 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - tsup docs: Shows how to configure TypeScript for library builds
 
   **Acceptance Criteria**:
-  - [ ] `tsconfig.json` exists
-  - [ ] Command: `npx tsc --noEmit` → No TypeScript errors
-  - [ ] `declaration: true` is set
-  - [ ] `outDir` and `rootDir` configured
+  - [x] `tsconfig.json` exists
+  - [x] Command: `npx tsc --noEmit` → No TypeScript errors
+  - [x] `declaration: true` is set
+  - [x] `outDir` and `rootDir` configured
 
   **Evidence Required**:
-  - [ ] tsconfig.json content captured
-  - [ ] tsc --noEmit output showing no errors
+  - [x] tsconfig.json content captured
+  - [x] tsc --noEmit output showing no errors
 
   **Commit**: YES
   - Message: `chore: add TypeScript configuration`
   - Files: `tsconfig.json`
   - Pre-commit: `npx tsc --noEmit`
 
-- [ ] 3. Create tsup Build Configuration (tsup.config.ts)
+- [x] 3. Create tsup Build Configuration (tsup.config.ts)
 
   **What to do**:
   - Create tsup.config.ts for building CJS + ESM formats
@@ -277,23 +277,23 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - tsup docs: Shows exact configuration for library builds
 
   **Acceptance Criteria**:
-  - [ ] `tsup.config.ts` exists
-  - [ ] Command: `npm run build` → Creates dist/ folder
-  - [ ] `dist/` contains: index.js, index.mjs, index.d.ts
-  - [ ] Bundle size < 20KB (check dist files)
+  - [x] `tsup.config.ts` exists
+  - [x] Command: `npm run build` → Creates dist/ folder
+  - [x] `dist/` contains: index.js, index.mjs, index.d.ts
+  - [x] Bundle size < 20KB (check dist files)
 
   **Evidence Required**:
-  - [ ] tsup.config.ts content captured
-  - [ ] npm run build output
-  - [ ] ls -la dist/ showing generated files
-  - [ ] Bundle size check: `du -h dist/* | head -10`
+  - [x] tsup.config.ts content captured
+  - [x] npm run build output
+  - [x] ls -la dist/ showing generated files
+  - [x] Bundle size check: `du -h dist/* | head -10`
 
   **Commit**: YES
   - Message: `chore: configure tsup build`
   - Files: `tsup.config.ts`
   - Pre-commit: `npm run build`
 
-- [ ] 4. Create vitest Test Configuration
+- [x] 4. Create vitest Test Configuration
 
   **What to do**:
   - Create vitest.config.ts for testing
@@ -326,21 +326,21 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - vitest docs: Shows proper configuration for React testing
 
   **Acceptance Criteria**:
-  - [ ] `vitest.config.ts` exists
-  - [ ] Command: `npm test` → Shows vitest help/menu
-  - [ ] Test pattern configured (files matching *.test.ts)
-  - [ ] React testing library works (can import @testing-library/react)
+  - [x] `vitest.config.ts` exists
+  - [x] Command: `npm test` → Shows vitest help/menu
+  - [x] Test pattern configured (files matching *.test.ts)
+  - [x] React testing library works (can import @testing-library/react)
 
   **Evidence Required**:
-  - [ ] vitest.config.ts content captured
-  - [ ] npm test output
+  - [x] vitest.config.ts content captured
+  - [x] npm test output
 
   **Commit**: YES
   - Message: `chore: configure vitest testing`
   - Files: `vitest.config.ts`
   - Pre-commit: `npm test`
 
-- [ ] 5. Create TypeScript Type Definitions (src/types/index.ts)
+- [x] 5. Create TypeScript Type Definitions (src/types/index.ts)
 
   **What to do**:
   - Define LogEntry type with all properties
@@ -379,22 +379,22 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - TypeScript docs: Best practices for type definitions
 
   **Acceptance Criteria**:
-  - [ ] `src/types/index.ts` exists
-  - [ ] Command: `npx tsc --noEmit` → All types valid
-  - [ ] All LogType values covered
-  - [ ] Config interface complete
-  - [ ] HookReturnType includes all exported methods
+  - [x] `src/types/index.ts` exists
+  - [x] Command: `npx tsc --noEmit` → All types valid
+  - [x] All LogType values covered
+  - [x] Config interface complete
+  - [x] HookReturnType includes all exported methods
 
   **Evidence Required**:
-  - [ ] src/types/index.ts content captured
-  - [ ] tsc --noEmit output showing no type errors
+  - [x] src/types/index.ts content captured
+  - [x] tsc --noEmit output showing no type errors
 
   **Commit**: YES
   - Message: `feat: add TypeScript type definitions`
   - Files: `src/types/index.ts`
   - Pre-commit: `npx tsc --noEmit`
 
-- [ ] 6. Create Utility Functions (src/utils/)
+- [x] 6. Create Utility Functions (src/utils/)
 
   **What to do**:
   - Create `src/utils/sanitize.ts` for data sanitization
@@ -436,23 +436,23 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - Navigator docs: For browser metadata collection
 
   **Acceptance Criteria**:
-  - [ ] `src/utils/sanitize.ts` exists and exports sanitizeData
-  - [ ] `src/utils/filename.ts` exists and exports generateFileName
-  - [ ] `src/utils/index.ts` exports all utilities
-  - [ ] sanitizeData correctly redacts keys like 'password', 'token', 'apiKey'
-  - [ ] generateFileName correctly replaces all placeholders
+  - [x] `src/utils/sanitize.ts` exists and exports sanitizeData
+  - [x] `src/utils/filename.ts` exists and exports generateFileName
+  - [x] `src/utils/index.ts` exports all utilities
+  - [x] sanitizeData correctly redacts keys like 'password', 'token', 'apiKey'
+  - [x] generateFileName correctly replaces all placeholders
 
   **Evidence Required**:
-  - [ ] src/utils/sanitize.ts content captured
-  - [ ] src/utils/filename.ts content captured
-  - [ ] src/utils/index.ts content captured
+  - [x] src/utils/sanitize.ts content captured
+  - [x] src/utils/filename.ts content captured
+  - [x] src/utils/index.ts content captured
 
   **Commit**: YES
   - Message: `feat: add utility functions for sanitization and filename generation`
   - Files: `src/utils/sanitize.ts`, `src/utils/filename.ts`, `src/utils/index.ts`
   - Pre-commit: `npx tsc --noEmit`
 
-- [ ] 7. Create Main Hook (src/hooks/useLogRecorder.ts)
+- [x] 7. Create Main Hook (src/hooks/useLogRecorder.ts)
 
   **What to do**:
   - Create `src/hooks/useLogRecorder.ts` with full implementation
@@ -503,26 +503,26 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - MDN: XHR and fetch APIs for interception
 
   **Acceptance Criteria**:
-  - [ ] `src/hooks/useLogRecorder.ts` exists
-  - [ ] Command: `npx tsc --noEmit` → No TypeScript errors
-  - [ ] Hook exports: downloadLogs, uploadLogs, clearLogs, getLogs, getLogCount, getMetadata, sessionId
-  - [ ] Console.log is intercepted and recorded
-  - [ ] Fetch requests are intercepted and recorded
-  - [ ] XHR requests are intercepted and recorded
-  - [ ] LocalStorage persistence works
-  - [ ] Download creates blob with correct format
+  - [x] `src/hooks/useLogRecorder.ts` exists
+  - [x] Command: `npx tsc --noEmit` → No TypeScript errors
+  - [x] Hook exports: downloadLogs, uploadLogs, clearLogs, getLogs, getLogCount, getMetadata, sessionId
+  - [x] Console.log is intercepted and recorded
+  - [x] Fetch requests are intercepted and recorded
+  - [x] XHR requests are intercepted and recorded
+  - [x] LocalStorage persistence works
+  - [x] Download creates blob with correct format
 
   **Evidence Required**:
-  - [ ] src/hooks/useLogRecorder.ts content captured
-  - [ ] tsc --noEmit output showing no errors
-  - [ ] Manual test of hook in test component
+  - [x] src/hooks/useLogRecorder.ts content captured
+  - [x] tsc --noEmit output showing no errors
+  - [x] Manual test of hook in test component
 
   **Commit**: YES
   - Message: `feat: implement useLogRecorder hook with all features`
   - Files: `src/hooks/useLogRecorder.ts`
   - Pre-commit: `npx tsc --noEmit`
 
-- [ ] 8. Create DebugPanel Components (src/components/)
+- [x] 8. Create DebugPanel Components (src/components/)
 
   **What to do**:
   - Create `src/components/DebugPanel.tsx` with full implementation
@@ -572,29 +572,29 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - MDN: Keyboard event handling
 
   **Acceptance Criteria**:
-  - [ ] `src/components/DebugPanel.tsx` exists
-  - [ ] `src/components/DebugPanelMinimal.tsx` exists
-  - [ ] `src/components/index.ts` exports both components
-  - [ ] Command: `npx tsc --noEmit` → No TypeScript errors
-  - [ ] Floating button appears on page
-  - [ ] Ctrl+Shift+D toggles panel
-  - [ ] Download buttons work
-  - [ ] Upload button works
-  - [ ] Clear button works
+  - [x] `src/components/DebugPanel.tsx` exists
+  - [x] `src/components/DebugPanelMinimal.tsx` exists
+  - [x] `src/components/index.ts` exports both components
+  - [x] Command: `npx tsc --noEmit` → No TypeScript errors
+  - [x] Floating button appears on page
+  - [x] Ctrl+Shift+D toggles panel
+  - [x] Download buttons work
+  - [x] Upload button works
+  - [x] Clear button works
 
   **Evidence Required**:
-  - [ ] src/components/DebugPanel.tsx content captured
-  - [ ] src/components/DebugPanelMinimal.tsx content captured
-  - [ ] src/components/index.ts content captured
-  - [ ] tsc --noEmit output showing no errors
-  - [ ] Component renders correctly in test app
+  - [x] src/components/DebugPanel.tsx content captured
+  - [x] src/components/DebugPanelMinimal.tsx content captured
+  - [x] src/components/index.ts content captured
+  - [x] tsc --noEmit output showing no errors
+  - [x] Component renders correctly in test app
 
   **Commit**: YES
   - Message: `feat: implement DebugPanel components`
   - Files: `src/components/DebugPanel.tsx`, `src/components/DebugPanelMinimal.tsx`, `src/components/index.ts`
   - Pre-commit: `npx tsc --noEmit`
 
-- [ ] 9. Create Main Export File (src/index.ts)
+- [x] 9. Create Main Export File (src/index.ts)
 
   **What to do**:
   - Create `src/index.ts` with all exports
@@ -633,22 +633,22 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - TypeScript docs: Proper module export patterns
 
   **Acceptance Criteria**:
-  - [ ] `src/index.ts` exists
-  - [ ] Command: `npx tsc --noEmit` → No TypeScript errors
-  - [ ] All exports are available via named imports
-  - [ ] Import statement works: `import { useLogRecorder, DebugPanel } from '@zaob/glean-debug-logger'`
+  - [x] `src/index.ts` exists
+  - [x] Command: `npx tsc --noEmit` → No TypeScript errors
+  - [x] All exports are available via named imports
+  - [x] Import statement works: `import { useLogRecorder, DebugPanel } from '@zaob/glean-debug-logger'`
 
   **Evidence Required**:
-  - [ ] src/index.ts content captured
-  - [ ] tsc --noEmit output showing no errors
-  - [ ] Import test in test file
+  - [x] src/index.ts content captured
+  - [x] tsc --noEmit output showing no errors
+  - [x] Import test in test file
 
   **Commit**: YES
   - Message: `feat: create main export file`
   - Files: `src/index.ts`
   - Pre-commit: `npx tsc --noEmit`
 
-- [ ] 10. Build Verification
+- [x] 10. Build Verification
 
   **What to do**:
   - Run `npm run build` to verify all source compiles
@@ -685,25 +685,25 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - tsup docs: Shows how to verify build output
 
   **Acceptance Criteria**:
-  - [ ] Command: `npm run build` → Success (exit code 0)
-  - [ ] `dist/index.js` exists (CJS format)
-  - [ ] `dist/index.mjs` exists (ESM format)
-  - [ ] `dist/index.d.ts` exists (TypeScript declarations)
-  - [ ] Bundle size < 20KB (check with `du -h dist/index.js`)
-  - [ ] Import works: `import { useLogRecorder } from './dist/index.js'`
+  - [x] Command: `npm run build` → Success (exit code 0)
+  - [x] `dist/index.js` exists (CJS format)
+  - [x] `dist/index.mjs` exists (ESM format)
+  - [x] `dist/index.d.ts` exists (TypeScript declarations)
+  - [x] Bundle size < 20KB (check with `du -h dist/index.js`)
+  - [x] Import works: `import { useLogRecorder } from './dist/index.js'`
 
   **Evidence Required**:
-  - [ ] npm run build output
-  - [ ] ls -la dist/ showing all generated files
-  - [ ] Bundle size check: `du -h dist/*`
-  - [ ] Import test output
+  - [x] npm run build output
+  - [x] ls -la dist/ showing all generated files
+  - [x] Bundle size check: `du -h dist/*`
+  - [x] Import test output
 
   **Commit**: YES
   - Message: `chore: verify build output`
   - Files: `dist/` (build artifacts)
   - Pre-commit: `npm run build`
 
-- [ ] 11. Create Backend Examples (examples/)
+- [x] 11. Create Backend Examples (examples/)
 
   **What to do**:
   - Create `examples/nextjs-file-system/` with Next.js API Route implementation
@@ -742,25 +742,25 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - Official docs: Shows proper API patterns for each service
 
   **Acceptance Criteria**:
-  - [ ] `examples/` folder created
-  - [ ] `examples/nextjs-file-system/` exists with route.js
-  - [ ] `examples/s3-upload/` exists with route.js
-  - [ ] `examples/supabase-storage/` exists with route.js
-  - [ ] `examples/postgresql/` exists with route.js
-  - [ ] `examples/secure-api/` exists with route.js
-  - [ ] `examples/README.md` explains usage
+  - [x] `examples/` folder created
+  - [x] `examples/nextjs-file-system/` exists with route.js
+  - [x] `examples/s3-upload/` exists with route.js
+  - [x] `examples/supabase-storage/` exists with route.js
+  - [x] `examples/postgresql/` exists with route.js
+  - [x] `examples/secure-api/` exists with route.js
+  - [x] `examples/README.md` explains usage
 
   **Evidence Required**:
-  - [ ] ls -la examples/ showing all subfolders
-  - [ ] Each example has route.js file
-  - [ ] README.md content captured
+  - [x] ls -la examples/ showing all subfolders
+  - [x] Each example has route.js file
+  - [x] README.md content captured
 
   **Commit**: YES
   - Message: `docs: add backend upload examples`
   - Files: `examples/`, `examples/**/*`
   - Pre-commit: `echo "Examples created"`
 
-- [ ] 12. Add Tests (Tests-After)
+- [x] 12. Add Tests (Tests-After)
 
   **What to do**:
   - Create `src/hooks/useLogRecorder.test.ts` with comprehensive tests
@@ -804,24 +804,24 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - vitest/React docs: Shows testing best practices
 
   **Acceptance Criteria**:
-  - [ ] `src/hooks/useLogRecorder.test.ts` exists
-  - [ ] `src/components/DebugPanel.test.tsx` exists
-  - [ ] Command: `npm test` → Runs all tests
-  - [ ] All tests pass (0 failures)
-  - [ ] Test coverage: Hook functionality tested
-  - [ ] Test coverage: Component rendering tested
+  - [x] `src/hooks/useLogRecorder.test.ts` exists
+  - [x] `src/components/DebugPanel.test.tsx` exists
+  - [x] Command: `npm test` → Runs all tests
+  - [x] All tests pass (0 failures)
+  - [x] Test coverage: Hook functionality tested
+  - [x] Test coverage: Component rendering tested
 
   **Evidence Required**:
-  - [ ] npm test output showing test results
-  - [ ] Test file contents captured
-  - [ ] Coverage report if available
+  - [x] npm test output showing test results
+  - [x] Test file contents captured
+  - [x] Coverage report if available
 
   **Commit**: YES
   - Message: `test: add comprehensive test suite`
   - Files: `src/**/*.test.ts`, `src/**/*.test.tsx`
   - Pre-commit: `npm test`
 
-- [ ] 13. Create README Documentation
+- [x] 13. Create README Documentation
 
   **What to do**:
   - Create `README.md` with comprehensive documentation
@@ -862,24 +862,24 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - Common patterns: Standard library README structure
 
   **Acceptance Criteria**:
-  - [ ] `README.md` exists
-  - [ ] Installation section: `npm install @zaob/glean-debug-logger`
-  - [ ] Usage section with code example
-  - [ ] API reference for all hook methods
-  - [ ] Configuration options documented
-  - [ ] Filename templates documented
-  - [ ] Reference to examples/ folder
+  - [x] `README.md` exists
+  - [x] Installation section: `npm install @zaob/glean-debug-logger`
+  - [x] Usage section with code example
+  - [x] API reference for all hook methods
+  - [x] Configuration options documented
+  - [x] Filename templates documented
+  - [x] Reference to examples/ folder
 
   **Evidence Required**:
-  - [ ] README.md content captured
-  - [ ] README length check (should be comprehensive)
+  - [x] README.md content captured
+  - [x] README length check (should be comprehensive)
 
   **Commit**: YES
   - Message: `docs: add comprehensive README`
   - Files: `README.md`
   - Pre-commit: `echo "Documentation complete"`
 
-- [ ] 14. Final Verification and Cleanup
+- [x] 14. Final Verification and Cleanup
 
   **What to do**:
   - Run full build: `npm run build`
@@ -910,19 +910,19 @@ Initialize Project → Setup Config → Create Types → Create Utils → Create
   - Reference: https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History - Git commit verification
 
   **Acceptance Criteria**:
-  - [ ] Command: `npm run build` → Success
-  - [ ] Command: `npm test` → All tests pass
-  - [ ] Bundle size < 20KB
-  - [ ] TypeScript declarations generated
-  - [ ] All files committed to git
-  - [ ] Clean working tree (no uncommitted changes)
+  - [x] Command: `npm run build` → Success
+  - [x] Command: `npm test` → All tests pass
+  - [x] Bundle size < 20KB
+  - [x] TypeScript declarations generated
+  - [x] All files committed to git
+  - [x] Clean working tree (no uncommitted changes)
 
   **Evidence Required**:
-  - [ ] npm run build output
-  - [ ] npm test output
-  - [ ] Bundle size verification
-  - [ ] git status output
-  - [ ] git log --oneline showing final commit
+  - [x] npm run build output
+  - [x] npm test output
+  - [x] Bundle size verification
+  - [x] git status output
+  - [x] git log --oneline showing final commit
 
   **Commit**: YES
   - Message: `chore: final verification and cleanup`
@@ -963,14 +963,14 @@ npx tsc --noEmit # No TypeScript errors
 ```
 
 ### Final Checklist
-- [ ] All "Must Have" present (see above)
-- [ ] All "Must NOT Have" absent (see guardrails)
-- [ ] `npm run build` succeeds
-- [ ] `npm test` passes (all tests)
-- [ ] Bundle size < 20KB
-- [ ] TypeScript declarations generated
-- [ ] CJS and ESM formats available
-- [ ] Backend examples in examples/ folder
-- [ ] README documentation complete
-- [ ] Clean git history (all committed)
-- [ ] Zero runtime dependencies (React peer only)
+- [x] All "Must Have" present (see above)
+- [x] All "Must NOT Have" absent (see guardrails)
+- [x] `npm run build` succeeds
+- [x] `npm test` passes (all tests)
+- [x] Bundle size < 20KB
+- [x] TypeScript declarations generated
+- [x] CJS and ESM formats available
+- [x] Backend examples in examples/ folder
+- [x] README documentation complete
+- [x] Clean git history (all committed)
+- [x] Zero runtime dependencies (React peer only)
