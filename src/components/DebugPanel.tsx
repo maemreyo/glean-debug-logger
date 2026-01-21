@@ -24,8 +24,8 @@ import {
   actionGroupStyles,
   labelStyles,
   buttonRowStyles,
-  primaryButtonStyles,
-  secondaryButtonStyles,
+  downloadButtonStyles,
+  saveToDirectoryButtonStyles,
   uploadButtonStyles,
   dangerButtonStyles,
   successMessageStyles,
@@ -173,7 +173,7 @@ export function DebugPanel({
       if (!supportsFileSystemAccess) {
         setDirectoryStatus({
           type: 'error',
-          message: 'Tính năng chỉ hỗ trợ Chrome/Edge',
+          message: 'Feature only supported in Chrome/Edge',
         });
         return;
       }
@@ -182,13 +182,13 @@ export function DebugPanel({
       if (filename) {
         setDirectoryStatus({
           type: 'success',
-          message: 'Đã lưu vào thư mục',
+          message: 'Saved to directory',
         });
       }
     } catch (err) {
       setDirectoryStatus({
         type: 'error',
-        message: 'Không thể lưu. Vui lòng thử lại hoặc chọn vị trí khác.',
+        message: 'Unable to save. Please try again or choose a different location.',
       });
     }
   }, [downloadLogs]);
@@ -209,7 +209,6 @@ export function DebugPanel({
 
   const openPanel = () => {
     setIsOpen(true);
-    // Focus will be handled by useEffect
   };
 
   const closePanel = () => {
@@ -252,8 +251,8 @@ export function DebugPanel({
         >
           <div className={headerStyles}>
             <div>
-              <h3 className={headerTitleStyles}>Debug Logger</h3>
-              <p className={headerSubtitleStyles}>Session: {sessionId.substring(0, 20)}...</p>
+              <h3 className={headerTitleStyles}>Debug</h3>
+              <p className={headerSubtitleStyles}>{sessionId.substring(0, 12)}...</p>
             </div>
             <button
               ref={closeButtonRef}
@@ -269,7 +268,7 @@ export function DebugPanel({
           <div className={statsGridStyles}>
             <div className={statItemStyles}>
               <div className={statValueStyles}>{logCount}</div>
-              <div className={statLabelStyles}>Total Logs</div>
+              <div className={statLabelStyles}>Logs</div>
             </div>
             <div className={statItemStyles}>
               <div className={`${statValueStyles} ${errorValueStyles}`}>{metadata.errorCount}</div>
@@ -279,73 +278,74 @@ export function DebugPanel({
               <div className={`${statValueStyles} ${networkErrorValueStyles}`}>
                 {metadata.networkErrorCount}
               </div>
-              <div className={statLabelStyles}>Net Errors</div>
+              <div className={statLabelStyles}>Network</div>
             </div>
           </div>
 
           <details className={detailsStyles}>
             <summary className={summaryStyles} role="button" aria-expanded="false">
-              <span>Session Info</span>
+              <span>▸ Session Details</span>
             </summary>
             <div className={sessionInfoStyles}>
               <div>
-                <strong>User:</strong> {metadata.userId || 'Anonymous'}
+                <strong>User</strong>
+                <span>{metadata.userId || 'Anonymous'}</span>
               </div>
               <div>
-                <strong>Browser:</strong> {metadata.browser} ({metadata.platform})
+                <strong>Browser</strong>
+                <span>{metadata.browser} ({metadata.platform})</span>
               </div>
               <div>
-                <strong>Resolution:</strong> {metadata.screenResolution}
+                <strong>Screen</strong>
+                <span>{metadata.screenResolution}</span>
               </div>
               <div>
-                <strong>URL:</strong> {metadata.url}
-              </div>
-              <div>
-                <strong>Timezone:</strong> {metadata.timezone}
+                <strong>Timezone</strong>
+                <span>{metadata.timezone}</span>
               </div>
             </div>
           </details>
 
           <div className={actionsStyles}>
             <div className={actionGroupStyles}>
-              <span className={labelStyles}>Download Logs</span>
+              <span className={labelStyles}>Export</span>
               <div className={buttonRowStyles}>
                 <button
                   type="button"
                   onClick={() => handleDownload('json')}
-                  className={primaryButtonStyles}
+                  className={downloadButtonStyles}
                   aria-label="Download logs as JSON"
                 >
-                  JSON
+                  📄 JSON
                 </button>
                 <button
                   type="button"
                   onClick={() => handleDownload('txt')}
-                  className={primaryButtonStyles}
+                  className={downloadButtonStyles}
                   aria-label="Download logs as text file"
                 >
-                  TXT
+                  📝 TXT
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveToDirectory}
+                  disabled={!('showDirectoryPicker' in window)}
+                  className={downloadButtonStyles}
+                  aria-label="Save logs to directory"
+                  title={
+                    'showDirectoryPicker' in window
+                      ? 'Choose directory to save file'
+                      : 'Feature only supported in Chrome/Edge'
+                  }
+                >
+                  📁 Folder
                 </button>
               </div>
-              <button
-                type="button"
-                onClick={handleSaveToDirectory}
-                disabled={!('showDirectoryPicker' in window)}
-                className={secondaryButtonStyles}
-                aria-label="Save logs to directory"
-                title={
-                  'showDirectoryPicker' in window
-                    ? 'Chọn thư mục để lưu file'
-                    : 'Tính năng chỉ hỗ trợ Chrome/Edge'
-                }
-              >
-                Lưu vào thư mục...
-              </button>
             </div>
 
             {uploadEndpoint && (
               <div className={actionGroupStyles}>
-                <span className={labelStyles}>Upload to Server</span>
+                <span className={labelStyles}>Upload</span>
                 <button
                   type="button"
                   onClick={handleUpload}
@@ -354,7 +354,7 @@ export function DebugPanel({
                   aria-label={isUploading ? 'Uploading logs...' : 'Upload logs to server'}
                   aria-busy={isUploading}
                 >
-                  {isUploading ? 'Uploading...' : 'Upload Logs'}
+                  {isUploading ? '⏳ Uploading...' : '☁️ Upload to Server'}
                 </button>
               </div>
             )}
@@ -383,41 +383,27 @@ export function DebugPanel({
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => {
-                if (confirm('Clear all logs? This cannot be undone.')) {
-                  clearLogs();
-                  setUploadStatus(null);
-                }
-              }}
-              className={dangerButtonStyles}
-              aria-label="Clear all logs"
-            >
-              Clear All Logs
-            </button>
+            <div className={actionGroupStyles}>
+              <span className={labelStyles}>Clear</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm('Clear all logs? This cannot be undone.')) {
+                    clearLogs();
+                    setUploadStatus(null);
+                  }
+                }}
+                className={dangerButtonStyles}
+                aria-label="Clear all logs"
+              >
+                🗑️ Clear All Logs
+              </button>
+            </div>
           </div>
 
           <div className={footerStyles}>
             <div className={footerTipStyles}>
-              <strong>💡 Tip:</strong> Press{' '}
-              <kbd
-                style={{
-                  padding: '2px 6px',
-                  background: '#e5e7eb',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                }}
-              >
-                Ctrl+Shift+D
-              </kbd>{' '}
-              to toggle
-            </div>
-            <div className={footerTipStyles}>
-              <strong>💾 Auto-save:</strong> Logs persist across page refreshes
-            </div>
-            <div className={footerTipStyles}>
-              <strong>🔒 Security:</strong> Sensitive data is auto-redacted
+              Press <kbd>Ctrl+Shift+D</kbd> to toggle
             </div>
           </div>
         </div>

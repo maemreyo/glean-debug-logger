@@ -6,23 +6,25 @@ export const toggleButtonStyles = css`
   bottom: 20px;
   right: 20px;
   z-index: 9998;
-  padding: 12px 20px;
-  background: #1f2937;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  padding: 8px 14px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s ease;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.15s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    background: #e5e7eb;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   &:active {
@@ -31,17 +33,21 @@ export const toggleButtonStyles = css`
 `;
 
 export const badgeStyles = css`
-  background: #374151;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
+  background: #e5e7eb;
+  color: #6b7280;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
 `;
 
 export const errorBadgeStyles = css`
-  background: #ef4444;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
 `;
 
 // Panel container
@@ -51,50 +57,54 @@ export const panelStyles = css`
   right: 20px;
   z-index: 9999;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  width: 384px;
-  max-height: 600px;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  width: 360px;
+  max-height: 580px;
   overflow: auto;
-  border: 1px solid #e5e7eb;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 `;
 
 // Panel header
 export const headerStyles = css`
-  background: linear-gradient(to right, #1f2937, #111827);
-  color: #fff;
-  padding: 16px;
+  background: #fafafa;
+  color: #374151;
+  padding: 12px 16px;
   border-radius: 12px 12px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #e5e7eb;
 `;
 
 export const headerTitleStyles = css`
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
 `;
 
 export const headerSubtitleStyles = css`
-  margin: 4px 0 0;
-  font-size: 12px;
-  opacity: 0.8;
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #9ca3af;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 `;
 
 export const closeButtonStyles = css`
   background: transparent;
   border: none;
-  color: #fff;
-  font-size: 20px;
+  color: #9ca3af;
+  font-size: 18px;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px 6px;
   border-radius: 4px;
-  transition: background 0.2s;
+  transition: all 0.15s ease;
+  line-height: 1;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: #f3f4f6;
+    color: #6b7280;
   }
 `;
 
@@ -102,25 +112,32 @@ export const closeButtonStyles = css`
 export const statsGridStyles = css`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 12px;
-  background: #f9fafb;
+  gap: 1px;
+  padding: 0;
+  background: #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
 `;
 
 export const statItemStyles = css`
   text-align: center;
+  background: #fff;
+  padding: 10px 8px;
 `;
 
 export const statValueStyles = css`
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #111827;
+  line-height: 1;
 `;
 
 export const statLabelStyles = css`
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 10px;
+  color: #9ca3af;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
 `;
 
 export const errorValueStyles = css`
@@ -133,20 +150,22 @@ export const networkErrorValueStyles = css`
 
 // Collapsible section
 export const detailsStyles = css`
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fafafa;
 `;
 
 export const summaryStyles = css`
   cursor: pointer;
   font-weight: 600;
-  color: #374151;
-  font-size: 14px;
+  color: #6b7280;
+  font-size: 11px;
   list-style: none;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 
   &::-webkit-details-marker {
     display: none;
@@ -154,206 +173,227 @@ export const summaryStyles = css`
 `;
 
 export const sessionInfoStyles = css`
-  margin-top: 8px;
-  font-size: 12px;
-  color: #4b5563;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #6b7280;
   line-height: 1.6;
 
   & > div {
     margin-bottom: 4px;
+    display: flex;
+    gap: 6px;
   }
 
   strong {
     color: #374151;
+    font-weight: 600;
+    min-width: 75px;
   }
 `;
 
 // Action buttons container
 export const actionsStyles = css`
-  padding: 16px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 `;
 
 export const actionGroupStyles = css`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 `;
 
 export const labelStyles = css`
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
-  color: #374151;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 export const buttonRowStyles = css`
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
 `;
 
-// Primary action button
-export const primaryButtonStyles = css`
-  flex: 1;
-  padding: 10px 16px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+// Download buttons - Subtle neutral palette
+export const downloadButtonStyles = css`
+  padding: 8px 12px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 
   &:hover:not(:disabled) {
-    background: #1d4ed8;
+    background: #e5e7eb;
+    border-color: #d1d5db;
     transform: translateY(-1px);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0);
+    background: #d1d5db;
   }
 
   &:disabled {
-    background: #9ca3af;
+    background: #f9fafb;
+    color: #9ca3af;
     cursor: not-allowed;
+    border-color: #f3f4f6;
   }
 `;
 
-// Secondary action button (directory picker)
-export const secondaryButtonStyles = css`
+// Save to directory button - Soft indigo accent
+export const saveToDirectoryButtonStyles = css`
   width: 100%;
-  padding: 10px 16px;
-  background: #7c3aed;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  padding: 9px 14px;
+  background: #f0f4ff;
+  color: #4f46e5;
+  border: 1px solid #e0e7ff;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 
   &:hover:not(:disabled) {
-    background: #6d28d9;
+    background: #e0e7ff;
+    border-color: #c7d2fe;
     transform: translateY(-1px);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0);
+    background: #c7d2fe;
   }
 
   &:disabled {
-    background: #9ca3af;
+    background: #f9fafb;
+    color: #9ca3af;
     cursor: not-allowed;
+    border-color: #f3f4f6;
     opacity: 0.6;
   }
 `;
 
-// Upload button
+// Upload button - Subtle green
 export const uploadButtonStyles = css`
   width: 100%;
-  padding: 10px 16px;
-  background: #16a34a;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  padding: 9px 14px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #dcfce7;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 
   &:hover:not(:disabled) {
-    background: #15803d;
+    background: #dcfce7;
+    border-color: #bbf7d0;
     transform: translateY(-1px);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0);
+    background: #bbf7d0;
   }
 
   &:disabled {
-    background: #9ca3af;
+    background: #f9fafb;
+    color: #9ca3af;
     cursor: not-allowed;
+    border-color: #f3f4f6;
   }
 `;
 
-// Danger button (clear logs)
+// Danger button (clear logs) - Subtle red
 export const dangerButtonStyles = css`
   width: 100%;
-  padding: 10px 16px;
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  padding: 9px 14px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 
   &:hover {
-    background: #b91c1c;
+    background: #fee2e2;
+    border-color: #fecaca;
     transform: translateY(-1px);
   }
 
   &:active {
     transform: translateY(0);
+    background: #fecaca;
   }
 `;
 
 // Status message
 export const successMessageStyles = css`
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  background: #dcfce7;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: #f0fdf4;
   color: #166534;
-  border: 1px solid #86efac;
+  border: 1px solid #bbf7d0;
 `;
 
 export const errorMessageStyles = css`
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  background: #fee2e2;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: #fef2f2;
   color: #991b1b;
-  border: 1px solid #fca5a5;
+  border: 1px solid #fecaca;
 `;
 
 // Footer
 export const footerStyles = css`
-  padding: 12px;
-  background: #f9fafb;
+  padding: 12px 16px;
+  background: #f3f4f6;
   border-top: 1px solid #e5e7eb;
   border-radius: 0 0 12px 12px;
   font-size: 12px;
-  color: #6b7280;
+  color: #9ca3af;
 `;
 
 export const footerTipStyles = css`
-  margin-bottom: 4px;
-
   kbd {
+    display: inline-block;
     padding: 2px 6px;
     background: #e5e7eb;
     border-radius: 4px;
-    font-family: monospace;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: #6b7280;
   }
 `;
 
@@ -367,7 +407,25 @@ export const darkModeStyles = css`
     }
 
     ${headerStyles} {
-      background: linear-gradient(to right, #334155, #0f172a);
+      background: #0f172a;
+      border-color: #1e293b;
+    }
+
+    ${headerTitleStyles} {
+      color: #f1f5f9;
+    }
+
+    ${headerSubtitleStyles} {
+      color: #64748b;
+    }
+
+    ${closeButtonStyles} {
+      color: #64748b;
+
+      &:hover {
+        background: #1e293b;
+        color: #94a3b8;
+      }
     }
 
     ${statsGridStyles} {
@@ -396,6 +454,82 @@ export const darkModeStyles = css`
       }
     }
 
+    ${labelStyles} {
+      color: #94a3b8;
+    }
+
+    ${downloadButtonStyles} {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #334155;
+
+      &:hover:not(:disabled) {
+        background: #334155;
+        border-color: #475569;
+      }
+
+      &:active:not(:disabled) {
+        background: #475569;
+      }
+    }
+
+    ${saveToDirectoryButtonStyles} {
+      background: #1e293b;
+      color: #818cf8;
+      border-color: #334155;
+
+      &:hover:not(:disabled) {
+        background: #334155;
+        border-color: #475569;
+      }
+
+      &:active:not(:disabled) {
+        background: #475569;
+      }
+    }
+
+    ${uploadButtonStyles} {
+      background: #1e293b;
+      color: #4ade80;
+      border-color: #334155;
+
+      &:hover:not(:disabled) {
+        background: #334155;
+        border-color: #475569;
+      }
+
+      &:active:not(:disabled) {
+        background: #475569;
+      }
+    }
+
+    ${dangerButtonStyles} {
+      background: #1e293b;
+      color: #f87171;
+      border-color: #334155;
+
+      &:hover {
+        background: #334155;
+        border-color: #475569;
+      }
+
+      &:active {
+        background: #475569;
+      }
+    }
+
+    ${successMessageStyles} {
+      background: #064e3b;
+      color: #6ee7b7;
+      border-color: #065f46;
+    }
+
+    ${errorMessageStyles} {
+      background: #7f1d1d;
+      color: #fca5a5;
+      border-color: #991b1b;
+    }
+
     ${footerStyles} {
       background: #0f172a;
       border-color: #334155;
@@ -408,12 +542,20 @@ export const darkModeStyles = css`
     }
 
     ${toggleButtonStyles} {
-      background: #334155;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      background: #1e293b;
+      border-color: #334155;
+      color: #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 
       &:hover {
-        background: #475569;
+        background: #334155;
+        border-color: #475569;
       }
+    }
+
+    ${badgeStyles} {
+      background: #334155;
+      color: #94a3b8;
     }
   }
 `;
