@@ -144,7 +144,7 @@ export interface LogRecorderConfig {
 // Hook Return Type
 export interface UseLogRecorderReturn {
   downloadLogs: (
-    format?: 'json' | 'txt',
+    format?: ExportFormat,
     customFilename?: string | null,
     options?: DownloadOptions
   ) => string | null;
@@ -189,4 +189,69 @@ export interface UploadPayload {
 export interface DownloadOptions {
   /** Show directory picker instead of default download location */
   showPicker?: boolean;
+}
+
+// Export Formats
+export type ExportFormat = 'json' | 'txt' | 'jsonl' | 'ecs.json' | 'ai.txt';
+
+// ECS Document (ECS 1.12.0 compliant)
+export interface ECSDocument {
+  '@timestamp': string;
+  'ecs.version': '1.12.0';
+  'log.level': string;
+  'event.category': string[];
+  'event.type'?: string[];
+  'event.action'?: string;
+  'event.id': string;
+  'event.original': object;
+  'event.duration'?: number;
+  message?: string;
+  error?: {
+    message: string;
+    type?: string;
+    stack_trace?: string;
+  };
+  http?: {
+    request?: {
+      method?: string;
+      body?: { content?: string };
+      headers?: Record<string, unknown>;
+    };
+    response?: {
+      status_code?: number;
+      body?: { content?: unknown };
+    };
+  };
+  url?: {
+    full?: string;
+    path?: string;
+    domain?: string;
+  };
+  service?: {
+    name?: string;
+    environment?: string;
+  };
+  user?: {
+    id?: string;
+  };
+  host?: {
+    name?: string;
+    type?: string;
+  };
+}
+
+// Stack Frame
+export interface StackFrame {
+  file?: string;
+  line1?: number;
+  column1?: number;
+  methodName?: string;
+  arguments?: unknown[];
+  ignored?: boolean;
+}
+
+// ECS Transform Options
+export interface ECSTransformOptions {
+  includeOriginal?: boolean; // Default: true
+  maxStackFrames?: number; // Default: 20
 }

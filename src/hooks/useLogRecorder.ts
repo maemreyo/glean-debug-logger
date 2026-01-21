@@ -1,6 +1,15 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
-import type { LogRecorderConfig, LogEntry, LogMetadata, UseLogRecorderReturn } from '../types';
+import type {
+  LogRecorderConfig,
+  LogEntry,
+  LogMetadata,
+  UseLogRecorderReturn,
+  ExportFormat,
+  DownloadOptions,
+} from '../types';
 import { sanitizeData, generateSessionId, generateFilename, collectMetadata } from '../utils';
+import { transformToECS, transformMetadataToECS } from '../utils/ecsTransform';
+import { stringifyJSONL } from '../utils/jsonl';
 import { ConsoleInterceptor } from '../interceptors/ConsoleInterceptor';
 import { NetworkInterceptor } from '../interceptors/NetworkInterceptor';
 import { XHRInterceptor } from '../interceptors/XHRInterceptor';
@@ -346,11 +355,17 @@ export function useLogRecorder(
   }, [config, addLog, safeStringify, consoleInterceptor, networkInterceptor, xhrInterceptor]);
 
   const downloadLogs = useCallback(
-    (format: 'json' | 'txt' = 'json', customFilename?: string | null): string | null => {
+    (
+      format?: ExportFormat,
+      customFilename?: string | null,
+      _options?: DownloadOptions
+    ): string | null => {
       if (typeof window === 'undefined') return null;
 
       updateMetadata();
-      const filename = customFilename || generateFilename(format, {}, config);
+      // TODO: Add support for jsonl, ecs.json, ai.txt formats in future tasks
+      let filename =
+        customFilename || generateFilename(format as 'json' | 'txt' | undefined, {}, config);
 
       let content: string;
       let mimeType: string;
@@ -361,6 +376,62 @@ export function useLogRecorder(
           : logsRef.current;
         content = safeStringify(output);
         mimeType = 'application/json';
+      } else if (format === 'jsonl') {
+        // Transform logs to ECS and output as JSONL
+        const ecsLogs = logsRef.current.map((log) => transformToECS(log, metadataRef.current));
+        content = stringifyJSONL(ecsLogs);
+        mimeType = 'application/x-ndjson';
+        filename = customFilename || generateFilename('jsonl' as any, {}, config);
+      } else if (format === 'ecs.json') {
+        // ECS-compliant JSON with metadata wrapper
+        const output = {
+          metadata: transformMetadataToECS(metadataRef.current),
+          logs: logsRef.current.map((log) => transformToECS(log, metadataRef.current)),
+        };
+        content = JSON.stringify(output, null, 2);
+        mimeType = 'application/json';
+        filename = customFilename || generateFilename('ecs-json' as any, {}, config);
+      } else if (format === 'ai.txt') {
+        // AI-optimized TXT format
+        const meta = metadataRef.current;
+        const metaSection = `# METADATA
+service.name=${meta.environment || 'unknown'}
+user.id=${meta.userId || 'anonymous'}
+timestamp=${new Date().toISOString()}
+
+# LOGS
+`;
+
+        const logLines = logsRef.current.map((log) => {
+          const ecs = transformToECS(log, meta);
+          const timestamp = ecs['@timestamp'];
+          const level = ecs.log?.level || 'info';
+          const category = ecs.event?.category?.[0] || 'unknown';
+
+          let line = `[${timestamp}] ${level} ${category}`;
+
+          if (ecs.message) {
+            line += ` | message="${ecs.message}"`;
+          }
+          if (ecs.http?.request?.method) {
+            line += ` | req.method=${ecs.http.request.method}`;
+          }
+          if (ecs.url?.full) {
+            line += ` | url=${ecs.url.full}`;
+          }
+          if (ecs.http?.response?.status_code) {
+            line += ` | res.status=${ecs.http.response.status_code}`;
+          }
+          if (ecs.error?.message) {
+            line += ` | error="${ecs.error.message}"`;
+          }
+
+          return line;
+        });
+
+        content = metaSection + logLines.join('\n');
+        mimeType = 'text/plain';
+        filename = customFilename || generateFilename('ai-txt' as any, {}, config);
       } else {
         const metaHeader = config.includeMetadata
           ? `${'='.repeat(80)}\nMETADATA\n${'='.repeat(80)}\n${safeStringify(

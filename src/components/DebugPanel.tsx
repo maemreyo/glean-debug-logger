@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLogRecorder } from '../hooks/useLogRecorder';
+import { ExportFormat } from '../types';
 import {
   toggleButtonStyles,
   badgeStyles,
@@ -158,7 +159,7 @@ export function DebugPanel({
   }, [uploadLogs]);
 
   const handleDownload = useCallback(
-    (format: 'json' | 'txt') => {
+    (format: ExportFormat) => {
       const filename = downloadLogs(format);
       if (filename) {
         setUploadStatus({
@@ -385,7 +386,33 @@ export function DebugPanel({
                 >
                   📁 Folder
                 </button>
-
+                <button
+                  type="button"
+                  onClick={() => handleDownload('jsonl')}
+                  disabled={logCount === 0}
+                  className={downloadButtonStyles}
+                  aria-label="Download logs as JSONL (JSON Lines)"
+                >
+                  📦 JSONL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDownload('ecs.json')}
+                  disabled={logCount === 0}
+                  className={downloadButtonStyles}
+                  aria-label="Download logs as ECS JSON (Elastic Common Schema)"
+                >
+                  📋 ECS
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDownload('ai.txt')}
+                  disabled={logCount === 0}
+                  className={downloadButtonStyles}
+                  aria-label="Download logs as AI-optimized TXT"
+                >
+                  🤖 AI-TXT
+                </button>
               </div>
             </div>
 

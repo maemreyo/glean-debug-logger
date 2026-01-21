@@ -1,13 +1,27 @@
 {
-  "active_plan": "/Users/trung.ngo/Documents/zaob-dev/glean-debug-logger/.sisyphus/plans/storybook-setup.md",
-  "started_at": "2026-01-20T16:43:46.020Z",
-  "completed_at": "2026-01-20T17:45:00.000Z",
-  "session_ids": [
-    "ses_423d60d82ffeaP9TJN5UW3nbHV",
-    "ses_42194bbe1ffebEroNyfUn4FazW"
+  "active_plan": "/Users/trung.ngo/Documents/zaob-dev/glean-debug-logger/.sisyphus/plans/ai-friendly-log-format-workplan.md",
+  "started_at": "2026-01-21T03:57:12.660Z",
+  "session_ids": ["ses_42194bbe1ffebEroNyfUn4FazW"],
+  "plan_name": "ai-friendly-log-format-workplan",
+  "status": "completed",
+  "total_tasks": 14,
+  "completed_tasks": 14,
+  "tasks_completed_ids": [
+    "task-1",
+    "task-2",
+    "task-3",
+    "task-4",
+    "task-5",
+    "task-6",
+    "task-7",
+    "task-8",
+    "task-9",
+    "task-10",
+    "task-11",
+    "task-12",
+    "task-13",
+    "task-14"
   ],
-  "plan_name": "storybook-setup",
-  "total_tasks": 9,
-  "completed_tasks": 9,
-  "progress": "44/44 checkboxes completed - ALL TASKS DONE"
+  "progress": "✅ ALL 14 TASKS COMPLETE",
+  "completed_at": "2026-01-21T11:43:07+07:00"
 }

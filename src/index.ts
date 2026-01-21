@@ -8,14 +8,16 @@
  */
 
 // Hooks
-export { useLogRecorder } from "./hooks/useLogRecorder";
+export { useLogRecorder } from './hooks/useLogRecorder';
 
 // Components
-export { DebugPanel } from "./components/DebugPanel";
-export { DebugPanelMinimal } from "./components/DebugPanelMinimal";
+export { DebugPanel } from './components/DebugPanel';
+export { DebugPanelMinimal } from './components/DebugPanelMinimal';
 
-// Utils
-export * from "./utils";
+// Utils (exclude ecsTransform types to avoid conflict with types/index.ts)
+export * from './utils/sanitize';
+export * from './utils/filename';
+export { transformToECS, filterStackTrace, transformMetadataToECS } from './utils/ecsTransform';
 
 // Types
-export * from "./types";
+export * from './types';
