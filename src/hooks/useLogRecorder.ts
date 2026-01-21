@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps */
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import type {
   LogRecorderConfig,

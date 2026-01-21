@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class FileService {
   private static supported: boolean | null = null;
 

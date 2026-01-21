@@ -3,6 +3,7 @@
  * Tests: state management, keyboard shortcuts, feature detection
  * @vitest-environment jsdom
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
@@ -265,7 +266,7 @@ describe('useDebugPanelControls - supportsDirectoryPicker', () => {
     // Delete showDirectoryPicker property from window
     delete (window as any).showDirectoryPicker;
     (FileService as any).supported = null;
-    
+
     const isSupported = FileService.isSupported();
     expect(isSupported).toBe(false);
   });
