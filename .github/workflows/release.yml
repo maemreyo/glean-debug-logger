@@ -41,12 +41,17 @@ jobs:
 
       - name: Debug OIDC
         run: |
-          echo "OIDC enabled: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL != '' }}"
-          echo "Using Trusted Publishing for npm"
+          echo "=== OIDC Debug ==="
+          echo "ACTIONS_ID_TOKEN_REQUEST_URL: ${ACTIONS_ID_TOKEN_REQUEST_URL:-not set}"
+          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+set}"
+          echo "NPM_REGISTRY_URL: ${NPM_REGISTRY_URL:-not set}"
+          echo "NPM_TOKEN: ${NPM_TOKEN:+set}"
+          echo "=================="
 
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_REGISTRY_URL: 'https://registry.npmjs.org/'
         run: npx semantic-release
 
       - name: Verify Release
