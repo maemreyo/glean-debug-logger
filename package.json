@@ -3,7 +3,8 @@
   "version": "1.4.2",
   "description": "React/Next.js debug logging library that captures console logs, network requests, exports with smart filenames, and supports server upload",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "author": "Zaob <zaob.ogn@gmail.com>",
   "license": "MIT",
