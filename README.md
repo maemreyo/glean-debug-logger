@@ -17,7 +17,7 @@ A production-ready React/Next.js debug logging library that intercepts console l
 To install and setup @zaob/glean-debug-logger in your project with a single command:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/zaob-dev/glean-debug-logger/main/AI_INSTALLATION_PROMPT.md | bash
+curl -sL https://raw.githubusercontent.com/maemreyo/glean-debug-logger/refs/heads/main/AI_INSTALLATION_PROMPT.md | bash
 ```
 
 This command will:
