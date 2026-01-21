@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.5.0...v2.0.0) (2026-01-21)
+
+
+### doc
+
+* **planning:** add comprehensive DX improvement plans for GleanDebugger component ([7c8f596](https://github.com/maemreyo/glean-debug-logger/commit/7c8f5964b3c70be556f81a4c4d837c4cc2bc0d1f))
+
+
+### BREAKING CHANGES
+
+* **planning:** This introduces new planning documents that will guide the implementation of the GleanDebugger component, which will change the integration pattern for the library.
+
 # [1.5.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.4.2...v1.5.0) (2026-01-21)
 
 
