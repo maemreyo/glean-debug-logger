@@ -58,7 +58,9 @@ export const panelStyles = css`
   z-index: 9999;
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
   width: 360px;
   max-height: 580px;
   overflow: auto;
@@ -80,7 +82,7 @@ export const headerStyles = css`
 export const headerTitleWrapperStyles = css`
   display: flex;
   gap: 8px;
-`
+`;
 
 export const headerTitleStyles = css`
   margin: 0;
@@ -220,7 +222,7 @@ export const labelStyles = css`
 
 export const buttonRowStyles = css`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
 `;
 

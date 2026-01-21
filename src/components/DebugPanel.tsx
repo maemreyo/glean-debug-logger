@@ -26,7 +26,6 @@ import {
   labelStyles,
   buttonRowStyles,
   downloadButtonStyles,
-  saveToDirectoryButtonStyles,
   uploadButtonStyles,
   dangerButtonStyles,
   successMessageStyles,
@@ -66,13 +65,17 @@ export function DebugPanel({
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const [copyStatus, setCopyStatus] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   // Refs for focus management
   const panelRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { downloadLogs, uploadLogs, clearLogs, getLogCount, getMetadata, sessionId } =
+  const { downloadLogs, uploadLogs, clearLogs, getLogs, getLogCount, getMetadata, sessionId } =
     useLogRecorder({
       fileNameTemplate,
       environment,
@@ -194,6 +197,25 @@ export function DebugPanel({
     }
   }, [downloadLogs]);
 
+  const handleCopy = useCallback(async () => {
+    setCopyStatus(null);
+    try {
+      const logs = getLogs();
+      const metadata = getMetadata();
+      const content = JSON.stringify({ metadata, logs }, null, 2);
+      await navigator.clipboard.writeText(content);
+      setCopyStatus({
+        type: 'success',
+        message: 'Copied to clipboard!',
+      });
+    } catch {
+      setCopyStatus({
+        type: 'error',
+        message: 'Failed to copy. Check clipboard permissions.',
+      });
+    }
+  }, [getLogs, getMetadata]);
+
   useEffect(() => {
     if (directoryStatus) {
       const timer = setTimeout(() => {
@@ -203,6 +225,16 @@ export function DebugPanel({
     }
     return undefined;
   }, [directoryStatus]);
+
+  useEffect(() => {
+    if (copyStatus) {
+      const timer = setTimeout(() => {
+        setCopyStatus(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [copyStatus]);
 
   const shouldShow = showInProduction || environment === 'development' || user?.role === 'admin';
 
@@ -294,7 +326,9 @@ export function DebugPanel({
               </div>
               <div>
                 <strong>Browser</strong>
-                <span>{metadata.browser} ({metadata.platform})</span>
+                <span>
+                  {metadata.browser} ({metadata.platform})
+                </span>
               </div>
               <div>
                 <strong>Screen</strong>
@@ -329,6 +363,16 @@ export function DebugPanel({
                 </button>
                 <button
                   type="button"
+                  onClick={handleCopy}
+                  disabled={logCount === 0}
+                  className={downloadButtonStyles}
+                  aria-label="Copy logs to clipboard"
+                  title="Copy logs as JSON to clipboard"
+                >
+                  📋 Copy
+                </button>
+                <button
+                  type="button"
                   onClick={handleSaveToDirectory}
                   disabled={!('showDirectoryPicker' in window)}
                   className={downloadButtonStyles}
@@ -341,6 +385,7 @@ export function DebugPanel({
                 >
                   📁 Folder
                 </button>
+
               </div>
             </div>
 
@@ -381,6 +426,18 @@ export function DebugPanel({
                 }
               >
                 {directoryStatus.message}
+              </div>
+            )}
+
+            {copyStatus && (
+              <div
+                role="status"
+                aria-live="polite"
+                className={
+                  copyStatus.type === 'success' ? successMessageStyles : errorMessageStyles
+                }
+              >
+                {copyStatus.message}
               </div>
             )}
 

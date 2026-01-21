@@ -2,7 +2,10 @@
   "active_plan": "/Users/trung.ngo/Documents/zaob-dev/glean-debug-logger/.sisyphus/plans/storybook-setup.md",
   "started_at": "2026-01-20T16:43:46.020Z",
   "completed_at": "2026-01-20T17:45:00.000Z",
-  "session_ids": ["ses_423d60d82ffeaP9TJN5UW3nbHV"],
+  "session_ids": [
+    "ses_423d60d82ffeaP9TJN5UW3nbHV",
+    "ses_42194bbe1ffebEroNyfUn4FazW"
+  ],
   "plan_name": "storybook-setup",
   "total_tasks": 9,
   "completed_tasks": 9,
