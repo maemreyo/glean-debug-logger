@@ -1,0 +1,1016 @@
+{
+    "metadata": {
+        "sessionId": "session_1768903651033_owgxhorqq",
+        "environment": "production",
+        "userId": "guest",
+        "timestamp": "2026-01-20T10:07:31.033Z",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:147.0) Gecko/20100101 Firefox/147.0",
+        "browser": "firefox",
+        "platform": "MacIntel",
+        "language": "en-GB",
+        "screenResolution": "1920x1080",
+        "viewport": "1265x970",
+        "url": "http://localhost:3001/",
+        "referrer": "",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "logCount": 13,
+        "errorCount": 1,
+        "networkErrorCount": 0
+    },
+    "logs": [
+        {
+            "type": "CONSOLE",
+            "level": "LOG",
+            "time": "2026-01-20T10:07:14.129Z",
+            "data": "Form completed with data: {\"expected_amount\":40,\"loan_period\":9,\"loan_purpose\":\"travel_loan\",\"agreeStatus\":\"1\"}"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "WARN",
+            "time": "2026-01-20T10:07:20.392Z",
+            "data": "Missing security headers: [\"x-content-type-options\",\"x-frame-options\",\"x-xss-protection\",\"strict-transport-security\"]"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "LOG",
+            "time": "2026-01-20T10:07:20.395Z",
+            "data": "Lead created: {\"id\":\"6ecc8781-48c0-46d5-ae11-20349d6cb225\",\"token\":\"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzbWFydGRvcCIsInN1YiI6ImF1dGhlbnRpY2F0aW9uIiwiZXhwIjoxNzY4OTkwMDQwLCJuYmYiOjE3Njg5MDM2NDAsImlhdCI6MTc2ODkwMzY0MCwidWlkIjoiNmVjYzg3ODEtNDhjMC00NmQ1LWFlMTEtMjAzNDlkNmNiMjI1In0.CyapICMmA71on-ujLB4UA0cLzzav9iwXaMNne1xyeJXhKc2rMK7Lmd3-jbSIq9diF2hI3qD56mkDT2Vghoao_j6Jvn9S516mhBPc683j-hT_-VBLTvkLbsuI6lp5KlfLBWmsoys2tHAjvigYBqlT6anVLWYFNNG_ImY-LDlPflzZj7jErybzA-D_P7OpWIHC0ybb9pfbALzHE202ESpKsa7Z1RdJPD_tD_X8sYbD1ezSAv_wXT8326E2RQT3npruvn-I3U8VYqE6kBXYYckgevImuyfKqS80YtW7cjUKysTUsrD9xVLDi26GN1nW9oZ4Q1Q7rDyCKYz2I7hcF1ZOT9t-Atewqz35JUt0Q88FH0Nvr0JuJUrZrOvOLU6pNpyfwaJhWOpj3d3Bgdcm7-t6NswgISIBnE4ijMZaCic2CSx9PH4fpCsIo_5pmiClEZbEGCDwyfAZ7A2FHFlTGLzJ4bbA1qEP7fQCP5odiLcomJ5kteMuBy7BhTRdu13BHm6lLPzIo6SBf1FbbJUnL3pN1hHjwaOkZLXbsSeWJ1sFsN49CW3vs8Q_ddnSB2gq_wUBEFlVA-cETCDRjVWldhOKyHs1dKgiu3bYFaAtyxPWGnnhNlWTILc1bYbbtnAYttBjLPHqRD1hUeH2ZiLsU_S_sQYiIcYuX3-fhciZ7bOuQh0\"}"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "ERROR",
+            "time": "2026-01-20T10:07:22.619Z",
+            "data": "Token refresh failed, logging out. {}"
+        },
+        {
+            "type": "FETCH_REQ",
+            "id": "o6mc1p",
+            "url": "/__nextjs_original-stack-frames",
+            "method": "POST",
+            "body": {
+                "frames": [
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/src_lib_d9476f2b._.js",
+                        "line1": 3961,
+                        "column1": 27,
+                        "methodName": "onResponse",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/node_modules__pnpm_5b596bb5._.js",
+                        "line1": 17428,
+                        "column1": 48,
+                        "methodName": "async*coreFetch",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/node_modules__pnpm_5b596bb5._.js",
+                        "line1": 17496,
+                        "column1": 20,
+                        "methodName": "async*POST",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/src_430b7ce1._.js",
+                        "line1": 650,
+                        "column1": 177,
+                        "methodName": "submitOTP",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/a1439_%40tanstack_query-core_build_modern_83b689aa._.js",
+                        "line1": 1637,
+                        "column1": 37,
+                        "methodName": "fn",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/a1439_%40tanstack_query-core_build_modern_83b689aa._.js",
+                        "line1": 834,
+                        "column1": 109,
+                        "methodName": "run",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/a1439_%40tanstack_query-core_build_modern_83b689aa._.js",
+                        "line1": 879,
+                        "column1": 17,
+                        "methodName": "start",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/a1439_%40tanstack_query-core_build_modern_83b689aa._.js",
+                        "line1": 1681,
+                        "column1": 287,
+                        "methodName": "execute",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/node_modules__pnpm_5b596bb5._.js",
+                        "line1": 16378,
+                        "column1": 279,
+                        "methodName": "async*mutate",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/node_modules__pnpm_5b596bb5._.js",
+                        "line1": 16972,
+                        "column1": 22,
+                        "methodName": "useMutation.useCallback[mutate]",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/src_components_ui_d9618ef5._.js",
+                        "line1": 7249,
+                        "column1": 22,
+                        "methodName": "handleSubmit",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/src_components_ui_d9618ef5._.js",
+                        "line1": 7306,
+                        "column1": 25,
+                        "methodName": "handleInput",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/src_components_ui_d9618ef5._.js",
+                        "line1": 6689,
+                        "column1": 59,
+                        "methodName": "handleInput",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/src_components_ui_d9618ef5._.js",
+                        "line1": 6828,
+                        "column1": 59,
+                        "methodName": "onChange",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 8965,
+                        "column1": 21,
+                        "methodName": "executeDispatch",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 886,
+                        "column1": 131,
+                        "methodName": "runWithFiberInDEV",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 8991,
+                        "column1": 41,
+                        "methodName": "processDispatchQueue",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 9286,
+                        "column1": 33,
+                        "methodName": "dispatchEventForPluginEventSystem/<",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 2211,
+                        "column1": 46,
+                        "methodName": "batchedUpdates$1",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 9067,
+                        "column1": 25,
+                        "methodName": "dispatchEventForPluginEventSystem",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 11224,
+                        "column1": 70,
+                        "methodName": "dispatchEvent",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 11206,
+                        "column1": 64,
+                        "methodName": "dispatchDiscreteEvent",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 9039,
+                        "column1": 30,
+                        "methodName": "EventListener.handleEvent*addTrappedEventListener",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 9008,
+                        "column1": 32,
+                        "methodName": "listenToNativeEvent",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 9014,
+                        "column1": 96,
+                        "methodName": "listenToAllSupportedEvents/<",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 9013,
+                        "column1": 29,
+                        "methodName": "listenToAllSupportedEvents",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_react-dom_1e5b32bb._.js",
+                        "line1": 14569,
+                        "column1": 35,
+                        "methodName": "exports.hydrateRoot",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_client_87e024d8._.js",
+                        "line1": 9963,
+                        "column1": 29,
+                        "methodName": "hydrate/<",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_compiled_1af17cdb._.js",
+                        "line1": 1662,
+                        "column1": 31,
+                        "methodName": "exports.startTransition",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_client_87e024d8._.js",
+                        "line1": 9962,
+                        "column1": 24,
+                        "methodName": "hydrate",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_client_87e024d8._.js",
+                        "line1": 10000,
+                        "column1": 16,
+                        "methodName": "<unknown>",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_client_87e024d8._.js",
+                        "line1": 135,
+                        "column1": 9,
+                        "methodName": "appBootstrap/<",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_client_87e024d8._.js",
+                        "line1": 99,
+                        "column1": 16,
+                        "methodName": "loadScriptsInSequence",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_client_87e024d8._.js",
+                        "line1": 128,
+                        "column1": 26,
+                        "methodName": "appBootstrap",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/42e71_next_dist_client_87e024d8._.js",
+                        "line1": 9997,
+                        "column1": 32,
+                        "methodName": "<unknown>",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/turbopack-_d933f01f._.js",
+                        "line1": 842,
+                        "column1": 26,
+                        "methodName": "instantiateModule/<",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/turbopack-_d933f01f._.js",
+                        "line1": 867,
+                        "column1": 26,
+                        "methodName": "runModuleExecutionHooks",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/turbopack-_d933f01f._.js",
+                        "line1": 840,
+                        "column1": 32,
+                        "methodName": "instantiateModule",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/turbopack-_d933f01f._.js",
+                        "line1": 771,
+                        "column1": 12,
+                        "methodName": "getOrInstantiateRuntimeModule",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/turbopack-_d933f01f._.js",
+                        "line1": 1589,
+                        "column1": 50,
+                        "methodName": "registerChunk",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/turbopack-_d933f01f._.js",
+                        "line1": 1527,
+                        "column1": 20,
+                        "methodName": "async*registerChunk",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/turbopack-_d933f01f._.js",
+                        "line1": 1816,
+                        "column1": 18,
+                        "methodName": "<unknown>",
+                        "arguments": []
+                    },
+                    {
+                        "file": "file:///Users/trung.ngo/Documents/projects/dop-fe/.next/static/chunks/turbopack-_d933f01f._.js",
+                        "line1": 1820,
+                        "column1": 3,
+                        "methodName": "<unknown>",
+                        "arguments": []
+                    }
+                ],
+                "isServer": false,
+                "isEdgeServer": false,
+                "isAppDirectory": true
+            },
+            "time": "2026-01-20T10:07:22.631Z"
+        },
+        {
+            "type": "FETCH_RES",
+            "id": "o6mc1p",
+            "url": "/__nextjs_original-stack-frames",
+            "status": 200,
+            "statusText": "OK",
+            "duration": "285ms",
+            "body": [
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "src/lib/api/client.ts",
+                            "line1": 165,
+                            "column1": 17,
+                            "ignored": false,
+                            "methodName": "onResponse"
+                        },
+                        "originalCodeFrame": "\u001b[0m \u001b[90m 163 |\u001b[39m         \u001b[36mconst\u001b[39m refreshed \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m refreshTokens()\u001b[33m;\u001b[39m\n \u001b[90m 164 |\u001b[39m         \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39mrefreshed) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 165 |\u001b[39m           \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m\"Token refresh failed\"\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 166 |\u001b[39m         }\n \u001b[90m 167 |\u001b[39m       } \u001b[36mcatch\u001b[39m (error) {\n \u001b[90m 168 |\u001b[39m         console\u001b[33m.\u001b[39merror(\u001b[32m\"Token refresh failed, logging out.\"\u001b[39m\u001b[33m,\u001b[39m error)\u001b[33m;\u001b[39m\u001b[0m"
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/openapi-fetch@0.15.0/node_modules/openapi-fetch/src/index.js",
+                            "line1": 214,
+                            "column1": 36,
+                            "ignored": true,
+                            "methodName": "async*coreFetch"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/openapi-fetch@0.15.0/node_modules/openapi-fetch/src/index.js",
+                            "line1": 271,
+                            "column1": 14,
+                            "ignored": true,
+                            "methodName": "async*POST"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "src/hooks/otp/use-submit.ts",
+                            "line1": 15,
+                            "column1": 45,
+                            "ignored": false,
+                            "methodName": "submitOTP"
+                        },
+                        "originalCodeFrame": "\u001b[0m \u001b[90m 13 |\u001b[39m \u001b[36masync\u001b[39m \u001b[36mfunction\u001b[39m submitOTP({ leadId\u001b[33m,\u001b[39m token\u001b[33m,\u001b[39m otp }\u001b[33m:\u001b[39m \u001b[33mSubmitOTPParams\u001b[39m) {\n \u001b[90m 14 |\u001b[39m   \u001b[36mtry\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 15 |\u001b[39m     \u001b[36mconst\u001b[39m { data\u001b[33m,\u001b[39m error } \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m apiClient\u001b[33m.\u001b[39m\u001b[33mPOST\u001b[39m(\u001b[32m\"/leads/{id}/submit-otp\"\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m    |\u001b[39m                                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 16 |\u001b[39m       params\u001b[33m:\u001b[39m {\n \u001b[90m 17 |\u001b[39m         path\u001b[33m:\u001b[39m {\n \u001b[90m 18 |\u001b[39m           id\u001b[33m:\u001b[39m leadId\u001b[33m,\u001b[39m\u001b[0m"
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/@tanstack+query-core@5.90.12/node_modules/@tanstack/query-core/src/mutation.ts",
+                            "line1": 190,
+                            "column1": 29,
+                            "ignored": true,
+                            "methodName": "fn"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/@tanstack+query-core@5.90.12/node_modules/@tanstack/query-core/src/retryer.ts",
+                            "line1": 155,
+                            "column1": 49,
+                            "ignored": true,
+                            "methodName": "run"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/@tanstack+query-core@5.90.12/node_modules/@tanstack/query-core/src/retryer.ts",
+                            "line1": 221,
+                            "column1": 9,
+                            "ignored": true,
+                            "methodName": "start"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/@tanstack+query-core@5.90.12/node_modules/@tanstack/query-core/src/mutation.ts",
+                            "line1": 233,
+                            "column1": 40,
+                            "ignored": true,
+                            "methodName": "execute"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/@tanstack+query-core@5.90.12/node_modules/@tanstack/query-core/src/mutationObserver.ts",
+                            "line1": 142,
+                            "column1": 34,
+                            "ignored": true,
+                            "methodName": "async*mutate"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/@tanstack+react-query@5.90.12_react@19.1.0/node_modules/@tanstack/react-query/src/useMutation.ts",
+                            "line1": 56,
+                            "column1": 16,
+                            "ignored": true,
+                            "methodName": "useMutation.useCallback[mutate]"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "src/components/ui/otp/otp-container.tsx",
+                            "line1": 119,
+                            "column1": 7,
+                            "ignored": false,
+                            "methodName": "handleSubmit"
+                        },
+                        "originalCodeFrame": "\u001b[0m \u001b[90m 117 |\u001b[39m     \u001b[90m// If leadId and token are provided, use V1 API\u001b[39m\n \u001b[90m 118 |\u001b[39m     \u001b[36mif\u001b[39m (leadId \u001b[33m&&\u001b[39m token) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 119 |\u001b[39m       submitOTP(\n \u001b[90m     |\u001b[39m       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 120 |\u001b[39m         { leadId\u001b[33m,\u001b[39m token\u001b[33m,\u001b[39m otp }\u001b[33m,\u001b[39m\n \u001b[90m 121 |\u001b[39m         {\n \u001b[90m 122 |\u001b[39m           onSuccess\u001b[33m:\u001b[39m () \u001b[33m=>\u001b[39m {\u001b[0m"
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "src/components/ui/otp/otp-container.tsx",
+                            "line1": 182,
+                            "column1": 7,
+                            "ignored": false,
+                            "methodName": "handleInput"
+                        },
+                        "originalCodeFrame": "\u001b[0m \u001b[90m 180 |\u001b[39m     \u001b[90m// Auto-submit when OTP is complete and status is waiting\u001b[39m\n \u001b[90m 181 |\u001b[39m     \u001b[36mif\u001b[39m (otp\u001b[33m.\u001b[39mlength \u001b[33m===\u001b[39m size \u001b[33m&&\u001b[39m otpStatus \u001b[33m===\u001b[39m \u001b[32m\"waiting\"\u001b[39m) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 182 |\u001b[39m       handleSubmit(otp)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 183 |\u001b[39m     }\n \u001b[90m 184 |\u001b[39m   }\u001b[33m;\u001b[39m\n \u001b[90m 185 |\u001b[39m\u001b[0m"
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "src/components/ui/otp/otp-form.tsx",
+                            "line1": 182,
+                            "column1": 5,
+                            "ignored": false,
+                            "methodName": "handleInput"
+                        },
+                        "originalCodeFrame": "\u001b[0m \u001b[90m 180 |\u001b[39m     \u001b[90m// Trigger onInput callback\u001b[39m\n \u001b[90m 181 |\u001b[39m     \u001b[36mconst\u001b[39m currentOtp \u001b[33m=\u001b[39m getFullOtp()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 182 |\u001b[39m     onInput\u001b[33m?\u001b[39m\u001b[33m.\u001b[39m(currentOtp)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 183 |\u001b[39m   }\u001b[33m;\u001b[39m\n \u001b[90m 184 |\u001b[39m\n \u001b[90m 185 |\u001b[39m   \u001b[36mconst\u001b[39m handleKeyUp \u001b[33m=\u001b[39m (\u001b[0m"
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "src/components/ui/otp/otp-form.tsx",
+                            "line1": 323,
+                            "column1": 34,
+                            "ignored": false,
+                            "methodName": "onChange"
+                        },
+                        "originalCodeFrame": "\u001b[0m \u001b[90m 321 |\u001b[39m                   } \u001b[36mas\u001b[39m \u001b[33mReact\u001b[39m\u001b[33m.\u001b[39m\u001b[33mCSSProperties\u001b[39m\n \u001b[90m 322 |\u001b[39m                 }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 323 |\u001b[39m                 onChange\u001b[33m=\u001b[39m{(e) \u001b[33m=>\u001b[39m handleInput(index\u001b[33m,\u001b[39m e)}\n \u001b[90m     |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 324 |\u001b[39m                 onKeyUp\u001b[33m=\u001b[39m{(e) \u001b[33m=>\u001b[39m handleKeyUp(index\u001b[33m,\u001b[39m e)}\n \u001b[90m 325 |\u001b[39m                 onKeyDown\u001b[33m=\u001b[39m{(e) \u001b[33m=>\u001b[39m handleKeyDown(index\u001b[33m,\u001b[39m e)}\n \u001b[90m 326 |\u001b[39m                 onFocus\u001b[33m=\u001b[39m{handleFocus}\u001b[0m"
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 16970,
+                            "column1": 9,
+                            "ignored": true,
+                            "methodName": "executeDispatch"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 874,
+                            "column1": 13,
+                            "ignored": true,
+                            "methodName": "runWithFiberInDEV"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 17020,
+                            "column1": 19,
+                            "ignored": true,
+                            "methodName": "processDispatchQueue"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 17621,
+                            "column1": 9,
+                            "ignored": true,
+                            "methodName": "dispatchEventForPluginEventSystem/<"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 3311,
+                            "column1": 40,
+                            "ignored": true,
+                            "methodName": "batchedUpdates$1"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 17174,
+                            "column1": 7,
+                            "ignored": true,
+                            "methodName": "dispatchEventForPluginEventSystem"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 21357,
+                            "column1": 11,
+                            "ignored": true,
+                            "methodName": "dispatchEvent"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 21325,
+                            "column1": 11,
+                            "ignored": true,
+                            "methodName": "dispatchDiscreteEvent"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 17121,
+                            "column1": 29,
+                            "ignored": true,
+                            "methodName": "EventListener.handleEvent*addTrappedEventListener"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 17056,
+                            "column1": 7,
+                            "ignored": true,
+                            "methodName": "listenToNativeEvent"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 17069,
+                            "column1": 15,
+                            "ignored": true,
+                            "methodName": "listenToAllSupportedEvents/<"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 17066,
+                            "column1": 25,
+                            "ignored": true,
+                            "methodName": "listenToAllSupportedEvents"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js",
+                            "line1": 25738,
+                            "column1": 7,
+                            "ignored": true,
+                            "methodName": "exports.hydrateRoot"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/src/client/app-index.tsx",
+                            "line1": 291,
+                            "column1": 22,
+                            "ignored": true,
+                            "methodName": "hydrate/<"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js",
+                            "line1": 1148,
+                            "column1": 27,
+                            "ignored": true,
+                            "methodName": "exports.startTransition"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/src/client/app-index.tsx",
+                            "line1": 290,
+                            "column1": 11,
+                            "ignored": true,
+                            "methodName": "hydrate"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/src/client/app-next-turbopack.ts",
+                            "line1": 13,
+                            "column1": 5,
+                            "ignored": true,
+                            "methodName": "<unknown>"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/src/client/app-bootstrap.ts",
+                            "line1": 76,
+                            "column1": 5,
+                            "ignored": true,
+                            "methodName": "appBootstrap/<"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/src/client/app-bootstrap.ts",
+                            "line1": 22,
+                            "column1": 12,
+                            "ignored": true,
+                            "methodName": "loadScriptsInSequence"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/src/client/app-bootstrap.ts",
+                            "line1": 58,
+                            "column1": 3,
+                            "ignored": true,
+                            "methodName": "appBootstrap"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "node_modules/.pnpm/next@15.5.4_@babel+core@7.28.5_@playwright+test@1.57.0_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/src/client/app-next-turbopack.ts",
+                            "line1": 10,
+                            "column1": 13,
+                            "ignored": true,
+                            "methodName": "<unknown>"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "[turbopack]/browser/runtime/base/dev-base.ts",
+                            "line1": 241,
+                            "column1": 7,
+                            "ignored": true,
+                            "methodName": "instantiateModule/<"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "[turbopack]/browser/runtime/base/dev-base.ts",
+                            "line1": 275,
+                            "column1": 7,
+                            "ignored": true,
+                            "methodName": "runModuleExecutionHooks"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "[turbopack]/browser/runtime/base/dev-base.ts",
+                            "line1": 235,
+                            "column1": 5,
+                            "ignored": true,
+                            "methodName": "instantiateModule"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "[turbopack]/browser/runtime/base/dev-base.ts",
+                            "line1": 128,
+                            "column1": 10,
+                            "ignored": true,
+                            "methodName": "getOrInstantiateRuntimeModule"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "[turbopack]/browser/runtime/dom/runtime-backend-dom.ts",
+                            "line1": 57,
+                            "column1": 11,
+                            "ignored": true,
+                            "methodName": "registerChunk"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "[turbopack]/browser/runtime/base/dev-base.ts",
+                            "line1": 1146,
+                            "column1": 18,
+                            "ignored": true,
+                            "methodName": "async*registerChunk"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "[turbopack]/browser/runtime/dom/dev-backend-dom.ts",
+                            "line1": 126,
+                            "column1": 1,
+                            "ignored": true,
+                            "methodName": "<unknown>"
+                        },
+                        "originalCodeFrame": null
+                    }
+                },
+                {
+                    "status": "fulfilled",
+                    "value": {
+                        "originalStackFrame": {
+                            "arguments": [],
+                            "file": "[turbopack]/browser/runtime/dom/dev-backend-dom.ts",
+                            "line1": 126,
+                            "column1": 1,
+                            "ignored": true,
+                            "methodName": "<unknown>"
+                        },
+                        "originalCodeFrame": null
+                    }
+                }
+            ],
+            "time": "2026-01-20T10:07:22.915Z"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "DEBUG",
+            "time": "2026-01-20T10:07:31.040Z",
+            "data": "[Theme Performance] applyTheme: 0.00ms"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "WARN",
+            "time": "2026-01-20T10:07:31.074Z",
+            "data": "Image with src \"/images/loan.png\" has \"fill\" but is missing \"sizes\" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "WARN",
+            "time": "2026-01-20T10:07:31.074Z",
+            "data": "Image with src \"/images/credit.png\" has \"fill\" but is missing \"sizes\" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "WARN",
+            "time": "2026-01-20T10:07:31.075Z",
+            "data": "Image with src \"/images/benefit.png\" has \"fill\" but is missing \"sizes\" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "WARN",
+            "time": "2026-01-20T10:07:31.082Z",
+            "data": "Image with src \"/images/banner-mobile.png\" has \"fill\" but is missing \"sizes\" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes"
+        },
+        {
+            "type": "CONSOLE",
+            "level": "LOG",
+            "time": "2026-01-20T10:07:31.092Z",
+            "data": "[Vercel Web Analytics] Failed to load script from https://va.vercel-scripts.com/v1/script.debug.js. Please check if any ad blockers are enabled and try again."
+        },
+        {
+            "type": "CONSOLE",
+            "level": "WARN",
+            "time": "2026-01-20T10:07:31.115Z",
+            "data": "Missing security headers: [\"x-content-type-options\",\"x-frame-options\",\"x-xss-protection\",\"strict-transport-security\"]"
+        }
+    ]
+}
