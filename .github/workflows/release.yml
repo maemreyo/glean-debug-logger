@@ -49,6 +49,13 @@ jobs:
           echo "NPM_TOKEN: ${NPM_TOKEN:+set}"
           echo "=================="
 
+      - name: Debug npm auth
+        run: |
+          echo "NPM_TOKEN present: ${NPM_TOKEN:+yes}"
+          echo "Trying npm whoami..."
+          npm whoami 2>&1 || echo "npm whoami failed"
+          echo "NPM_REGISTRY_URL: ${NPM_REGISTRY_URL:-not set}"
+
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
