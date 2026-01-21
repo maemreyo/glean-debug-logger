@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  id-token: write
   contents: write
   packages: write
   issues: write
@@ -38,18 +39,16 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Debug NPM Token
+      - name: Debug OIDC
         run: |
-          echo "NPM_TOKEN exists: ${{ secrets.NPM_TOKEN != '' }}"
-          npm whoami || echo "npm whoami failed"
-          echo "NPM_TOKEN value: ${{ secrets.NPM_TOKEN }}"
+          echo "OIDC enabled: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL != '' }}"
+          echo "Using Trusted Publishing for npm"
 
       - name: Semantic Release
         id: semantic-release
         uses: cycjimmy/semantic-release-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Verify Release
         if: steps.semantic-release.outputs.version
