@@ -183,19 +183,23 @@ describe('XHRInterceptor', () => {
   });
 
   describe('detach()', () => {
-    it('restores original XMLHttpRequest', () => {
+    it('restores original XMLHttpRequest prototype methods', () => {
       const originalOpen = originalXHR.prototype.open;
+      const originalSend = originalXHR.prototype.send;
       const onRequest = vi.fn();
 
       interceptor.onXHRRequest(onRequest);
       interceptor.attach();
 
-      expect(window.XMLHttpRequest).not.toBe(originalXHR);
+      // Prototype methods should be patched
+      expect(XMLHttpRequest.prototype.open).not.toBe(originalOpen);
+      expect(XMLHttpRequest.prototype.send).not.toBe(originalSend);
 
       interceptor.detach();
 
-      expect(window.XMLHttpRequest).toBe(originalXHR);
+      // Prototype methods should be restored
       expect(XMLHttpRequest.prototype.open).toBe(originalOpen);
+      expect(XMLHttpRequest.prototype.send).toBe(originalSend);
     });
 
     it('stops intercepting after detach', () => {

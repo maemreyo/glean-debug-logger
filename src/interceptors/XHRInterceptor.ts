@@ -13,6 +13,15 @@ export class XHRInterceptor {
   private onError: ((config: XHRRequestConfig, error: Error) => void)[];
   private requestTracker: WeakMap<XMLHttpRequest, XHRRequestConfig>;
   private excludeUrls: RegExp[];
+  private originalOpen: (
+    method: string,
+    url: string | URL,
+    async?: boolean,
+    user?: string | null,
+    password?: string | null
+  ) => void;
+  private originalSend: (body?: Document | XMLHttpRequestBodyInit | null) => void;
+  private isAttached: boolean = false;
 
   constructor(options: { excludeUrls?: string[] } = {}) {
     this.originalXHR = window.XMLHttpRequest;
@@ -21,71 +30,86 @@ export class XHRInterceptor {
     this.onError = [];
     this.requestTracker = new WeakMap();
     this.excludeUrls = (options.excludeUrls || []).map((url) => new RegExp(url));
+    this.originalOpen = this.originalXHR.prototype.open;
+    this.originalSend = this.originalXHR.prototype.send;
   }
 
   attach(): void {
-    const OriginalXHR = this.originalXHR;
+    if (this.isAttached) return;
+    this.isAttached = true;
+
     const interceptor = this;
 
-    const MyXMLHttpRequest = function (this: XMLHttpRequest) {
-      const xhr = new OriginalXHR();
-      interceptor.requestTracker.set(xhr, {
-        method: '',
-        url: '',
+    this.originalXHR.prototype.open = function (
+      this: XMLHttpRequest,
+      method: string,
+      url: string | URL,
+      async?: boolean,
+      user?: string | null,
+      password?: string | null
+    ) {
+      const urlString = typeof url === 'string' ? url : url.href;
+
+      interceptor.requestTracker.set(this, {
+        method,
+        url: urlString,
         headers: {},
         body: null,
         startTime: Date.now(),
       });
-      return xhr;
-    } as unknown as typeof XMLHttpRequest;
 
-    // Proper prototype chain inheritance without circular reference
-    MyXMLHttpRequest.prototype = Object.create(OriginalXHR.prototype);
-    MyXMLHttpRequest.prototype.constructor = MyXMLHttpRequest;
-
-    const originalOpen = OriginalXHR.prototype.open;
-    MyXMLHttpRequest.prototype.open = function (method: string, url: string) {
-      const config = interceptor.requestTracker.get(this);
-      if (config) {
-        config.method = method;
-        config.url = url;
-
-        if (interceptor.excludeUrls.some((regex) => regex.test(url))) {
-          return originalOpen.apply(this, [method, url] as never);
-        }
-
-        for (const cb of interceptor.onRequest) {
-          cb(config);
-        }
+      if (interceptor.excludeUrls.some((regex) => regex.test(urlString))) {
+        return interceptor.originalOpen.call(this, method, url, async ?? true, user, password);
       }
-      return originalOpen.apply(this, [method, url] as never);
+
+      const config = interceptor.requestTracker.get(this)!;
+      for (const cb of interceptor.onRequest) {
+        cb(config);
+      }
+
+      return interceptor.originalOpen.call(this, method, url, async ?? true, user, password);
     };
 
-    const originalSend = OriginalXHR.prototype.send;
-    MyXMLHttpRequest.prototype.send = function (body?: Document | XMLHttpRequestBodyInit | null) {
+    this.originalXHR.prototype.send = function (
+      this: XMLHttpRequest,
+      body?: Document | XMLHttpRequestBodyInit | null
+    ) {
       const config = interceptor.requestTracker.get(this);
       if (config) {
         config.body = body;
-        this.onload = () => {
+
+        const originalOnLoad = this.onload;
+        const originalOnError = this.onerror;
+
+        this.onload = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
           const duration = Date.now() - config.startTime;
           for (const cb of interceptor.onResponse) {
             cb(config, this.status, duration);
           }
+          if (originalOnLoad) {
+            originalOnLoad.call(this, ev);
+          }
         };
-        this.onerror = () => {
+
+        this.onerror = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
           for (const cb of interceptor.onError) {
             cb(config, new Error('XHR Error'));
           }
+          if (originalOnError) {
+            originalOnError.call(this, ev);
+          }
         };
       }
-      return originalSend.apply(this, [body] as never);
-    };
 
-    window.XMLHttpRequest = MyXMLHttpRequest;
+      return interceptor.originalSend.call(this, body);
+    };
   }
 
   detach(): void {
-    window.XMLHttpRequest = this.originalXHR;
+    if (!this.isAttached) return;
+    this.isAttached = false;
+    this.originalXHR.prototype.open = this.originalOpen;
+    this.originalXHR.prototype.send = this.originalSend;
   }
 
   onXHRRequest(callback: (config: XHRRequestConfig) => void): void {
