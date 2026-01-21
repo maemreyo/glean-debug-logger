@@ -73,6 +73,10 @@ describe('XHRInterceptor', () => {
         };
 
         xhrInstance.send();
+        // Manually trigger onload for test
+        setTimeout(() => {
+          if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+        }, 10);
       });
     });
 
@@ -373,6 +377,7 @@ describe('XHRInterceptor', () => {
     it('measures duration accurately', async () => {
       const onResponse = vi.fn();
       interceptor.onXHRResponse(onResponse);
+      interceptor.attach();
 
       const delay = 100;
       let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
@@ -380,22 +385,21 @@ describe('XHRInterceptor', () => {
 
       const loadPromise = new Promise<void>((resolve) => {
         xhrInstance.onload = () => {
+          expect(onResponse).toHaveBeenCalled();
           const duration = onResponse.mock.calls[0][2] as number;
           expect(duration).toBeGreaterThanOrEqual(delay - 10);
           resolve();
         };
       });
 
-       // Simulate network delay
-       setTimeout(() => {
-         xhrInstance.send();
-         setTimeout(() => {
-           if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
-         }, delay);
-       }, 10);
+      // Manually trigger load after delay
+      xhrInstance.send();
+      setTimeout(() => {
+        if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+      }, delay + 10);
 
-       await loadPromise;
-  });
+      await loadPromise;
+    });
 
     it('supports multiple response callbacks', async () => {
       const callback1 = vi.fn();
@@ -404,6 +408,7 @@ describe('XHRInterceptor', () => {
 
       interceptor.onXHRResponse(callback1);
       interceptor.onXHRResponse(callback2);
+      interceptor.attach();
 
       let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
       xhrInstance.open('GET', 'https://example.com/test');
@@ -427,6 +432,7 @@ describe('XHRInterceptor', () => {
     it('receives correct HTTP status codes', async () => {
       const onResponse = vi.fn();
       interceptor.onXHRResponse(onResponse);
+      interceptor.attach();
 
       const testCases = [
         { url: 'https://example.com/200', status: 200 },
@@ -436,8 +442,15 @@ describe('XHRInterceptor', () => {
 
       const promises = testCases.map((testCase) => {
         return new Promise<void>((resolve) => {
-          let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
+          const xhrInstance = new XMLHttpRequest();
           xhrInstance.open('GET', testCase.url);
+
+          // Define writable status property using Object.defineProperty
+          Object.defineProperty(xhrInstance, 'status', {
+            value: 0,
+            writable: true,
+            configurable: true,
+          });
 
           xhrInstance.onload = () => {
             const status = onResponse.mock.calls[testCases.indexOf(testCase)][1];
