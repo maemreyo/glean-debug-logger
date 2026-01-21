@@ -1,3 +1,26 @@
+# [1.3.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.2.0...v1.3.0) (2026-01-21)
+
+
+### Bug Fixes
+
+* correct regex pattern in sanitizeFilename function ([beedee3](https://github.com/maemreyo/glean-debug-logger/commit/beedee3520b4561fddbe195781957c25813589e8))
+
+
+### chore
+
+* **build:** remove deprecated type declaration files ([e4e8cc7](https://github.com/maemreyo/glean-debug-logger/commit/e4e8cc70e195d7828ddb26b2a12c12072c92f8cc))
+
+
+### Features
+
+* **export:** add AI-friendly log formats (JSONL, ECS JSON, AI-TXT) ([286261c](https://github.com/maemreyo/glean-debug-logger/commit/286261c8591a51f9aba47d656882eff11fcaa722))
+
+
+### BREAKING CHANGES
+
+* **build:** Removes dist/index.d.mts, dist/index.d.ts, dist/index.js, and dist/index.mjs files. Users should update to use the newer type definitions and build artifacts.
+* **export:** The ExportFormat type now includes 'jsonl', 'ecs.json', and 'ai.txt' options
+
 # [1.2.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.1.0...v1.2.0) (2026-01-21)
 
 
