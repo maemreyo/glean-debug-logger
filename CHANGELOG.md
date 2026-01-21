@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.3.0...v1.4.0) (2026-01-21)
+
+
+### Features
+
+* **ui:** add copy format settings and refactor debug panel layout ([52e363d](https://github.com/maemreyo/glean-debug-logger/commit/52e363d5a99fa572ba30189eb2c1ecaae8b45a44))
+
+
+### BREAKING CHANGES
+
+* **ui:** The copy functionality now defaults to ECS JSON format instead of plain JSON. Users can change this in the new settings dropdown.
+
 # [1.3.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.2.0...v1.3.0) (2026-01-21)
 
 
