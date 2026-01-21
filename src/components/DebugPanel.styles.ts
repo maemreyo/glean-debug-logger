@@ -226,15 +226,21 @@ export const buttonRowStyles = css`
   gap: 6px;
 `;
 
+export const buttonGrid3Styles = css`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+`;
+
 // Download buttons - Subtle neutral palette
 export const downloadButtonStyles = css`
-  padding: 8px 12px;
+  padding: 6px 8px;
   background: #f3f4f6;
   color: #374151;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   transition: all 0.15s ease;
   display: flex;
@@ -264,13 +270,13 @@ export const downloadButtonStyles = css`
 // Save to directory button - Soft indigo accent
 export const saveToDirectoryButtonStyles = css`
   width: 100%;
-  padding: 9px 14px;
+  padding: 6px 8px;
   background: #f0f4ff;
   color: #4f46e5;
   border: 1px solid #e0e7ff;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   transition: all 0.15s ease;
   display: flex;
@@ -301,13 +307,13 @@ export const saveToDirectoryButtonStyles = css`
 // Upload button - Subtle green
 export const uploadButtonStyles = css`
   width: 100%;
-  padding: 9px 14px;
+  padding: 6px 8px;
   background: #f0fdf4;
   color: #16a34a;
   border: 1px solid #dcfce7;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   transition: all 0.15s ease;
   display: flex;
@@ -337,13 +343,13 @@ export const uploadButtonStyles = css`
 // Danger button (clear logs) - Subtle red
 export const dangerButtonStyles = css`
   width: 100%;
-  padding: 9px 14px;
+  padding: 6px 8px;
   background: #fef2f2;
   color: #dc2626;
   border: 1px solid #fee2e2;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   transition: all 0.15s ease;
   display: flex;
@@ -401,6 +407,101 @@ export const footerTipStyles = css`
     font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
     font-size: 11px;
     color: #6b7280;
+  }
+`;
+
+// Settings dropdown styles - defined BEFORE darkModeStyles to avoid reference errors
+export const settingsDropdownStyles = css`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10000;
+  min-width: 180px;
+  padding: 8px 0;
+`;
+
+export const settingsDropdownHeaderStyles = css`
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f3f4f6;
+`;
+
+export const settingsDropdownItemStyles = css`
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: #374151;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+`;
+
+export const settingsDropdownItemSelectedStyles = css`
+  background: #f3f4f6;
+`;
+
+export const actionButtonStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+  }
+
+  &:active:not(:disabled) {
+    background: #e5e7eb;
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    border-color: #f3f4f6;
+  }
+`;
+
+export const dangerActionButtonStyles = css`
+  ${actionButtonStyles}
+  color: #dc2626;
+  border-color: #fee2e2;
+  background: #fef2f2;
+
+  &:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #fecaca;
+  }
+
+  &:active:not(:disabled) {
+    background: #fecaca;
   }
 `;
 
@@ -563,6 +664,24 @@ export const darkModeStyles = css`
     ${badgeStyles} {
       background: #334155;
       color: #94a3b8;
+    }
+
+    ${settingsDropdownStyles} {
+      background: #1e293b;
+      border-color: #334155;
+    }
+
+    ${settingsDropdownHeaderStyles} {
+      color: #64748b;
+      border-color: #334155;
+    }
+
+    ${settingsDropdownItemStyles} {
+      color: #e2e8f0;
+
+      &:hover {
+        background: #334155;
+      }
     }
   }
 `;

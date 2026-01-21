@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLogRecorder } from '../hooks/useLogRecorder';
 import { ExportFormat } from '../types';
+import { transformToECS, transformMetadataToECS } from '../utils/ecsTransform';
+import { stringifyJSONL } from '../utils/jsonl';
 import {
   toggleButtonStyles,
   badgeStyles,
@@ -22,17 +24,16 @@ import {
   detailsStyles,
   summaryStyles,
   sessionInfoStyles,
-  actionsStyles,
-  actionGroupStyles,
-  labelStyles,
-  buttonRowStyles,
-  downloadButtonStyles,
-  uploadButtonStyles,
-  dangerButtonStyles,
   successMessageStyles,
   errorMessageStyles,
   footerStyles,
   footerTipStyles,
+  settingsDropdownHeaderStyles,
+  settingsDropdownItemSelectedStyles,
+  settingsDropdownItemStyles,
+  settingsDropdownStyles,
+  actionButtonStyles,
+  dangerActionButtonStyles,
 } from './DebugPanel.styles';
 
 interface DebugPanelProps {
@@ -70,6 +71,23 @@ export function DebugPanel({
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Copy format setting with localStorage persistence (default: 'ecs.json')
+  const [copyFormat, setCopyFormat] = useState<'json' | 'ecs.json' | 'ai.txt'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('debug-panel-copy-format');
+      if (saved && ['json', 'ecs.json', 'ai.txt'].includes(saved)) {
+        return saved as 'json' | 'ecs.json' | 'ai.txt';
+      }
+    }
+    return 'ecs.json'; // Default to ECS JSON (AI-friendly)
+  });
+
+  // Save copy format to localStorage
+  useEffect(() => {
+    localStorage.setItem('debug-panel-copy-format', copyFormat);
+  }, [copyFormat]);
 
   // Refs for focus management
   const panelRef = useRef<HTMLDivElement>(null);
@@ -203,7 +221,56 @@ export function DebugPanel({
     try {
       const logs = getLogs();
       const metadata = getMetadata();
-      const content = JSON.stringify({ metadata, logs }, null, 2);
+
+      let content: string;
+
+      // Generate content based on selected format
+      if (copyFormat === 'json') {
+        // Original JSON format
+        content = JSON.stringify({ metadata, logs }, null, 2);
+      } else if (copyFormat === 'ecs.json') {
+        // ECS-compliant JSON with metadata wrapper
+        const ecsLogs = logs.map((log) => transformToECS(log, metadata));
+        const output = {
+          metadata: transformMetadataToECS(metadata),
+          logs: ecsLogs,
+        };
+        content = JSON.stringify(output, null, 2);
+      } else if (copyFormat === 'ai.txt') {
+        // AI-optimized TXT format
+        const metaSection = `# METADATA
+service.name=${metadata.environment || 'unknown'}
+user.id=${metadata.userId || 'anonymous'}
+timestamp=${new Date().toISOString()}
+
+# LOGS
+`;
+        const logLines = logs.map((log) => {
+          const ecs = transformToECS(log, metadata);
+          const timestamp = ecs['@timestamp'];
+          const level = (ecs as unknown as Record<string, unknown>)['log.level'] as string;
+          const category =
+            ((ecs as unknown as Record<string, unknown>)['event.category'] as string[])?.[0] ||
+            'unknown';
+          let line = `[${timestamp}] ${level} ${category}`;
+          if (ecs.message) line += ` | message="${ecs.message}"`;
+          if (ecs.http?.request?.method) line += ` | req.method=${ecs.http.request.method}`;
+          if (ecs.url?.full) line += ` | url=${ecs.url.full}`;
+          if (ecs.http?.response?.status_code)
+            line += ` | res.status=${ecs.http.response.status_code}`;
+          if (ecs.error?.message) line += ` | error="${ecs.error.message}"`;
+          return line;
+        });
+        content = metaSection + logLines.join('\n');
+      } else if (copyFormat === 'jsonl') {
+        // JSONL format
+        const ecsLogs = logs.map((log) => transformToECS(log, metadata));
+        content = stringifyJSONL(ecsLogs);
+      } else {
+        // Default to original JSON
+        content = JSON.stringify({ metadata, logs }, null, 2);
+      }
+
       await navigator.clipboard.writeText(content);
       setCopyStatus({
         type: 'success',
@@ -215,7 +282,7 @@ export function DebugPanel({
         message: 'Failed to copy. Check clipboard permissions.',
       });
     }
-  }, [getLogs, getMetadata]);
+  }, [getLogs, getMetadata, copyFormat]);
 
   useEffect(() => {
     if (directoryStatus) {
@@ -236,6 +303,22 @@ export function DebugPanel({
     }
     return undefined;
   }, [copyStatus]);
+
+  // Close panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isOpen && panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        if (toggleButtonRef.current?.contains(e.target as Node)) {
+          return;
+        }
+        setIsOpen(false);
+        toggleButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   const shouldShow = showInProduction || environment === 'development' || user?.role === 'admin';
 
@@ -288,15 +371,65 @@ export function DebugPanel({
               <h3 className={headerTitleStyles}>Debug</h3>
               <p className={headerSubtitleStyles}>{sessionId.substring(0, 36)}...</p>
             </div>
-            <button
-              ref={closeButtonRef}
-              type="button"
-              onClick={closePanel}
-              className={closeButtonStyles}
-              aria-label="Close debug panel"
-            >
-              ✕
-            </button>
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              {/* Settings button for copy format */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowSettings(!showSettings)}
+                  className={closeButtonStyles}
+                  aria-label="Actions and settings"
+                  aria-expanded={showSettings}
+                  title="Actions and settings"
+                >
+                  ⚙️
+                </button>
+                {showSettings && (
+                  <div className={settingsDropdownStyles} style={{ width: '220px' }}>
+                    <div className={settingsDropdownHeaderStyles}>Copy Format</div>
+                    {(['json', 'ecs.json', 'ai.txt'] as const).map((format) => (
+                      <button
+                        key={format}
+                        type="button"
+                        onClick={() => {
+                          setCopyFormat(format);
+                          setShowSettings(false);
+                        }}
+                        className={`${settingsDropdownItemStyles} ${copyFormat === format ? settingsDropdownItemSelectedStyles : ''}`}
+                      >
+                        {copyFormat === format && '✓ '}
+                        {format === 'json' && '📄 JSON'}
+                        {format === 'ecs.json' && '📋 ECS (AI)'}
+                        {format === 'ai.txt' && '🤖 AI-TXT'}
+                      </button>
+                    ))}
+
+                    <div style={{ borderTop: '1px solid #f3f4f6', margin: '8px 0' }} />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleSaveToDirectory();
+                        setShowSettings(false);
+                      }}
+                      className={settingsDropdownItemStyles}
+                      disabled={!('showDirectoryPicker' in window)}
+                    >
+                      📁 Save to Folder
+                    </button>
+                  </div>
+                )}
+              </div>
+              <button
+                ref={closeButtonRef}
+                type="button"
+                onClick={closePanel}
+                className={closeButtonStyles}
+                aria-label="Close debug panel"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           <div className={statsGridStyles}>
@@ -316,122 +449,77 @@ export function DebugPanel({
             </div>
           </div>
 
-          <details className={detailsStyles}>
-            <summary className={summaryStyles} role="button" aria-expanded="false">
-              <span>▸ Session Details</span>
-            </summary>
-            <div className={sessionInfoStyles}>
-              <div>
-                <strong>User</strong>
-                <span>{metadata.userId || 'Anonymous'}</span>
-              </div>
-              <div>
-                <strong>Browser</strong>
-                <span>
-                  {metadata.browser} ({metadata.platform})
-                </span>
-              </div>
-              <div>
-                <strong>Screen</strong>
-                <span>{metadata.screenResolution}</span>
-              </div>
-              <div>
-                <strong>Timezone</strong>
-                <span>{metadata.timezone}</span>
-              </div>
-            </div>
-          </details>
-
-          <div className={actionsStyles}>
-            <div className={actionGroupStyles}>
-              {/* <span className={labelStyles}>Export</span> */}
-              <div className={buttonRowStyles}>
-                <button
-                  type="button"
-                  onClick={() => handleDownload('json')}
-                  className={downloadButtonStyles}
-                  aria-label="Download logs as JSON"
-                >
-                  📄 JSON
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDownload('txt')}
-                  className={downloadButtonStyles}
-                  aria-label="Download logs as text file"
-                >
-                  📝 TXT
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  disabled={logCount === 0}
-                  className={downloadButtonStyles}
-                  aria-label="Copy logs to clipboard"
-                  title="Copy logs as JSON to clipboard"
-                >
-                  📋 Copy
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveToDirectory}
-                  disabled={!('showDirectoryPicker' in window)}
-                  className={downloadButtonStyles}
-                  aria-label="Save logs to directory"
-                  title={
-                    'showDirectoryPicker' in window
-                      ? 'Choose directory to save file'
-                      : 'Feature only supported in Chrome/Edge'
-                  }
-                >
-                  📁 Folder
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDownload('jsonl')}
-                  disabled={logCount === 0}
-                  className={downloadButtonStyles}
-                  aria-label="Download logs as JSONL (JSON Lines)"
-                >
-                  📦 JSONL
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDownload('ecs.json')}
-                  disabled={logCount === 0}
-                  className={downloadButtonStyles}
-                  aria-label="Download logs as ECS JSON (Elastic Common Schema)"
-                >
-                  📋 ECS
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDownload('ai.txt')}
-                  disabled={logCount === 0}
-                  className={downloadButtonStyles}
-                  aria-label="Download logs as AI-optimized TXT"
-                >
-                  🤖 AI-TXT
-                </button>
-              </div>
-            </div>
-
-            {uploadEndpoint && (
-              <div className={actionGroupStyles}>
-                <span className={labelStyles}>Upload</span>
+          <div style={{ padding: '12px 16px' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '6px',
+                marginBottom: '8px',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => handleDownload('json')}
+                className={actionButtonStyles}
+              >
+                📄 JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload('txt')}
+                className={actionButtonStyles}
+              >
+                📝 TXT
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload('jsonl')}
+                className={actionButtonStyles}
+                disabled={logCount === 0}
+              >
+                📦 JSONL
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload('ecs.json')}
+                className={actionButtonStyles}
+                disabled={logCount === 0}
+              >
+                📋 ECS
+              </button>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className={actionButtonStyles}
+                disabled={logCount === 0}
+              >
+                📋 Copy
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload('ai.txt')}
+                className={actionButtonStyles}
+                disabled={logCount === 0}
+              >
+                🤖 AI
+              </button>
+              {uploadEndpoint ? (
                 <button
                   type="button"
                   onClick={handleUpload}
+                  className={actionButtonStyles}
                   disabled={isUploading}
-                  className={uploadButtonStyles}
-                  aria-label={isUploading ? 'Uploading logs...' : 'Upload logs to server'}
-                  aria-busy={isUploading}
                 >
-                  {isUploading ? '⏳ Uploading...' : '☁️ Upload to Server'}
+                  ☁️ Upload
                 </button>
-              </div>
-            )}
+              ) : (
+                <div />
+              )}
+            </div>
+          </div>
 
+          <div style={{ padding: '0 16px 12px' }}>
             {uploadStatus && (
               <div
                 role="status"
@@ -467,23 +555,51 @@ export function DebugPanel({
                 {copyStatus.message}
               </div>
             )}
+          </div>
 
-            <div className={actionGroupStyles}>
-              {/* <span className={labelStyles}>Clear</span> */}
+          <details
+            className={detailsStyles}
+            style={{ borderTop: '1px solid #f3f4f6', borderRadius: 0 }}
+          >
+            <summary className={summaryStyles}>
+              <span>▸ Session Details</span>
+            </summary>
+            <div className={sessionInfoStyles}>
+              <div>
+                <strong>User</strong>
+                <span>{metadata.userId || 'Anonymous'}</span>
+              </div>
+              <div>
+                <strong>Browser</strong>
+                <span>
+                  {metadata.browser} ({metadata.platform})
+                </span>
+              </div>
+              <div>
+                <strong>Screen</strong>
+                <span>{metadata.screenResolution}</span>
+              </div>
+              <div>
+                <strong>Timezone</strong>
+                <span>{metadata.timezone}</span>
+              </div>
+            </div>
+          </details>
+
+          <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'flex-end' }}>
+            {!uploadEndpoint && (
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm('Clear all logs? This cannot be undone.')) {
+                  if (confirm('Clear all logs?')) {
                     clearLogs();
-                    setUploadStatus(null);
                   }
                 }}
-                className={dangerButtonStyles}
-                aria-label="Clear all logs"
+                className={dangerActionButtonStyles}
               >
-                🗑️ Clear All Logs
+                🗑️ Clear
               </button>
-            </div>
+            )}
           </div>
 
           <div className={footerStyles}>
