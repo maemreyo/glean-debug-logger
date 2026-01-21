@@ -51,7 +51,7 @@ export function sanitizeData<T>(data: T, options: SanitizeOptions = {}): T {
 
 export function sanitizeFilename(name: string): string {
   return name
-    .replace(/[^a-z0-9_\-]/gi, '_')
+    .replace(/[^a-z0-9_-]/gi, '_')
     .replace(/_+/g, '_')
     .replace(/^_|_$/g, '');
 }

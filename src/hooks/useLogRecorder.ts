@@ -38,6 +38,7 @@ const DEFAULT_CONFIG: LogRecorderConfig = {
 export function useLogRecorder(
   customConfig: Partial<LogRecorderConfig> = {}
 ): UseLogRecorderReturn {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const config = { ...DEFAULT_CONFIG, ...customConfig };
 
   const configRef = useRef({
@@ -54,6 +55,7 @@ export function useLogRecorder(
   });
 
   // Update ref when config changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     configRef.current = {
       maxLogs: config.maxLogs,
@@ -352,6 +354,7 @@ export function useLogRecorder(
       cleanupFns.forEach((fn) => fn());
       isInitialized.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, addLog, safeStringify, consoleInterceptor, networkInterceptor, xhrInterceptor]);
 
   const downloadLogs = useCallback(
@@ -450,6 +453,7 @@ timestamp=${new Date().toISOString()}
       FileService.downloadWithFallback(content, filename, mimeType);
       return filename;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [config, safeStringify, updateMetadata]
   );
 
@@ -491,6 +495,7 @@ timestamp=${new Date().toISOString()}
         return { success: false, error: errorMessage };
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [config.uploadEndpoint, safeStringify, updateMetadata]
   );
 

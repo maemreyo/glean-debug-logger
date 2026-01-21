@@ -131,7 +131,7 @@ describe('useDebugPanelControls - Keyboard Shortcuts', () => {
   });
 
   it('should prevent default on Ctrl+Shift+D', () => {
-    const { result } = renderHook(() => useDebugPanelControls());
+    renderHook(() => useDebugPanelControls());
 
     const event = new KeyboardEvent('keydown', {
       key: 'D',

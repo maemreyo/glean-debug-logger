@@ -38,6 +38,7 @@ export class XHRInterceptor {
     if (this.isAttached) return;
     this.isAttached = true;
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const interceptor = this;
 
     this.originalXHR.prototype.open = function (

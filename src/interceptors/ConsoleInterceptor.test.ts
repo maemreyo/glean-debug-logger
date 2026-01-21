@@ -3,18 +3,8 @@ import { ConsoleInterceptor } from './ConsoleInterceptor';
 
 describe('ConsoleInterceptor', () => {
   let interceptor: ConsoleInterceptor;
-  let originalConsole: Pick<Console, 'log' | 'error' | 'warn' | 'info' | 'debug'>;
 
   beforeEach(() => {
-    // Store original console before each test
-    originalConsole = {
-      log: console.log.bind(console),
-      error: console.error.bind(console),
-      warn: console.warn.bind(console),
-      info: console.info.bind(console),
-      debug: console.debug.bind(console),
-    };
-
     interceptor = new ConsoleInterceptor();
   });
 

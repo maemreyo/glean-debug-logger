@@ -215,7 +215,7 @@ describe('NetworkInterceptor', () => {
 
     it('measures duration accurately', async () => {
       const onResponse = vi.fn();
-      let delay = 100;
+      const delay = 100;
       const mockFetch = vi.fn(async () => {
         await new Promise((resolve) => setTimeout(resolve, delay));
         return new Response('test', { status: 200 });

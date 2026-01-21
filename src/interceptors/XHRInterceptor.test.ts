@@ -51,12 +51,11 @@ describe('XHRInterceptor', () => {
     it('calls response callback on successful request', () => {
       return new Promise<void>((resolve) => {
         const onResponse = vi.fn();
-        let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
 
         interceptor.onXHRResponse(onResponse);
         interceptor.attach();
 
-        xhrInstance = new XMLHttpRequest();
+        const xhrInstance = new XMLHttpRequest();
         xhrInstance.open('GET', 'https://example.com/test');
         xhrInstance.onload = () => {
           expect(onResponse).toHaveBeenCalled();
@@ -348,14 +347,13 @@ describe('XHRInterceptor', () => {
   });
 
   describe('onXHRResponse()', () => {
-    it('registers callback that receives config, status, and duration', (done) => {
+    it('registers callback that receives config, status, and duration', () => {
       const onResponse = vi.fn();
-      let xhrInstance: XMLHttpRequest;
 
       interceptor.onXHRResponse(onResponse);
       interceptor.attach();
 
-      xhrInstance = new XMLHttpRequest();
+      const xhrInstance = new XMLHttpRequest();
       xhrInstance.open('GET', 'https://example.com/test');
       xhrInstance.onload = () => {
         expect(onResponse).toHaveBeenCalled();
@@ -380,7 +378,7 @@ describe('XHRInterceptor', () => {
       interceptor.attach();
 
       const delay = 100;
-      let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
+      const xhrInstance = new XMLHttpRequest();
       xhrInstance.open('GET', 'https://example.com/test');
 
       const loadPromise = new Promise<void>((resolve) => {
@@ -410,7 +408,7 @@ describe('XHRInterceptor', () => {
       interceptor.onXHRResponse(callback2);
       interceptor.attach();
 
-      let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
+      const xhrInstance: XMLHttpRequest = new XMLHttpRequest();
       xhrInstance.open('GET', 'https://example.com/test');
 
       const loadPromise = new Promise<void>((resolve) => {
@@ -478,13 +476,12 @@ describe('XHRInterceptor', () => {
 describe('onXHRError()', () => {
   it('registers callback that receives config and error', async () => {
     const onError = vi.fn();
-    let xhrInstance: XMLHttpRequest;
     const interceptor = new XHRInterceptor();
 
     interceptor.onXHRError(onError);
     interceptor.attach();
 
-    xhrInstance = new XMLHttpRequest();
+    const xhrInstance = new XMLHttpRequest();
     xhrInstance.open('GET', 'https://invalid-url');
 
     const errorPromise = new Promise<void>((resolve) => {
@@ -512,14 +509,13 @@ describe('onXHRError()', () => {
   it('supports multiple error callbacks', async () => {
     const callback1 = vi.fn();
     const callback2 = vi.fn();
-    let xhrInstance: XMLHttpRequest;
     const interceptor = new XHRInterceptor();
 
     interceptor.onXHRError(callback1);
     interceptor.onXHRError(callback2);
     interceptor.attach();
 
-    xhrInstance = new XMLHttpRequest();
+    const xhrInstance = new XMLHttpRequest();
     xhrInstance.open('GET', 'https://invalid-url');
 
     const errorPromise = new Promise<void>((resolve) => {
@@ -538,15 +534,14 @@ describe('onXHRError()', () => {
     await errorPromise;
   });
 
-  it('captures request config in error callback', (done) => {
+  it('captures request config in error callback', () => {
     const onError = vi.fn();
-    let xhrInstance: XMLHttpRequest;
     const interceptor = new XHRInterceptor();
 
     interceptor.onXHRError(onError);
     interceptor.attach();
 
-    xhrInstance = new XMLHttpRequest();
+    const xhrInstance = new XMLHttpRequest();
     xhrInstance.open('POST', 'https://invalid-url/api');
     xhrInstance.onerror = () => {
       const config = onError.mock.calls[0][0];

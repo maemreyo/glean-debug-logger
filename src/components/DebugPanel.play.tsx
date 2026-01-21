@@ -116,7 +116,7 @@ export const testClearLogs = async ({
  * - Triggers keyboard event
  * - Verifies panel opens
  */
-export const testKeyboardShortcut = async ({ canvasElement }: ExtendedPlayContext) => {
+export const testKeyboardShortcut = async ({ canvasElement: _canvasElement }: ExtendedPlayContext) => {
   // Simulate Ctrl+Shift+D keyboard event
   await userEvent.keyboard('{Control>}{Shift>}{d}{/Shift}{/Control}');
 
@@ -131,7 +131,7 @@ export const testKeyboardShortcut = async ({ canvasElement }: ExtendedPlayContex
  * - Presses Escape
  * - Verifies panel closes
  */
-export const testEscapeKey = async ({ canvasElement }: ExtendedPlayContext) => {
+export const testEscapeKey = async ({ canvasElement: _canvasElement }: ExtendedPlayContext) => {
   // Open panel using keyboard shortcut
   await userEvent.keyboard('{Control>}{Shift>}{d}{/Shift}{/Control}');
 
