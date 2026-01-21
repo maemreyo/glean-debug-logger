@@ -1,3 +1,31 @@
+# [1.2.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.1.0...v1.2.0) (2026-01-21)
+
+
+### Bug Fixes
+
+* **xhr:** fix XHRInterceptor prototype patching and test expectations ([9877d6d](https://github.com/maemreyo/glean-debug-logger/commit/9877d6d2607e26a1755d32e270ff82dc3a7fbc28))
+* **xhr:** fix XHRInterceptor prototype patching and test expectations ([20aee4e](https://github.com/maemreyo/glean-debug-logger/commit/20aee4e5eb19bbf23fa7ed4c66023b705d715216))
+
+
+### Features
+
+* **storybook:** add complete Storybook setup with stories, tests, and documentation ([ed75d4f](https://github.com/maemreyo/glean-debug-logger/commit/ed75d4f7970858c397d92e7f190362cea88286d0))
+* **interceptors:** add console, network, and XHR interception services ([f74e735](https://github.com/maemreyo/glean-debug-logger/commit/f74e735ac9614cd592bccc5b030776a0e6e53419))
+* **debug-panel:** add copy to clipboard functionality with comprehensive UI improvements ([a93687c](https://github.com/maemreyo/glean-debug-logger/commit/a93687c144e1d2c4d2c59a79743c7057bc343404))
+* **xhr:** comment out all tests in XHRInterceptor.test.ts ([44c55d4](https://github.com/maemreyo/glean-debug-logger/commit/44c55d49a5febe34ac94abe4c6d8ddc89924793d))
+* **debug-panel:** refactor UI with Goober styling and accessibility enhancements ([3fe2014](https://github.com/maemreyo/glean-debug-logger/commit/3fe2014a4a29ee093215e719e4856683b41a36eb))
+* **debug-panel:** refactor UI with improved styling, accessibility, and internationalization ([3b38e34](https://github.com/maemreyo/glean-debug-logger/commit/3b38e344d9ba56c9c9672f10753a287b4d9f8ba7))
+* **xhr:** uncomment all tests in XHRInterceptor.test.ts ([988e515](https://github.com/maemreyo/glean-debug-logger/commit/988e51532eabfb7f920ee9c73dae746567273e7b))
+
+
+### BREAKING CHANGES
+
+* **xhr:** The XHRInterceptor now requires explicit attach() call before use
+* **debug-panel:** The DebugPanel component now requires additional state management for copy functionality and has updated styling classes.
+* **debug-panel:** The DebugPanel component now requires Goober as a peer dependency. Projects using this component must install goober@^2.1.18.
+* **interceptors:** The interceptors introduce new API surfaces that may require
+adjustments to existing logging and network monitoring implementations.
+
 # [1.1.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.0.0...v1.1.0) (2026-01-20)
 
 
