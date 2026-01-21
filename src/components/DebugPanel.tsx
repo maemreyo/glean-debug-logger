@@ -8,6 +8,7 @@ import {
   errorBadgeStyles,
   panelStyles,
   headerStyles,
+  headerTitleWrapperStyles,
   headerTitleStyles,
   headerSubtitleStyles,
   closeButtonStyles,
@@ -250,9 +251,9 @@ export function DebugPanel({
           className={panelStyles}
         >
           <div className={headerStyles}>
-            <div>
+            <div className={headerTitleWrapperStyles}>
               <h3 className={headerTitleStyles}>Debug</h3>
-              <p className={headerSubtitleStyles}>{sessionId.substring(0, 12)}...</p>
+              <p className={headerSubtitleStyles}>{sessionId.substring(0, 36)}...</p>
             </div>
             <button
               ref={closeButtonRef}
@@ -308,7 +309,7 @@ export function DebugPanel({
 
           <div className={actionsStyles}>
             <div className={actionGroupStyles}>
-              <span className={labelStyles}>Export</span>
+              {/* <span className={labelStyles}>Export</span> */}
               <div className={buttonRowStyles}>
                 <button
                   type="button"
@@ -384,7 +385,7 @@ export function DebugPanel({
             )}
 
             <div className={actionGroupStyles}>
-              <span className={labelStyles}>Clear</span>
+              {/* <span className={labelStyles}>Clear</span> */}
               <button
                 type="button"
                 onClick={() => {

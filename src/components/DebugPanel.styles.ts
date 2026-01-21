@@ -77,6 +77,11 @@ export const headerStyles = css`
   border-bottom: 1px solid #e5e7eb;
 `;
 
+export const headerTitleWrapperStyles = css`
+  display: flex;
+  gap: 8px;
+`
+
 export const headerTitleStyles = css`
   margin: 0;
   font-size: 14px;
