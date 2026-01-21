@@ -1,45 +1,70 @@
-# Security Policy
+# Security & Data Privacy
 
-## Supported Versions
+The `@zaob/glean-debug-logger` is designed with a "Security-First" approach to ensure that debugging information doesn't compromise user privacy or system security.
 
-Currently, only the latest version of `@zaob/glean-debug-logger` receives security updates.
+## 1. Automatic Data Redaction (Sanitization)
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
+The library includes a robust sanitization engine that automatically identifies and masks sensitive information before it is ever stored or exported.
 
-## Reporting a Vulnerability
+### How it Works
+The `sanitizeData` utility recursively traverses all captured objects (console arguments, network headers, and request/response bodies). If a key matches any of the "forbidden keys," its value is replaced with `***REDACTED***`.
 
-If you discover a security vulnerability, please do not open a public issue. Instead, send an email to **zaob.ogn@gmail.com** with the following details:
+### Default Protected Keys
+By default, the following keys (case-insensitive) are automatically redacted:
+- `password`, `pass`, `pwd`
+- `token`, `access_token`, `refresh_token`
+- `apiKey`, `api_key`
+- `secret`, `client_secret`
+- `authorization` (Headers)
+- `creditCard`, `cardNumber`, `cvv`
+- `ssn`, `social_security`
 
-- A description of the vulnerability
-- Steps to reproduce the issue
-- Potential impact of the vulnerability
-- Any suggested fixes (if known)
+### Customizing Sanitization
+You can provide additional keys specific to your application:
 
-I will acknowledge receipt of your report within 48 hours and provide regular updates on the progress of the fix.
+```tsx
+useLogRecorder({
+  sanitizeKeys: ['session_id', 'internal_uuid'],
+});
+```
 
-## Security Best Practices
+## 2. Secure Log Exports
 
-When using this library in production, consider the following security best practices:
+- **No Path Traversal**: Filenames generated from templates are sanitized to remove special characters (like `..`, `/`, `\`) to prevent path traversal issues during saving.
+- **Controlled Visibility**: The `DebugPanel` component has a `showInProduction` prop (default: `false`). This prevents the debug UI from being exposed to end-users in production environments.
 
-1. **Disable in Production**: The debug panel should not be visible in production environments. Use `showInProduction={false}` on the `DebugPanel` component.
+## 3. Server Upload Security
 
-2. **Review Uploaded Logs**: Implement proper authentication and validation on your server endpoint that receives log uploads.
+When using the `uploadLogs` functionality, we recommend following these backend security patterns:
 
-3. **Sanitize Sensitive Data**: Ensure the `sanitizeKeys` option includes all sensitive data patterns specific to your application.
+- **Authentication**: Always verify the user's session before accepting a log upload.
+- **Payload Limits**: Implement a maximum payload size (e.g., 5MB) on your server to prevent Denial of Service (DoS) attacks.
+- **Rate Limiting**: Limit the number of uploads a single user or IP can perform in a given timeframe.
+- **Storage Isolation**: Store logs in a non-public bucket or directory.
 
-4. **Rate Limiting**: Implement rate limiting on your log upload endpoint to prevent abuse.
+Example of a secure upload handler (pseudo-code):
+```typescript
+async function handleLogUpload(req) {
+  const user = await authenticate(req);
+  if (!user.isAdmin) throw Error("Unauthorized");
+  
+  await checkRateLimit(user.id, "10/hour");
+  
+  const payload = await req.json();
+  if (JSON.stringify(payload).length > 5 * 1024 * 1024) {
+    throw Error("Payload too large");
+  }
+  
+  await saveToS3(payload);
+}
+```
 
-5. **Access Control**: Restrict access to the debug panel and log download functionality to authorized users only.
+## 4. LocalStorage Considerations
 
-## Security Audits
+Logs are stored in `localStorage` if `enablePersistence` is true. 
+- **Clear on Logout**: We recommend calling `recorder.clearLogs()` when a user logs out of your application to ensure no sensitive session info remains in the browser.
+- **Sensitive Contexts**: If your application handles extremely sensitive data (e.g., medical or financial records), you may want to disable persistence entirely.
 
-This library automatically redacts common sensitive data patterns including:
-- Passwords
-- API keys
-- Authentication tokens
-- Credit card numbers
-- Social security numbers
+## 5. Reporting Vulnerabilities
 
-However, you should review and customize the `sanitizeKeys` configuration for your specific use case.
+If you discover a security vulnerability, please do not open a public issue. Instead, send an email to **zaob.ogn@gmail.com**. We will acknowledge receipt within 48 hours and work on a fix immediately.

@@ -8,20 +8,21 @@
 [![React](https://img.shields.io/badge/React-17%2B-61DAFB)](https://react.dev/)
 [![minzipped](https://badgen.net/bundlephobia/minzip/@zaob/glean-debug-logger)](https://bundlephobia.com/result?p=@zaob/glean-debug-logger)
 
-A production-ready React/Next.js debug logging library that captures console logs, network requests (Fetch + XHR), exports with smart filenames, and supports server upload.
+A production-ready React/Next.js debug logging library that intercepts console logs, network requests (Fetch/XHR), and exports them with smart filenames. Designed for both manual debugging and automated analysis by AI agents.
 
-## Features
+## 🚀 Features
 
-- **Console Log Interception**: Captures `console.log`, `console.error`, `console.warn`, `console.info`, `console.debug`
-- **Network Request Interception**: Monitors Fetch and XHR requests/responses
-- **Smart Filename Templates**: Generate descriptive filenames with metadata placeholders
-- **Rich Metadata Collection**: Browser, platform, screen resolution, timezone, and more
-- **Auto-Sanitization**: Automatically redacts sensitive data (password, token, apiKey, etc.)
-- **LocalStorage Persistence**: Logs persist across page refreshes
-- **Download/Upload**: Export logs as JSON or TXT, or upload to your server
-- **Debug Panel UI**: Floating debug panel with stats and controls
+- **Console Log Interception**: Automatically captures `console.log`, `console.error`, `console.warn`, `console.info`, and `console.debug`.
+- **Network Request Interception**: Monitors both `Fetch API` and `XMLHttpRequest` (XHR) requests and responses.
+- **Smart Filename Templates**: Generate descriptive filenames with metadata placeholders (env, date, userId, errorCount, etc.).
+- **Rich Metadata Collection**: Gathers browser info, platform, screen resolution, timezone, and current URL.
+- **Auto-Sanitization**: Automatically redacts sensitive data (passwords, tokens, API keys, credit card numbers, etc.).
+- **LocalStorage Persistence**: Logs persist across page refreshes so you don't lose data on navigation.
+- **Multiple Export Formats**: Export logs as JSON, TXT, JSONL (AI-optimized), ECS-compliant JSON, or AI-friendly TXT.
+- **Debug Panel UI**: A floating debug panel with real-time stats, format-aware clipboard copy, and server upload capability.
+- **Zero Runtime Dependencies**: Only React is required as a peer dependency. Bundle size < 20KB.
 
-## Installation
+## 📦 Installation
 
 ```bash
 npm install @zaob/glean-debug-logger
@@ -29,133 +30,90 @@ npm install @zaob/glean-debug-logger
 
 **Peer Dependency**: React 17+ must be installed in your project.
 
-## Quick Start
+## 🏁 Quick Start
 
 ```tsx
 import { useLogRecorder, DebugPanel } from "@zaob/glean-debug-logger";
 
 function App() {
-  const { downloadLogs, uploadLogs, getMetadata } = useLogRecorder({
+  const { downloadLogs, uploadLogs } = useLogRecorder({
     fileNameTemplate: "{env}_{date}_{userId}_{errorCount}errors",
     environment: "production",
-    userId: user?.id,
+    userId: "user_123",
     uploadEndpoint: "/api/logs/upload",
   });
 
   return (
     <div>
+      <h1>My Awesome App</h1>
       <button onClick={() => downloadLogs("json")}>Download Logs</button>
-      <DebugPanel user={user} />
+      
+      {/* Fixed-position debug panel (Ctrl+Shift+D to toggle) */}
+      <DebugPanel 
+        environment="production" 
+        userId="user_123" 
+        uploadEndpoint="/api/logs/upload"
+      />
     </div>
   );
 }
 ```
 
-## API Reference
+## 📖 Detailed Documentation
 
-### useLogRecorder Hook
+- [Architecture Overview](./docs/ARCHITECTURE.md) - Deep dive into interceptors and data flow.
+- [API Reference](./docs/API.md) - Full details on `useLogRecorder` and components.
+- [Log Export Formats](./docs/log-formats.md) - Details on JSON, JSONL, ECS, and AI-TXT formats.
+- [Security & Sanitization](./docs/SECURITY.md) - How we protect your sensitive data.
+- [Integration Examples](./docs/INTEGRATIONS.md) - Next.js, S3, Supabase, and PostgreSQL.
+- [Development Guide](./docs/DEVELOPMENT.md) - Conventions, build process, and contributing.
 
-```tsx
-const {
-  downloadLogs, // (format?, customFilename?) => string | null
-  uploadLogs, // (customEndpoint?) => Promise<{ success, data?, error? }>
-  clearLogs, // () => void
-  getLogs, // () => LogEntry[]
-  getLogCount, // () => number
-  getMetadata, // () => LogMetadata
-  sessionId, // string
-} = useLogRecorder(config);
-```
+## 🛠 Usage Patterns
 
-#### Configuration Options
+### Smart Filename Templates
 
-| Option              | Type           | Default                                   | Description                     |
-| ------------------- | -------------- | ----------------------------------------- | ------------------------------- |
-| `maxLogs`           | number         | 1000                                      | Maximum number of logs to keep  |
-| `enablePersistence` | boolean        | true                                      | Enable localStorage persistence |
-| `persistenceKey`    | string         | 'debug_logs'                              | localStorage key                |
-| `captureConsole`    | boolean        | true                                      | Capture console.log calls       |
-| `captureFetch`      | boolean        | true                                      | Capture Fetch requests          |
-| `captureXHR`        | boolean        | true                                      | Capture XHR requests            |
-| `sanitizeKeys`      | string[]       | [...]                                     | Keys to redact                  |
-| `excludeUrls`       | string[]       | []                                        | URLs to exclude from capture    |
-| `fileNameTemplate`  | string         | '{env}_{userId}_{sessionId}\_{timestamp}' | Filename template               |
-| `environment`       | string         | 'development'                             | Environment name                |
-| `userId`            | string \| null | null                                      | User identifier                 |
-| `sessionId`         | string \| null | null                                      | Session identifier              |
-| `includeMetadata`   | boolean        | true                                      | Include metadata in export      |
-| `uploadEndpoint`    | string \| null | null                                      | Server upload URL               |
-| `uploadOnError`     | boolean        | false                                     | Auto-upload on errors           |
+Placeholders are replaced with real values at the time of export:
 
-### DebugPanel Component
-
-```tsx
-<DebugPanel
-  user={{ id?: string; email?: string; role?: string }}
-  environment?: string
-  uploadEndpoint?: string
-  fileNameTemplate?: string
-  maxLogs?: number
-  showInProduction?: boolean
-/>
-```
-
-**Keyboard Shortcut**: Press `Ctrl+Shift+D` to toggle the debug panel.
-
-## Smart Filename Templates
-
-Generate descriptive filenames using placeholders:
-
-```javascript
+```typescript
 const config = {
-  fileNameTemplate: "{env}_{date}_{userId}_{errorCount}errors",
+  fileNameTemplate: "{env}_{date}_{userId}_{errorCount}errors_{browser}",
 };
+// Result: production_2026-01-20_user123_5errors_chrome.json
 ```
 
-**Available Placeholders**:
+### AI-Optimized Exports
 
-| Placeholder    | Description      | Example                  |
-| -------------- | ---------------- | ------------------------ |
-| `{env}`        | Environment      | `production`             |
-| `{userId}`     | User ID          | `user123` or `anonymous` |
-| `{sessionId}`  | Session ID       | `session_abc123`         |
-| `{timestamp}`  | ISO timestamp    | `2024-01-20T10-30-45`    |
-| `{date}`       | Date only        | `2024-01-20`             |
-| `{time}`       | Time only        | `10-30-45`               |
-| `{errorCount}` | Error count      | `5`                      |
-| `{logCount}`   | Log count        | `1234`                   |
-| `{browser}`    | Browser name     | `chrome`                 |
-| `{platform}`   | OS platform      | `MacIntel`               |
-| `{url}`        | Current URL path | `_checkout_payment`      |
+For use with AI coding assistants or automated analysis tools:
 
-## Security
+```typescript
+downloadLogs('jsonl'); // Line-delimited JSON (NDJSON)
+downloadLogs('ai.txt'); // Human-readable structured text
+```
 
-Sensitive data is automatically redacted. Configure additional keys:
+### Server Upload Integration
 
-```tsx
-useLogRecorder({
-  sanitizeKeys: ["password", "token", "apiKey", "secret", "customKey"],
+The library can POST logs directly to your backend for persistence:
+
+```typescript
+const { uploadLogs } = useLogRecorder({
+  uploadEndpoint: "/api/logs/upload",
+  uploadOnError: true, // Auto-upload when a console.error occurs
 });
 ```
 
-## Backend Integration
+## 🛡 Security
 
-See the `examples/` folder for reference implementations:
+Sensitive keys are automatically redacted from all captured logs. The default list includes:
+`password`, `token`, `apiKey`, `secret`, `authorization`, `creditCard`, `cardNumber`, `cvv`, `ssn`.
 
-- **nextjs-file-system**: Save to local filesystem
-- **s3-upload**: Upload to AWS S3
-- **supabase-storage**: Upload to Supabase Storage
-- **postgresql**: Save to PostgreSQL database
-- **secure-api**: With rate limiting and authentication
+You can customize this list:
 
-## Build Output
+```tsx
+useLogRecorder({
+  sanitizeKeys: ["custom_secret_key", "session_id"],
+});
+```
 
-| Format             | Size   |
-| ------------------ | ------ |
-| CJS (index.js)     | ~19 KB |
-| ESM (index.mjs)    | ~18 KB |
-| TypeScript (.d.ts) | ~5 KB  |
+## 📄 License
 
-## License
-
-MIT
+MIT © [zaob](https://github.com/maemreyo)
