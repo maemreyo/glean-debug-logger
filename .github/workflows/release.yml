@@ -45,10 +45,9 @@ jobs:
           echo "Using Trusted Publishing for npm"
 
       - name: Semantic Release
-        id: semantic-release
-        uses: cycjimmy/semantic-release-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
 
       - name: Verify Release
         if: steps.semantic-release.outputs.version
