@@ -39,26 +39,9 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Debug OIDC
-        run: |
-          echo "=== OIDC Debug ==="
-          echo "ACTIONS_ID_TOKEN_REQUEST_URL: ${ACTIONS_ID_TOKEN_REQUEST_URL:-not set}"
-          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+set}"
-          echo "NPM_REGISTRY_URL: ${NPM_REGISTRY_URL:-not set}"
-          echo "NPM_TOKEN: ${NPM_TOKEN:+set}"
-          echo "=================="
-
-      - name: Debug npm auth
-        run: |
-          echo "NPM_TOKEN present: ${NPM_TOKEN:+yes}"
-          echo "Trying npm whoami..."
-          npm whoami 2>&1 || echo "npm whoami failed"
-          echo "NPM_REGISTRY_URL: ${NPM_REGISTRY_URL:-not set}"
-
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_REGISTRY_URL: 'https://registry.npmjs.org/'
         run: npx semantic-release
 
