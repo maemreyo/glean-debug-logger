@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/maemreyo/glean-debug-logger/compare/v1.4.1...v1.4.2) (2026-01-21)
+
+
+### Bug Fixes
+
+* **ci:** add @semantic-release/npm plugin to publish to npm registry ([872fd7b](https://github.com/maemreyo/glean-debug-logger/commit/872fd7bf675aa615b9bd674406529792ab27753e))
+
 ## [1.4.1](https://github.com/maemreyo/glean-debug-logger/compare/v1.4.0...v1.4.1) (2026-01-21)
 
 

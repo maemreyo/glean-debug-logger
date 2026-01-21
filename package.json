@@ -1,6 +1,6 @@
 {
   "name": "@zaob/glean-debug-logger",
-  "version": "1.0.0",
+  "version": "1.4.2",
   "description": "React/Next.js debug logging library that captures console logs, network requests, exports with smart filenames, and supports server upload",
   "publishConfig": {
     "access": "public"
