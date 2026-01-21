@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/maemreyo/glean-debug-logger/compare/v1.4.0...v1.4.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* **ci:** remove [skip ci] from release commits to trigger GitHub Action ([715ac97](https://github.com/maemreyo/glean-debug-logger/commit/715ac97f0c448bd41ab8e2712c577f71521234bb))
+
 # [1.4.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.3.0...v1.4.0) (2026-01-21)
 
 
