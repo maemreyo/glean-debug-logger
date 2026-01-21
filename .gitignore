@@ -98,3 +98,4 @@ temp/
 
 # Yarn Integrity file
 .yarn-integrity
+dist/
