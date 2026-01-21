@@ -76,7 +76,10 @@ export const testDownloadJson: PlayFunction = async ({ canvasElement }) => {
  * - Confirms dialog
  * - Verifies logs are cleared
  */
-export const testClearLogs: PlayFunction = async ({ canvasElement, args }) => {
+export const testClearLogs: PlayFunction = async ({
+  canvasElement: _canvasElement,
+  args: _args,
+}) => {
   // Open panel
   const toggleButton = canvasElement.querySelector(
     'button[class*="toggleButtonStyles"]'

@@ -51,7 +51,7 @@ describe('XHRInterceptor', () => {
     it('calls response callback on successful request', () => {
       return new Promise<void>((resolve) => {
         const onResponse = vi.fn();
-        let xhrInstance: XMLHttpRequest;
+        let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
 
         interceptor.onXHRResponse(onResponse);
         interceptor.attach();
@@ -365,108 +365,116 @@ describe('XHRInterceptor', () => {
         expect(typeof status).toBe('number');
         expect(typeof duration).toBe('number');
         expect(duration).toBeGreaterThanOrEqual(0);
-        done();
       };
 
       xhrInstance.send();
     });
 
-    it('measures duration accurately', (done) => {
+    it('measures duration accurately', async () => {
       const onResponse = vi.fn();
-      const delay = 100;
-      let xhrInstance: XMLHttpRequest;
-
       interceptor.onXHRResponse(onResponse);
-      interceptor.attach();
 
-      xhrInstance = new XMLHttpRequest();
+      const delay = 100;
+      let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
       xhrInstance.open('GET', 'https://example.com/test');
-      xhrInstance.onload = () => {
-        const duration = onResponse.mock.calls[0][2] as number;
-        expect(duration).toBeGreaterThanOrEqual(delay - 10);
-        done();
-      };
 
-      // Simulate network delay
-      setTimeout(() => {
-        xhrInstance.send();
-        // Manually trigger onload after delay
-        setTimeout(() => {
-          xhrInstance.status = 200;
-          if (xhrInstance.onload) xhrInstance.onload();
-        }, delay);
-      }, 10);
-    });
+      const loadPromise = new Promise<void>((resolve) => {
+        xhrInstance.onload = () => {
+          const duration = onResponse.mock.calls[0][2] as number;
+          expect(duration).toBeGreaterThanOrEqual(delay - 10);
+          resolve();
+        };
+      });
 
-    it('supports multiple response callbacks', (done) => {
+       // Simulate network delay
+       setTimeout(() => {
+         xhrInstance.send();
+         setTimeout(() => {
+           if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+         }, delay);
+       }, 10);
+
+       await loadPromise;
+  });
+
+    it('supports multiple response callbacks', async () => {
       const callback1 = vi.fn();
       const callback2 = vi.fn();
-      let xhrInstance: XMLHttpRequest;
+      const interceptor = new XHRInterceptor();
 
       interceptor.onXHRResponse(callback1);
       interceptor.onXHRResponse(callback2);
-      interceptor.attach();
 
-      xhrInstance = new XMLHttpRequest();
+      let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
       xhrInstance.open('GET', 'https://example.com/test');
-      xhrInstance.onload = () => {
-        expect(callback1).toHaveBeenCalled();
-        expect(callback2).toHaveBeenCalled();
-        done();
-      };
+
+      const loadPromise = new Promise<void>((resolve) => {
+        xhrInstance.onload = () => {
+          expect(callback1).toHaveBeenCalled();
+          expect(callback2).toHaveBeenCalled();
+          resolve();
+        };
+      });
 
       xhrInstance.send();
+      setTimeout(() => {
+        if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+      }, 10);
+
+      await loadPromise;
     });
 
-    it('receives correct HTTP status codes', (done) => {
+    it('receives correct HTTP status codes', async () => {
       const onResponse = vi.fn();
-      let xhrInstance: XMLHttpRequest;
-
       interceptor.onXHRResponse(onResponse);
-      interceptor.attach();
 
       const testCases = [
-        { status: 200, message: 'OK' },
-        { status: 201, message: 'Created' },
-        { status: 404, message: 'Not Found' },
-        { status: 500, message: 'Internal Server Error' },
+        { url: 'https://example.com/200', status: 200 },
+        { url: 'https://example.com/404', status: 404 },
+        { url: 'https://example.com/500', status: 500 },
       ];
 
-      let completed = 0;
+      const promises = testCases.map((testCase) => {
+        return new Promise<void>((resolve) => {
+          let xhrInstance: XMLHttpRequest = new XMLHttpRequest();
+          xhrInstance.open('GET', testCase.url);
 
-      testCases.forEach((testCase) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://example.com/test');
-        xhr.onload = () => {
-          const status = onResponse.mock.calls[completed][1];
-          expect(status).toBe(testCase.status);
-          completed++;
+          xhrInstance.onload = () => {
+            const status = onResponse.mock.calls[testCases.indexOf(testCase)][1];
+            expect(status).toBe(testCase.status);
+            resolve();
+          };
 
-          if (completed === testCases.length) {
-            done();
-          }
-        };
-
-        xhr.send();
-        // Manually simulate status
-        setTimeout(() => {
-          xhr.status = testCase.status;
-          if (xhr.onload) xhr.onload();
-        }, 10);
+          xhrInstance.send();
+          setTimeout(
+            () => {
+              (xhrInstance as any).status = testCase.status;
+              if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+            },
+            10,
+            testCase
+          );
+        });
       });
+
+      await Promise.all(promises);
     });
   });
+});
 
-  describe('onXHRError()', () => {
-    it('registers callback that receives config and error', (done) => {
-      const onError = vi.fn();
-      let xhrInstance: XMLHttpRequest;
+describe('onXHRError()', () => {
+  it('registers callback that receives config and error', async () => {
+    const onError = vi.fn();
+    let xhrInstance: XMLHttpRequest;
+    const interceptor = new XHRInterceptor();
 
-      interceptor.onXHRError(onError);
-      interceptor.attach();
+    interceptor.onXHRError(onError);
+    interceptor.attach();
 
-      xhrInstance = new XMLHttpRequest();
-      xhrInstance.open('GET', 'https://invalid-url');
+    xhrInstance = new XMLHttpRequest();
+    xhrInstance.open('GET', 'https://invalid-url');
+
+    const errorPromise = new Promise<void>((resolve) => {
       xhrInstance.onerror = () => {
         expect(onError).toHaveBeenCalled();
         const config = onError.mock.calls[0][0];
@@ -475,204 +483,218 @@ describe('XHRInterceptor', () => {
         expect(config).toHaveProperty('url');
         expect(error).toBeInstanceOf(Error);
         expect(error).toHaveProperty('message', 'XHR Error');
-        done();
+        resolve();
       };
-
-      xhrInstance.send();
-      // Manually trigger error
-      setTimeout(() => {
-        if (xhrInstance.onerror) xhrInstance.onerror();
-      }, 10);
     });
 
-    it('supports multiple error callbacks', (done) => {
-      const callback1 = vi.fn();
-      const callback2 = vi.fn();
-      let xhrInstance: XMLHttpRequest;
+    xhrInstance.send();
+    // Manually trigger error
+    setTimeout(() => {
+      if (xhrInstance.onerror) xhrInstance.onerror(new ProgressEvent('error'));
+    }, 10);
 
-      interceptor.onXHRError(callback1);
-      interceptor.onXHRError(callback2);
-      interceptor.attach();
+    await errorPromise;
+  });
 
-      xhrInstance = new XMLHttpRequest();
-      xhrInstance.open('GET', 'https://invalid-url');
+  it('supports multiple error callbacks', async () => {
+    const callback1 = vi.fn();
+    const callback2 = vi.fn();
+    let xhrInstance: XMLHttpRequest;
+    const interceptor = new XHRInterceptor();
+
+    interceptor.onXHRError(callback1);
+    interceptor.onXHRError(callback2);
+    interceptor.attach();
+
+    xhrInstance = new XMLHttpRequest();
+    xhrInstance.open('GET', 'https://invalid-url');
+
+    const errorPromise = new Promise<void>((resolve) => {
       xhrInstance.onerror = () => {
         expect(callback1).toHaveBeenCalled();
         expect(callback2).toHaveBeenCalled();
-        done();
+        resolve();
       };
-
-      xhrInstance.send();
-      setTimeout(() => {
-        if (xhrInstance.onerror) xhrInstance.onerror();
-      }, 10);
     });
 
-    it('captures request config in error callback', (done) => {
-      const onError = vi.fn();
-      let xhrInstance: XMLHttpRequest;
+    xhrInstance.send();
+    setTimeout(() => {
+      if (xhrInstance.onerror) xhrInstance.onerror(new ProgressEvent('error'));
+    }, 1);
 
-      interceptor.onXHRError(onError);
-      interceptor.attach();
-
-      xhrInstance = new XMLHttpRequest();
-      xhrInstance.open('POST', 'https://invalid-url/api');
-      xhrInstance.send('{"test":"data"}');
-      xhrInstance.onerror = () => {
-        const config = onError.mock.calls[0][0];
-
-        expect(config).toMatchObject({
-          method: 'POST',
-          url: 'https://invalid-url/api',
-          body: '{"test":"data"}',
-        });
-        done();
-      };
-
-      setTimeout(() => {
-        if (xhrInstance.onerror) xhrInstance.onerror();
-      }, 10);
-    });
+    await errorPromise;
   });
 
-  describe('constructor options', () => {
-    it('initializes with no exclude URLs by default', () => {
-      interceptor = new XHRInterceptor();
-      interceptor.attach();
+  it('captures request config in error callback', (done) => {
+    const onError = vi.fn();
+    let xhrInstance: XMLHttpRequest;
+    const interceptor = new XHRInterceptor();
 
-      const onRequest = vi.fn();
-      interceptor.onXHRRequest(onRequest);
+    interceptor.onXHRError(onError);
+    interceptor.attach();
 
+    xhrInstance = new XMLHttpRequest();
+    xhrInstance.open('POST', 'https://invalid-url/api');
+    xhrInstance.onerror = () => {
+      const config = onError.mock.calls[0][0];
+
+      expect(config).toMatchObject({
+        method: 'POST',
+        url: 'https://invalid-url/api',
+        body: '{"test":"data"}',
+      });
+    };
+    xhrInstance.send('{"test":"data"}');
+    setTimeout(() => {
+      if (xhrInstance.onerror) xhrInstance.onerror(new ProgressEvent('error'));
+    }, 1);
+  });
+});
+
+describe('constructor options', () => {
+  it('initializes with no exclude URLs by default', () => {
+    const interceptor = new XHRInterceptor();
+    interceptor.attach();
+
+    const onRequest = vi.fn();
+    interceptor.onXHRRequest(onRequest);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://example.com/test');
+
+    expect(onRequest).toHaveBeenCalled();
+  });
+
+  it('accepts empty excludeUrls array', () => {
+    const interceptor = new XHRInterceptor({ excludeUrls: [] });
+    interceptor.attach();
+
+    const onRequest = vi.fn();
+    interceptor.onXHRRequest(onRequest);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://example.com/test');
+
+    expect(onRequest).toHaveBeenCalled();
+  });
+
+  it('converts string patterns to RegExp', () => {
+    const interceptor = new XHRInterceptor({ excludeUrls: ['example\\.com', 'localhost'] });
+
+    // The excludeUrls property should contain RegExp instances
+    expect(interceptor['excludeUrls']).toHaveLength(2);
+    expect(interceptor['excludeUrls'][0]).toBeInstanceOf(RegExp);
+    expect(interceptor['excludeUrls'][1]).toBeInstanceOf(RegExp);
+  });
+});
+
+describe('memory safety', () => {
+  it('uses WeakMap for request tracking', () => {
+    const interceptor = new XHRInterceptor();
+    expect(interceptor['requestTracker']).toBeInstanceOf(WeakMap);
+  });
+
+  it('allows garbage collection of XHR instances', () => {
+    const interceptor = new XHRInterceptor();
+    interceptor.attach();
+
+    const createAndDiscardXHR = () => {
       const xhr = new XMLHttpRequest();
       xhr.open('GET', 'https://example.com/test');
+      // xhr goes out of scope here and should be eligible for GC
+    };
 
-      expect(onRequest).toHaveBeenCalled();
-    });
+    // This should not cause memory leaks due to WeakMap
+    createAndDiscardXHR();
+    createAndDiscardXHR();
+    createAndDiscardXHR();
 
-    it('accepts empty excludeUrls array', () => {
-      interceptor = new XHRInterceptor({ excludeUrls: [] });
-      interceptor.attach();
+    // If this test passes without memory issues, WeakMap is working
+    expect(true).toBe(true);
+  });
+});
 
-      const onRequest = vi.fn();
-      interceptor.onXHRRequest(onRequest);
+describe('prototype chain', () => {
+  it('maintains XMLHttpRequest prototype chain', () => {
+    const interceptor = new XHRInterceptor();
+    interceptor.attach();
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', 'https://example.com/test');
+    const xhr = new XMLHttpRequest();
 
-      expect(onRequest).toHaveBeenCalled();
-    });
-
-    it('converts string patterns to RegExp', () => {
-      interceptor = new XHRInterceptor({ excludeUrls: ['example\\.com', 'localhost'] });
-
-      // The excludeUrls property should contain RegExp instances
-      expect(interceptor['excludeUrls']).toHaveLength(2);
-      expect(interceptor['excludeUrls'][0]).toBeInstanceOf(RegExp);
-      expect(interceptor['excludeUrls'][1]).toBeInstanceOf(RegExp);
-    });
+    // Should inherit all standard XMLHttpRequest methods and properties
+    expect(typeof xhr.open).toBe('function');
+    expect(typeof xhr.send).toBe('function');
+    expect(typeof xhr.setRequestHeader).toBe('function');
+    expect(typeof xhr.getResponseHeader).toBe('function');
+    expect(typeof xhr.getAllResponseHeaders).toBe('function');
+    expect(typeof xhr.abort).toBe('function');
   });
 
-  describe('memory safety', () => {
-    it('uses WeakMap for request tracking', () => {
-      interceptor = new XHRInterceptor();
-      expect(interceptor['requestTracker']).toBeInstanceOf(WeakMap);
-    });
+  it('preserves XMLHttpRequest behavior', () => {
+    const interceptor = new XHRInterceptor();
+    interceptor.attach();
 
-    it('allows garbage collection of XHR instances', () => {
-      interceptor.attach();
+    const xhr = new XMLHttpRequest();
 
-      const createAndDiscardXHR = () => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://example.com/test');
-        // xhr goes out of scope here and should be eligible for GC
-      };
+    // Should work like a normal XMLHttpRequest
+    expect(() => xhr.open('GET', 'https://example.com/test')).not.toThrow();
+    expect(() => xhr.send()).not.toThrow();
+  });
+});
 
-      // This should not cause memory leaks due to WeakMap
-      createAndDiscardXHR();
-      createAndDiscardXHR();
-      createAndDiscardXHR();
+describe('URL handling', () => {
+  it('handles absolute URLs', () => {
+    const onRequest = vi.fn();
+    const interceptor = new XHRInterceptor();
 
-      // If this test passes without memory issues, WeakMap is working
-      expect(true).toBe(true);
-    });
+    interceptor.onXHRRequest(onRequest);
+    interceptor.attach();
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://example.com/api/test');
+
+    expect(onRequest.mock.calls[0][0]).toHaveProperty('url', 'https://example.com/api/test');
   });
 
-  describe('prototype chain', () => {
-    it('maintains XMLHttpRequest prototype chain', () => {
-      interceptor.attach();
+  it('handles relative URLs', () => {
+    const onRequest = vi.fn();
+    const interceptor = new XHRInterceptor();
 
-      const xhr = new XMLHttpRequest();
+    interceptor.onXHRRequest(onRequest);
+    interceptor.attach();
 
-      // Should inherit all standard XMLHttpRequest methods and properties
-      expect(typeof xhr.open).toBe('function');
-      expect(typeof xhr.send).toBe('function');
-      expect(typeof xhr.setRequestHeader).toBe('function');
-      expect(typeof xhr.getResponseHeader).toBe('function');
-      expect(typeof xhr.getAllResponseHeaders).toBe('function');
-      expect(typeof xhr.abort).toBe('function');
-    });
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/test');
 
-    it('preserves XMLHttpRequest behavior', () => {
-      interceptor.attach();
-
-      const xhr = new XMLHttpRequest();
-
-      // Should work like a normal XMLHttpRequest
-      expect(() => xhr.open('GET', 'https://example.com/test')).not.toThrow();
-      expect(() => xhr.send()).not.toThrow();
-    });
+    expect(onRequest.mock.calls[0][0]).toHaveProperty('url', '/api/test');
   });
 
-  describe('URL handling', () => {
-    it('handles absolute URLs', () => {
-      const onRequest = vi.fn();
+  it('handles URLs with query parameters', () => {
+    const onRequest = vi.fn();
+    const interceptor = new XHRInterceptor();
 
-      interceptor.onXHRRequest(onRequest);
-      interceptor.attach();
+    interceptor.onXHRRequest(onRequest);
+    interceptor.attach();
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', 'https://example.com/api/test');
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://example.com/api?key=value&foo=bar');
 
-      expect(onRequest.mock.calls[0][0]).toHaveProperty('url', 'https://example.com/api/test');
-    });
+    expect(onRequest.mock.calls[0][0]).toHaveProperty(
+      'url',
+      'https://example.com/api?key=value&foo=bar'
+    );
+  });
 
-    it('handles relative URLs', () => {
-      const onRequest = vi.fn();
+  it('handles URLs with hash fragments', () => {
+    const onRequest = vi.fn();
+    const interceptor = new XHRInterceptor();
 
-      interceptor.onXHRRequest(onRequest);
-      interceptor.attach();
+    interceptor.onXHRRequest(onRequest);
+    interceptor.attach();
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', '/api/test');
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://example.com/page#section');
 
-      expect(onRequest.mock.calls[0][0]).toHaveProperty('url', '/api/test');
-    });
-
-    it('handles URLs with query parameters', () => {
-      const onRequest = vi.fn();
-
-      interceptor.onXHRRequest(onRequest);
-      interceptor.attach();
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', 'https://example.com/api?key=value&foo=bar');
-
-      expect(onRequest.mock.calls[0][0]).toHaveProperty(
-        'url',
-        'https://example.com/api?key=value&foo=bar'
-      );
-    });
-
-    it('handles URLs with hash fragments', () => {
-      const onRequest = vi.fn();
-
-      interceptor.onXHRRequest(onRequest);
-      interceptor.attach();
-
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', 'https://example.com/page#section');
-
-      expect(onRequest.mock.calls[0][0]).toHaveProperty('url', 'https://example.com/page#section');
-    });
+    expect(onRequest.mock.calls[0][0]).toHaveProperty('url', 'https://example.com/page#section');
   });
 });

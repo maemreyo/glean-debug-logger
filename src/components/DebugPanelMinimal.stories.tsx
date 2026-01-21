@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ComponentMeta } from '@storybook/react';
 import { DebugPanelMinimal } from './DebugPanelMinimal';
 
 const meta = {
   title: 'Components/DebugPanelMinimal',
-  component: DebugPanelMinimal as ComponentMeta<typeof DebugPanelMinimal>,
+  component: DebugPanelMinimal,
   parameters: {
     layout: 'fullscreen',
   },

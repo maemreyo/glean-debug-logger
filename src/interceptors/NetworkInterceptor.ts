@@ -27,15 +27,7 @@ export class NetworkInterceptor {
 
       try {
         const response = await this.originalFetch(...args);
-        const cloned = response.clone();
         const duration = Date.now() - startTime;
-
-        let body: unknown;
-        try {
-          body = await cloned.text();
-        } catch {
-          body = '[Unable to read response body]';
-        }
 
         this.onResponse.forEach((cb) => cb(urlStr, response.status, duration));
         return response;

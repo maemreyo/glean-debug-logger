@@ -11,14 +11,14 @@ export class FileService {
   static async saveToDirectory(
     content: string,
     filename: string,
-    mimeType: string = 'application/json'
+    _mimeType: string = 'application/json'
   ): Promise<void> {
     if (!this.isSupported()) {
       throw new Error('File System Access API not supported');
     }
 
     try {
-      const dirHandle = await window.showDirectoryPicker();
+      const dirHandle = await (window as any).showDirectoryPicker();
       const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
       const writable = await fileHandle.createWritable();
       await writable.write(content);

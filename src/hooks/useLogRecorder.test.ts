@@ -11,7 +11,6 @@ import {
   createMockFetchResponse,
   createMockDirectoryHandle,
 } from './__mocks__/browser';
-import { useLogRecorder } from './useLogRecorder';
 
 // Setup browser mocks before all tests
 beforeAll(() => {
