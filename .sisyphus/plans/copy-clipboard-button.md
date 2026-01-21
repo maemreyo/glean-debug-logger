@@ -19,19 +19,20 @@ User wants to add a copy-to-clipboard button to DebugPanel so users can copy log
 
 - `useLogRecorder.downloadLogs()` returns only filename, not content
 - Use `getLogs()` + `getMetadata()` to get raw data for clipboard
-- Content format: `JSON.stringify({ metadata: getMetadata(), logs: getLogs() }, null, 2)`
-- Test infrastructure: Vitest + @testing-library/react exists
-- Existing tests: `src/components/__tests__/DebugPanel.test.tsx` is a good reference
+- Content format: `JSON.stringify({ metadata, logs }, null, 2)`
+- Clipboard pattern exists in DebugPanel.tsx:139 (upload URL copy)
+- Test infrastructure: Vitest + Storybook play functions
+- Existing tests: `src/components/DebugPanel.test.tsx` (Storybook interaction tests)
 
 ### Metis Review
 
 **Identified Gaps (addressed)**:
 
-- Test location: Use `DebugPanel.test.tsx` with play functions (existing pattern)
+- Test pattern: Use existing `DebugPanel.test.tsx` with Storybook play functions
 - Button layout: Change `buttonRowStyles` to 4-column grid (`grid-template-columns: repeat(4, 1fr)`)
 - Empty logs handling: Disable button when `logCount === 0` (consistent with Folder button)
 - Format: Copy as JSON only (consistent with default download behavior)
-- Error handling: Try/catch with error message reusing existing `uploadStatus` state
+- Error handling: Try/catch with error message
 - Success message: 3-second timeout (same pattern as directoryStatus)
 - Dark mode: Use existing `downloadButtonStyles` dark mode palette
 
@@ -86,8 +87,8 @@ Add a "📋 Copy" button to the DebugPanel that copies logs directly to clipboar
 
 - **Infrastructure exists**: YES
 - **User wants tests**: YES (existing tests pattern)
-- **Framework**: Vitest + @testing-library/react
-- **Test file**: `src/components/__tests__/DebugPanel.test.tsx`
+- **Framework**: Vitest + Storybook play functions
+- **Test file**: `src/components/DebugPanel.test.tsx` (Storybook interaction tests, not **tests** subdirectory)
 
 ### Manual Verification Commands
 
@@ -260,85 +261,75 @@ buttonRowStyles (4-col) → handleCopy function → copyButton component → Tes
   - Message: `feat(components): add copy status message display`
   - Files: `src/components/DebugPanel.tsx`
 
-- [ ] 4. Add unit tests for copy functionality in DebugPanel.test.tsx
+- [ ] 4. Add copy test as Storybook play function in DebugPanel.test.tsx
 
   **What to do**:
-  - Add tests using existing test patterns (play functions):
+  - Add new play function `testCopyLogs` to `src/components/DebugPanel.test.tsx`:
 
     ```typescript
-    test('copy button copies logs to clipboard', async () => {
-      const user = userEvent.setup();
-      const mockClipboard = vi.fn().mockResolvedValue(undefined);
-      vi.stubGlobal('navigator', { clipboard: { writeText: mockClipboard } });
+    /**
+     * Play function to test copy to clipboard interaction
+     * - Opens panel
+     * - Clicks copy button
+     * - Verifies clipboard write is called
+     * - Verifies success message appears
+     */
+    export const testCopyLogs: PlayFunction = async ({ canvasElement }) => {
+      // Mock navigator.clipboard.writeText
+      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      vi.stubGlobal('navigator', { clipboard: { writeText: writeTextMock } });
 
-      render(<DebugPanel />);
-      await user.click(screen.getByRole('button', { name: /Debug/i }));
+      // Open panel
+      const toggleButton = canvasElement.querySelector(
+        'button[class*="toggleButtonStyles"]'
+      ) as HTMLButtonElement;
+      expect(toggleButton).toBeInTheDocument();
+      await userEvent.click(toggleButton);
 
-      // Copy button should be visible
-      const copyButton = screen.getByRole('button', { name: /Copy logs to clipboard/i });
+      // Wait for panel
+      const panel = await screen.findByRole('dialog');
+      await expect(panel).toBeInTheDocument();
+
+      // Find and click copy button
+      const copyButton = await screen.findByRole('button', { name: /Copy logs to clipboard/i });
       expect(copyButton).toBeInTheDocument();
+      await userEvent.click(copyButton);
 
-      // Click copy
-      await user.click(copyButton);
-
-      // Verify clipboard was called with JSON
-      expect(mockClipboard).toHaveBeenCalledWith(
-        expect.stringContaining('"metadata"')
-      );
-      expect(mockClipboard).toHaveBeenCalledWith(
-        expect.stringContaining('"logs"')
-      );
+      // Verify clipboard was called
+      expect(writeTextMock).toHaveBeenCalled();
+      expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('"metadata"'));
+      expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('"logs"'));
 
       // Verify success message appears
-      expect(screen.getByText('Copied to clipboard!')).toBeInTheDocument();
-    });
-
-    test('copy button is disabled when no logs', async () => {
-      const user = userEvent.setup();
-      vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn() } });
-
-      render(<DebugPanel />);
-      await user.click(screen.getByRole('button', { name: /Debug/i }));
-
-      const copyButton = screen.getByRole('button', { name: /Copy logs to clipboard/i });
-      expect(copyButton).toBeDisabled();
-    });
-
-    test('copy button shows error on clipboard failure', async () => {
-      const user = userEvent.setup();
-      vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn().mockRejectedValue(new Error('Clipboard error')) } });
-
-      render(<DebugPanel />);
-      await user.click(screen.getByRole('button', { name: /Debug/i }));
-
-      const copyButton = screen.getByRole('button', { name: /Copy logs to clipboard/i });
-      await user.click(copyButton);
-
-      expect(screen.getByText('Failed to copy')).toBeInTheDocument();
-    });
+      await waitFor(() => {
+        const successMessage = screen.getByText(/Copied to clipboard/i);
+        expect(successMessage).toBeInTheDocument();
+      });
+    };
     ```
+
+  - Add to the re-export at line 134: `export { userEvent, waitFor, screen, expect, vi };
 
   **Must NOT do**:
   - Don't create new test file (add to existing DebugPanel.test.tsx)
-  - Don't use testing-library/user-event v14 syntax (existing codebase uses v13)
+  - Don't modify any other play functions
 
   **Parallelizable**: NO (depends on 2, 3)
 
   **References**:
-  - `src/components/__tests__/DebugPanel.test.tsx` - Existing test patterns, imports, and setup
-  - `src/components/__tests__/useDebugPanelControls.test.tsx` - Example of testing button interactions
+  - `src/components/DebugPanel.test.tsx:1-50` - Existing play function imports and setup
+  - `src/components/DebugPanel.test.tsx:62-86` - `testDownloadJson` play function pattern
+  - `src/components/DebugPanel.test.tsx:88-110` - `testClearLogs` play function pattern
 
   **Acceptance Criteria**:
-  - [ ] `npm run test` passes (all existing + new tests)
-  - [ ] Tests cover: successful copy, empty logs disabled state, clipboard failure error
-  - [ ] Tests use existing pattern (play functions, userEvent.setup)
-  - [ ] Tests mock navigator.clipboard properly
+  - [ ] `npm run test-storybook` passes (Storybook interaction tests)
+  - [ ] Copy button interaction is tested via Storybook play function
+  - [ ] Clipboard mocking works correctly in Storybook context
+  - [ ] Test follows existing play function pattern
 
   **Commit**: YES | NO
-  - Message: `test(components): add tests for copy-to-clipboard functionality`
-  - Files: `src/components/__tests__/DebugPanel.test.tsx`
-
-- [ ] 5. Run full verification
+  - Message: `test(components): add Storybook play function for copy-to-clipboard`
+  - Files: `src/components/DebugPanel.test.tsx`
 
   **What to do**:
   - Run `npm run test` - all tests pass
@@ -367,12 +358,12 @@ buttonRowStyles (4-col) → handleCopy function → copyButton component → Tes
 
 ## Commit Strategy
 
-| After Task | Message                                                                | Files                                          | Verification        |
-| ---------- | ---------------------------------------------------------------------- | ---------------------------------------------- | ------------------- |
-| 1          | `refactor(components): update button row to 4 columns for copy button` | `src/components/DebugPanel.styles.ts`          | npm run lint        |
-| 2          | `feat(components): add copy-to-clipboard button to DebugPanel`         | `src/components/DebugPanel.tsx`                | npm run lint, build |
-| 3          | `feat(components): add copy status message display`                    | `src/components/DebugPanel.tsx`                | npm run lint        |
-| 4          | `test(components): add tests for copy-to-clipboard functionality`      | `src/components/__tests__/DebugPanel.test.tsx` | npm run test        |
+| After Task | Message                                                                | Files                                 | Verification           |
+| ---------- | ---------------------------------------------------------------------- | ------------------------------------- | ---------------------- |
+| 1          | `refactor(components): update button row to 4 columns for copy button` | `src/components/DebugPanel.styles.ts` | npm run lint           |
+| 2          | `feat(components): add copy-to-clipboard button to DebugPanel`         | `src/components/DebugPanel.tsx`       | npm run lint, build    |
+| 3          | `feat(components): add copy status message display`                    | `src/components/DebugPanel.tsx`       | npm run lint           |
+| 4          | `test(components): add Storybook play function for copy-to-clipboard`  | `src/components/DebugPanel.test.tsx`  | npm run test-storybook |
 
 ---
 
