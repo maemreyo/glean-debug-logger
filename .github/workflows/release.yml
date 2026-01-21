@@ -40,9 +40,9 @@ jobs:
 
       - name: Debug NPM Token
         run: |
-          echo "NPM_TOKEN length: ${{ length(secrets.NPM_TOKEN) }}"
-          echo "NPM_TOKEN first 10 chars: ${{ secrets.NPM_TOKEN && secrets.NPM_TOKEN.substring(0, 10) || 'empty' }}"
-          npm whoami
+          echo "NPM_TOKEN exists: ${{ secrets.NPM_TOKEN != '' }}"
+          npm whoami || echo "npm whoami failed"
+          echo "NPM_TOKEN value: ${{ secrets.NPM_TOKEN }}"
 
       - name: Semantic Release
         id: semantic-release
