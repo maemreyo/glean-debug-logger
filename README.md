@@ -10,6 +10,28 @@
 
 A production-ready React/Next.js debug logging library that intercepts console logs, network requests (Fetch/XHR), and exports them with smart filenames. Designed for both manual debugging and automated analysis by AI agents.
 
+---
+
+## Quick Setup: One-Line Command
+
+To install and setup @zaob/glean-debug-logger in your project with a single command:
+
+```bash
+curl -sL https://raw.githubusercontent.com/zaob-dev/glean-debug-logger/main/AI_INSTALLATION_PROMPT.md | bash
+```
+
+This command will:
+1. Fetch the latest installation prompt from the repository
+2. Execute the installation steps for your package manager
+3. Provide integration code
+
+**Note:** This command requires the user to:
+- Have curl installed
+- Be in a React/Next.js project directory
+- Have internet access to fetch the raw file
+
+---
+
 ## 🚀 Features
 
 - **Console Log Interception**: Automatically captures `console.log`, `console.error`, `console.warn`, `console.info`, and `console.debug`.

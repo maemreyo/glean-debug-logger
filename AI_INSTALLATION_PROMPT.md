@@ -105,7 +105,7 @@ npm install react react-dom
 
 ### Issue: TypeScript errors
 ```
-Solution: Ensure TypeScript >= 4.0 is installed
+Solution: Ensure TypeScript >= 5.3.0 is installed
 npm install -D typescript@latest
 ```
 
@@ -183,7 +183,7 @@ After completing the integration, provide:
 1. ALWAYS read the documentation files FIRST before suggesting anything
 2. CHECK the user's environment - don't assume
 3. VERIFY installation succeeded before moving to configuration
-4. The library has ZERO runtime dependencies (except React peer dependency)
+4. The library has ONE runtime dependency: `goober` (^2.1.18) for CSS-in-JS styling
 5. Bundle size should be under 20KB (verify if concerned)
 6. Named exports ONLY - use named imports, not default exports
 7. Security: The library auto-redacts sensitive keys (password, token, apiKey, etc.)
@@ -197,3 +197,4 @@ If you cannot find the information you need, ask the user:
 - "Are you seeing any specific errors?"
 
 Then proceed with the appropriate installation and configuration steps.
+
