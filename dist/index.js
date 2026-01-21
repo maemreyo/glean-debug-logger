@@ -1,14 +1,15 @@
 'use strict';var react=require('react'),goober=require('goober'),jsxRuntime=require('react/jsx-runtime');// @ts-nocheck
-var Fe=["password","token","apiKey","secret","authorization","creditCard","cardNumber","cvv","ssn"];function K(a,e={}){let o=e.keys||Fe;if(!a||typeof a!="object")return a;let t=Array.isArray(a)?[...a]:{...a},c=i=>{if(!i||typeof i!="object")return i;for(let r in i)if(Object.prototype.hasOwnProperty.call(i,r)){let f=r.toLowerCase();o.some(v=>f.includes(v.toLowerCase()))?i[r]="***REDACTED***":i[r]!==null&&typeof i[r]=="object"&&(i[r]=c(i[r]));}return i};return c(t)}function O(a){return a.replace(/[^a-z0-9_\-]/gi,"_").replace(/_+/g,"_").replace(/^_|_$/g,"")}function re(){if(typeof navigator>"u")return "unknown";let a=navigator.userAgent;return a.includes("Edg")?"edge":a.includes("Chrome")?"chrome":a.includes("Firefox")?"firefox":a.includes("Safari")?"safari":"unknown"}function Se(a,e,o,t){if(typeof window>"u")return {sessionId:a,environment:e,userId:o,timestamp:new Date().toISOString(),userAgent:"",browser:"unknown",platform:"",language:"",screenResolution:"0x0",viewport:"0x0",url:"",referrer:"",timezone:"",logCount:t,errorCount:0,networkErrorCount:0};let c=typeof window.screen<"u"?`${window.screen.width}x${window.screen.height}`:"0x0",i=typeof window.innerWidth<"u"&&typeof window.innerHeight<"u"?`${window.innerWidth}x${window.innerHeight}`:"0x0";return {sessionId:a,environment:e,userId:o,timestamp:new Date().toISOString(),userAgent:navigator.userAgent,browser:re(),platform:navigator.platform,language:navigator.language,screenResolution:c,viewport:i,url:window.location.href,referrer:document.referrer,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,logCount:t,errorCount:0,networkErrorCount:0}}function ke(){return `session_${Date.now()}_${Math.random().toString(36).substring(2,11)}`}function U(a="json",e={},o={}){let{fileNameTemplate:t="{env}_{userId}_{sessionId}_{timestamp}",environment:c="development",userId:i="anonymous",sessionId:r="unknown"}=o,f=new Date().toISOString().replace(/[:.]/g,"-").split(".")[0],h=new Date().toISOString().split("T")[0],v=new Date().toLocaleTimeString("en-US",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"}).replace(/:/g,"-"),x=o.browser||re(),S=o.platform||(typeof navigator<"u"?navigator.platform:"unknown"),R=(o.url||(typeof window<"u"?window.location.pathname.replace(/\//g,"_"):"unknown")).split("?")[0]||"unknown",w=String(o.errorCount??e.errorCount??0),C=String(o.logCount??e.logCount??0),I=t.replace("{env}",O(c)).replace("{userId}",O(i??"anonymous")).replace("{sessionId}",O(r??"unknown")).replace("{timestamp}",f).replace("{date}",h).replace("{time}",v).replace(/\{errorCount\}/g,w).replace(/\{logCount\}/g,C).replace("{browser}",O(x)).replace("{platform}",O(S)).replace("{url}",O(R));for(let[T,F]of Object.entries(e))I=I.replace(`{${T}}`,String(F));return `${I}.${a}`}function We(a,e="json"){let o=a.url.split("?")[0]||"unknown";return U(e,{},{environment:a.environment,userId:a.userId,sessionId:a.sessionId,browser:a.browser,platform:a.platform,url:o,errorCount:a.errorCount,logCount:a.logCount})}var B=class{constructor(){this.originalConsole={log:console.log.bind(console),error:console.error.bind(console),warn:console.warn.bind(console),info:console.info.bind(console),debug:console.debug.bind(console)},this.callbacks=[];}attach(){Object.keys(this.originalConsole).forEach(e=>{let o=this.originalConsole[e];console[e]=(...t)=>{this.callbacks.forEach(c=>{c(e,t);}),o(...t);};});}detach(){Object.keys(this.originalConsole).forEach(e=>{console[e]=this.originalConsole[e];});}onLog(e){this.callbacks.push(e);}};var Y=class{constructor(e={}){this.originalFetch=window.fetch.bind(window),this.onRequest=[],this.onResponse=[],this.onError=[],this.excludeUrls=(e.excludeUrls||[]).map(o=>new RegExp(o));}attach(){window.fetch=async(...e)=>{let[o,t]=e,c=o.toString();if(this.excludeUrls.some(r=>r.test(c)))return this.originalFetch(...e);let i=Date.now();this.onRequest.forEach(r=>r(c,t||{}));try{let r=await this.originalFetch(...e),f=Date.now()-i;return this.onResponse.forEach(h=>h(c,r.status,f)),r}catch(r){throw this.onError.forEach(f=>f(c,r)),r}};}detach(){window.fetch=this.originalFetch;}onFetchRequest(e){this.onRequest.push(e);}onFetchResponse(e){this.onResponse.push(e);}onFetchError(e){this.onError.push(e);}};var W=class{constructor(e={}){this.isAttached=false;this.originalXHR=window.XMLHttpRequest,this.onRequest=[],this.onResponse=[],this.onError=[],this.requestTracker=new WeakMap,this.excludeUrls=(e.excludeUrls||[]).map(o=>new RegExp(o)),this.originalOpen=this.originalXHR.prototype.open,this.originalSend=this.originalXHR.prototype.send;}attach(){if(this.isAttached)return;this.isAttached=true;let e=this;this.originalXHR.prototype.open=function(o,t,c,i,r){let f=typeof t=="string"?t:t.href;if(e.requestTracker.set(this,{method:o,url:f,headers:{},body:null,startTime:Date.now()}),e.excludeUrls.some(v=>v.test(f)))return e.originalOpen.call(this,o,t,c??true,i,r);let h=e.requestTracker.get(this);for(let v of e.onRequest)v(h);return e.originalOpen.call(this,o,t,c??true,i,r)},this.originalXHR.prototype.send=function(o){let t=e.requestTracker.get(this);if(t){t.body=o;let c=this.onload,i=this.onerror;this.onload=function(r){let f=Date.now()-t.startTime;for(let h of e.onResponse)h(t,this.status,f);c&&c.call(this,r);},this.onerror=function(r){for(let f of e.onError)f(t,new Error("XHR Error"));i&&i.call(this,r);};}return e.originalSend.call(this,o)};}detach(){this.isAttached&&(this.isAttached=false,this.originalXHR.prototype.open=this.originalOpen,this.originalXHR.prototype.send=this.originalSend);}onXHRRequest(e){this.onRequest.push(e);}onXHRResponse(e){this.onResponse.push(e);}onXHRError(e){this.onError.push(e);}};var $=class{static isSupported(){return this.supported===null&&(this.supported=typeof window<"u"&&"showDirectoryPicker"in window),this.supported}static async saveToDirectory(e,o,t="application/json"){if(!this.isSupported())throw new Error("File System Access API not supported");try{let r=await(await(await window.showDirectoryPicker()).getFileHandle(o,{create:!0})).createWritable();await r.write(e),await r.close();}catch(c){if(c.name==="AbortError")return;throw c}}static download(e,o,t="application/json"){let c=new Blob([e],{type:t}),i=URL.createObjectURL(c),r=document.createElement("a");r.href=i,r.download=o,document.body.appendChild(r),r.click(),document.body.removeChild(r),URL.revokeObjectURL(i);}static async downloadWithFallback(e,o,t="application/json"){if(this.isSupported())try{await this.saveToDirectory(e,o,t);return}catch(c){if(c.name==="AbortError")return}this.download(e,o,t);}};$.supported=null;var $e={maxLogs:1e3,enablePersistence:true,persistenceKey:"debug_logs",captureConsole:true,captureFetch:true,captureXHR:true,enableDirectoryPicker:false,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:[],fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:"development",userId:null,sessionId:null,includeMetadata:true,uploadEndpoint:null,uploadOnError:false,uploadOnErrorCount:5};function P(a={}){let e={...$e,...a},o=react.useRef({maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount});react.useEffect(()=>{o.current={maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount};},[e]);let t=react.useRef([]),c=react.useRef(e.sessionId||ke()),i=react.useRef(Se(c.current,e.environment,e.userId,0)),[r,f]=react.useState(0),h=react.useRef(0),v=react.useRef(false),x=react.useCallback(m=>{let n=new Set;return JSON.stringify(m,(l,s)=>{if(typeof s=="object"&&s!==null){if(n.has(s))return "[Circular]";n.add(s);}return s})},[]),S=react.useMemo(()=>new B,[]),k=react.useMemo(()=>new Y({excludeUrls:e.excludeUrls}),[e.excludeUrls]),R=react.useMemo(()=>new W({excludeUrls:e.excludeUrls}),[e.excludeUrls]),w=react.useCallback(m=>{let n=o.current;t.current.push(m),t.current.length>n.maxLogs&&t.current.shift(),f(t.current.length),m.type==="CONSOLE"?m.level==="ERROR"?h.current++:h.current=0:m.type==="FETCH_ERR"||m.type==="XHR_ERR"?h.current++:h.current=0;let l=n.uploadOnErrorCount??5;if(h.current>=l&&n.uploadEndpoint){let s={metadata:{...i.current,logCount:t.current.length},logs:t.current,fileName:U("json",{},e)};fetch(n.uploadEndpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:x(s)}).catch(()=>{}),h.current=0;}if(n.enablePersistence&&typeof window<"u")try{localStorage.setItem(n.persistenceKey,x(t.current));}catch{console.warn("[useLogRecorder] Failed to persist logs");}},[x]),C=react.useCallback(()=>{let m=t.current.filter(l=>l.type==="CONSOLE").reduce((l,s)=>s.level==="ERROR"?l+1:l,0),n=t.current.filter(l=>l.type==="FETCH_ERR"||l.type==="XHR_ERR").length;i.current={...i.current,logCount:t.current.length,errorCount:m,networkErrorCount:n};},[]);react.useEffect(()=>{if(typeof window>"u"||v.current)return;if(v.current=true,e.enablePersistence)try{let n=localStorage.getItem(e.persistenceKey);n&&(t.current=JSON.parse(n),f(t.current.length));}catch{console.warn("[useLogRecorder] Failed to load persisted logs");}let m=[];if(e.captureConsole&&(S.attach(),S.onLog((n,l)=>{let s=l.map(b=>{if(typeof b=="object")try{return x(b)}catch{return String(b)}return String(b)}).join(" ");w({type:"CONSOLE",level:n.toUpperCase(),time:new Date().toISOString(),data:s.substring(0,5e3)});}),m.push(()=>S.detach())),e.captureFetch){let n=new Map;k.onFetchRequest((l,s)=>{let b=Math.random().toString(36).substring(7),p=null;if(s?.body)try{p=typeof s.body=="string"?JSON.parse(s.body):s.body,p=K(p,{keys:e.sanitizeKeys});}catch{p=String(s.body).substring(0,1e3);}n.set(b,{url:l,method:s?.method||"GET",headers:K(s?.headers,{keys:e.sanitizeKeys}),body:p}),w({type:"FETCH_REQ",id:b,url:l,method:s?.method||"GET",headers:K(s?.headers,{keys:e.sanitizeKeys}),body:p,time:new Date().toISOString()});}),k.onFetchResponse((l,s,b)=>{for(let[p,N]of n.entries())if(N.url===l){n.delete(p),w({type:"FETCH_RES",id:p,url:l,status:s,statusText:"",duration:`${b}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});break}}),k.onFetchError((l,s)=>{for(let[b,p]of n.entries())if(p.url===l){n.delete(b),w({type:"FETCH_ERR",id:b,url:l,error:s.toString(),duration:"[unknown]ms",time:new Date().toISOString()});break}}),k.attach(),m.push(()=>k.detach());}return e.captureXHR&&(R.onXHRRequest(n=>{w({type:"XHR_REQ",id:Math.random().toString(36).substring(7),url:n.url,method:n.method,headers:n.headers,body:n.body,time:new Date().toISOString()});}),R.onXHRResponse((n,l,s)=>{w({type:"XHR_RES",id:Math.random().toString(36).substring(7),url:n.url,status:l,statusText:"",duration:`${s}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});}),R.onXHRError((n,l)=>{w({type:"XHR_ERR",id:Math.random().toString(36).substring(7),url:n.url,error:l.message,duration:"[unknown]ms",time:new Date().toISOString()});}),R.attach(),m.push(()=>R.detach())),()=>{m.forEach(n=>n()),v.current=false;}},[e,w,x,S,k,R]);let I=react.useCallback((m="json",n)=>{if(typeof window>"u")return null;C();let l=n||U(m,{},e),s,b;if(m==="json"){let p=e.includeMetadata?{metadata:i.current,logs:t.current}:t.current;s=x(p),b="application/json";}else s=(e.includeMetadata?`${"=".repeat(80)}
+var Xe=["password","token","apiKey","secret","authorization","creditCard","cardNumber","cvv","ssn"];function B(o,e={}){let t=e.keys||Xe;if(!o||typeof o!="object")return o;let r=Array.isArray(o)?[...o]:{...o},l=s=>{if(!s||typeof s!="object")return s;for(let n in s)if(Object.prototype.hasOwnProperty.call(s,n)){let p=n.toLowerCase();t.some(v=>p.includes(v.toLowerCase()))?s[n]="***REDACTED***":s[n]!==null&&typeof s[n]=="object"&&(s[n]=l(s[n]));}return s};return l(r)}function I(o){return o.replace(/[^a-z0-9_\-]/gi,"_").replace(/_+/g,"_").replace(/^_|_$/g,"")}function ne(){if(typeof navigator>"u")return "unknown";let o=navigator.userAgent;return o.includes("Edg")?"edge":o.includes("Chrome")?"chrome":o.includes("Firefox")?"firefox":o.includes("Safari")?"safari":"unknown"}function Ee(o,e,t,r){if(typeof window>"u")return {sessionId:o,environment:e,userId:t,timestamp:new Date().toISOString(),userAgent:"",browser:"unknown",platform:"",language:"",screenResolution:"0x0",viewport:"0x0",url:"",referrer:"",timezone:"",logCount:r,errorCount:0,networkErrorCount:0};let l=typeof window.screen<"u"?`${window.screen.width}x${window.screen.height}`:"0x0",s=typeof window.innerWidth<"u"&&typeof window.innerHeight<"u"?`${window.innerWidth}x${window.innerHeight}`:"0x0";return {sessionId:o,environment:e,userId:t,timestamp:new Date().toISOString(),userAgent:navigator.userAgent,browser:ne(),platform:navigator.platform,language:navigator.language,screenResolution:l,viewport:s,url:window.location.href,referrer:document.referrer,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,logCount:r,errorCount:0,networkErrorCount:0}}function Ce(){return `session_${Date.now()}_${Math.random().toString(36).substring(2,11)}`}function $(o="json",e={},t={}){let{fileNameTemplate:r="{env}_{userId}_{sessionId}_{timestamp}",environment:l="development",userId:s="anonymous",sessionId:n="unknown"}=t,p=new Date().toISOString().replace(/[:.]/g,"-").split(".")[0],h=new Date().toISOString().split("T")[0],v=new Date().toLocaleTimeString("en-US",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"}).replace(/:/g,"-"),x=t.browser||ne(),k=t.platform||(typeof navigator<"u"?navigator.platform:"unknown"),S=(t.url||(typeof window<"u"?window.location.pathname.replace(/\//g,"_"):"unknown")).split("?")[0]||"unknown",w=String(t.errorCount??e.errorCount??0),E=String(t.logCount??e.logCount??0),T=r.replace("{env}",I(l)).replace("{userId}",I(s??"anonymous")).replace("{sessionId}",I(n??"unknown")).replace("{timestamp}",p).replace("{date}",h).replace("{time}",v).replace(/\{errorCount\}/g,w).replace(/\{logCount\}/g,E).replace("{browser}",I(x)).replace("{platform}",I(k)).replace("{url}",I(S));for(let[N,_]of Object.entries(e))T=T.replace(`{${N}}`,String(_));return `${T}.${o}`}function et(o,e="json"){let t=o.url.split("?")[0]||"unknown";return $(e,{},{environment:o.environment,userId:o.userId,sessionId:o.sessionId,browser:o.browser,platform:o.platform,url:t,errorCount:o.errorCount,logCount:o.logCount})}var qe={log:"info",info:"info",warn:"warn",error:"error",debug:"debug"};function Le(o){let e=parseFloat(o);return isNaN(e)?0:Math.round(e*1e6)}function Pe(o){return qe[o.toLowerCase()]||"info"}function se(o){return o.filter(e=>!e.ignored).slice(0,20)}function ae(o){return {service:{environment:o.environment},user:o.userId?{id:o.userId}:void 0,host:{name:o.browser,type:o.platform}}}function Te(o,e){let t={"@timestamp":o.time,event:{original:o,category:[]}},r=ae(e);switch(Object.assign(t,r),o.type){case "CONSOLE":{t.log={level:Pe(o.level)},t.message=o.data,t.event.category=["console"];break}case "FETCH_REQ":case "XHR_REQ":{t.http={request:{method:o.method}},t.url={full:o.url},t.event.category=["network","web"],t.event.action="request",t.event.id=o.id;break}case "FETCH_RES":case "XHR_RES":{t.http={response:{status_code:o.status}},t.url={full:o.url},t.event.duration=Le(o.duration),t.event.category=["network","web"],t.event.action="response",t.event.id=o.id;break}case "FETCH_ERR":case "XHR_ERR":{t.error={message:o.error},t.url={full:o.url},t.event.duration=Le(o.duration),t.event.category=["network","web"],t.event.action="error",t.event.id=o.id;let l=o;if(typeof l.body=="object"&&l.body!==null){let s=l.body;if(Array.isArray(s.frames)){let n=se(s.frames);t.error.stack_trace=n.map(p=>`  at ${p.functionName||"?"} (${p.filename||"?"}:${p.lineNumber||0}:${p.columnNumber||0})`).join(`
+`);}}break}default:{t.message=JSON.stringify(o);break}}return t}var W=class{constructor(){this.originalConsole={log:console.log.bind(console),error:console.error.bind(console),warn:console.warn.bind(console),info:console.info.bind(console),debug:console.debug.bind(console)},this.callbacks=[];}attach(){Object.keys(this.originalConsole).forEach(e=>{let t=this.originalConsole[e];console[e]=(...r)=>{this.callbacks.forEach(l=>{l(e,r);}),t(...r);};});}detach(){Object.keys(this.originalConsole).forEach(e=>{console[e]=this.originalConsole[e];});}onLog(e){this.callbacks.push(e);}};var Y=class{constructor(e={}){this.originalFetch=window.fetch.bind(window),this.onRequest=[],this.onResponse=[],this.onError=[],this.excludeUrls=(e.excludeUrls||[]).map(t=>new RegExp(t));}attach(){window.fetch=async(...e)=>{let[t,r]=e,l=t.toString();if(this.excludeUrls.some(n=>n.test(l)))return this.originalFetch(...e);let s=Date.now();this.onRequest.forEach(n=>n(l,r||{}));try{let n=await this.originalFetch(...e),p=Date.now()-s;return this.onResponse.forEach(h=>h(l,n.status,p)),n}catch(n){throw this.onError.forEach(p=>p(l,n)),n}};}detach(){window.fetch=this.originalFetch;}onFetchRequest(e){this.onRequest.push(e);}onFetchResponse(e){this.onResponse.push(e);}onFetchError(e){this.onError.push(e);}};var J=class{constructor(e={}){this.isAttached=false;this.originalXHR=window.XMLHttpRequest,this.onRequest=[],this.onResponse=[],this.onError=[],this.requestTracker=new WeakMap,this.excludeUrls=(e.excludeUrls||[]).map(t=>new RegExp(t)),this.originalOpen=this.originalXHR.prototype.open,this.originalSend=this.originalXHR.prototype.send;}attach(){if(this.isAttached)return;this.isAttached=true;let e=this;this.originalXHR.prototype.open=function(t,r,l,s,n){let p=typeof r=="string"?r:r.href;if(e.requestTracker.set(this,{method:t,url:p,headers:{},body:null,startTime:Date.now()}),e.excludeUrls.some(v=>v.test(p)))return e.originalOpen.call(this,t,r,l??true,s,n);let h=e.requestTracker.get(this);for(let v of e.onRequest)v(h);return e.originalOpen.call(this,t,r,l??true,s,n)},this.originalXHR.prototype.send=function(t){let r=e.requestTracker.get(this);if(r){r.body=t;let l=this.onload,s=this.onerror;this.onload=function(n){let p=Date.now()-r.startTime;for(let h of e.onResponse)h(r,this.status,p);l&&l.call(this,n);},this.onerror=function(n){for(let p of e.onError)p(r,new Error("XHR Error"));s&&s.call(this,n);};}return e.originalSend.call(this,t)};}detach(){this.isAttached&&(this.isAttached=false,this.originalXHR.prototype.open=this.originalOpen,this.originalXHR.prototype.send=this.originalSend);}onXHRRequest(e){this.onRequest.push(e);}onXHRResponse(e){this.onResponse.push(e);}onXHRError(e){this.onError.push(e);}};var U=class{static isSupported(){return this.supported===null&&(this.supported=typeof window<"u"&&"showDirectoryPicker"in window),this.supported}static async saveToDirectory(e,t,r="application/json"){if(!this.isSupported())throw new Error("File System Access API not supported");try{let n=await(await(await window.showDirectoryPicker()).getFileHandle(t,{create:!0})).createWritable();await n.write(e),await n.close();}catch(l){if(l.name==="AbortError")return;throw l}}static download(e,t,r="application/json"){let l=new Blob([e],{type:r}),s=URL.createObjectURL(l),n=document.createElement("a");n.href=s,n.download=t,document.body.appendChild(n),n.click(),document.body.removeChild(n),URL.revokeObjectURL(s);}static async downloadWithFallback(e,t,r="application/json"){if(this.isSupported())try{await this.saveToDirectory(e,t,r);return}catch(l){if(l.name==="AbortError")return}this.download(e,t,r);}};U.supported=null;var je={maxLogs:1e3,enablePersistence:true,persistenceKey:"debug_logs",captureConsole:true,captureFetch:true,captureXHR:true,enableDirectoryPicker:false,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:[],fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:"development",userId:null,sessionId:null,includeMetadata:true,uploadEndpoint:null,uploadOnError:false,uploadOnErrorCount:5};function X(o={}){let e={...je,...o},t=react.useRef({maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount});react.useEffect(()=>{t.current={maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount};},[e]);let r=react.useRef([]),l=react.useRef(e.sessionId||Ce()),s=react.useRef(Ee(l.current,e.environment,e.userId,0)),[n,p]=react.useState(0),h=react.useRef(0),v=react.useRef(false),x=react.useCallback(m=>{let a=new Set;return JSON.stringify(m,(c,i)=>{if(typeof i=="object"&&i!==null){if(a.has(i))return "[Circular]";a.add(i);}return i})},[]),k=react.useMemo(()=>new W,[]),R=react.useMemo(()=>new Y({excludeUrls:e.excludeUrls}),[e.excludeUrls]),S=react.useMemo(()=>new J({excludeUrls:e.excludeUrls}),[e.excludeUrls]),w=react.useCallback(m=>{let a=t.current;r.current.push(m),r.current.length>a.maxLogs&&r.current.shift(),p(r.current.length),m.type==="CONSOLE"?m.level==="ERROR"?h.current++:h.current=0:m.type==="FETCH_ERR"||m.type==="XHR_ERR"?h.current++:h.current=0;let c=a.uploadOnErrorCount??5;if(h.current>=c&&a.uploadEndpoint){let i={metadata:{...s.current,logCount:r.current.length},logs:r.current,fileName:$("json",{},e)};fetch(a.uploadEndpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:x(i)}).catch(()=>{}),h.current=0;}if(a.enablePersistence&&typeof window<"u")try{localStorage.setItem(a.persistenceKey,x(r.current));}catch{console.warn("[useLogRecorder] Failed to persist logs");}},[x]),E=react.useCallback(()=>{let m=r.current.filter(c=>c.type==="CONSOLE").reduce((c,i)=>i.level==="ERROR"?c+1:c,0),a=r.current.filter(c=>c.type==="FETCH_ERR"||c.type==="XHR_ERR").length;s.current={...s.current,logCount:r.current.length,errorCount:m,networkErrorCount:a};},[]);react.useEffect(()=>{if(typeof window>"u"||v.current)return;if(v.current=true,e.enablePersistence)try{let a=localStorage.getItem(e.persistenceKey);a&&(r.current=JSON.parse(a),p(r.current.length));}catch{console.warn("[useLogRecorder] Failed to load persisted logs");}let m=[];if(e.captureConsole&&(k.attach(),k.onLog((a,c)=>{let i=c.map(b=>{if(typeof b=="object")try{return x(b)}catch{return String(b)}return String(b)}).join(" ");w({type:"CONSOLE",level:a.toUpperCase(),time:new Date().toISOString(),data:i.substring(0,5e3)});}),m.push(()=>k.detach())),e.captureFetch){let a=new Map;R.onFetchRequest((c,i)=>{let b=Math.random().toString(36).substring(7),g=null;if(i?.body)try{g=typeof i.body=="string"?JSON.parse(i.body):i.body,g=B(g,{keys:e.sanitizeKeys});}catch{g=String(i.body).substring(0,1e3);}a.set(b,{url:c,method:i?.method||"GET",headers:B(i?.headers,{keys:e.sanitizeKeys}),body:g}),w({type:"FETCH_REQ",id:b,url:c,method:i?.method||"GET",headers:B(i?.headers,{keys:e.sanitizeKeys}),body:g,time:new Date().toISOString()});}),R.onFetchResponse((c,i,b)=>{for(let[g,F]of a.entries())if(F.url===c){a.delete(g),w({type:"FETCH_RES",id:g,url:c,status:i,statusText:"",duration:`${b}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});break}}),R.onFetchError((c,i)=>{for(let[b,g]of a.entries())if(g.url===c){a.delete(b),w({type:"FETCH_ERR",id:b,url:c,error:i.toString(),duration:"[unknown]ms",time:new Date().toISOString()});break}}),R.attach(),m.push(()=>R.detach());}return e.captureXHR&&(S.onXHRRequest(a=>{w({type:"XHR_REQ",id:Math.random().toString(36).substring(7),url:a.url,method:a.method,headers:a.headers,body:a.body,time:new Date().toISOString()});}),S.onXHRResponse((a,c,i)=>{w({type:"XHR_RES",id:Math.random().toString(36).substring(7),url:a.url,status:c,statusText:"",duration:`${i}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});}),S.onXHRError((a,c)=>{w({type:"XHR_ERR",id:Math.random().toString(36).substring(7),url:a.url,error:c.message,duration:"[unknown]ms",time:new Date().toISOString()});}),S.attach(),m.push(()=>S.detach())),()=>{m.forEach(a=>a()),v.current=false;}},[e,w,x,k,R,S]);let T=react.useCallback((m,a,c)=>{if(typeof window>"u")return null;E();let i=a||$(m,{},e),b,g;if(m==="json"){let F=e.includeMetadata?{metadata:s.current,logs:r.current}:r.current;b=x(F),g="application/json";}else b=(e.includeMetadata?`${"=".repeat(80)}
 METADATA
 ${"=".repeat(80)}
-${x(i.current)}
+${x(s.current)}
 ${"=".repeat(80)}
 
-`:"")+t.current.map(N=>`[${N.time}] ${N.type}
-${x(N)}
+`:"")+r.current.map(O=>`[${O.time}] ${O.type}
+${x(O)}
 ${"=".repeat(80)}`).join(`
-`),b="text/plain";return $.downloadWithFallback(s,l,b),l},[e,x,C]),T=react.useCallback(async m=>{let n=m||e.uploadEndpoint;if(!n)return {success:false,error:"No endpoint configured"};try{C();let l={metadata:i.current,logs:t.current,fileName:U("json",{},e)},s=await fetch(n,{method:"POST",headers:{"Content-Type":"application/json"},body:x(l)});if(!s.ok)throw new Error(`Upload failed: ${s.status}`);return {success:!0,data:await s.json()}}catch(l){let s=l instanceof Error?l.message:"Unknown error";return console.error("[useLogRecorder] Failed to upload logs:",l),{success:false,error:s}}},[e.uploadEndpoint,x,C]),F=react.useCallback(()=>{if(t.current=[],f(0),h.current=0,e.enablePersistence&&typeof window<"u")try{localStorage.removeItem(e.persistenceKey);}catch{console.warn("[useLogRecorder] Failed to clear persisted logs");}},[e.enablePersistence,e.persistenceKey]),D=react.useCallback(()=>[...t.current],[]),H=react.useCallback(()=>r,[r]),te=react.useCallback(()=>(C(),{...i.current}),[C]);return {downloadLogs:I,uploadLogs:T,clearLogs:F,getLogs:D,getLogCount:H,getMetadata:te,sessionId:c.current}}var se=goober.css`
+`),g="text/plain";return U.downloadWithFallback(b,i,g),i},[e,x,E]),N=react.useCallback(async m=>{let a=m||e.uploadEndpoint;if(!a)return {success:false,error:"No endpoint configured"};try{E();let c={metadata:s.current,logs:r.current,fileName:$("json",{},e)},i=await fetch(a,{method:"POST",headers:{"Content-Type":"application/json"},body:x(c)});if(!i.ok)throw new Error(`Upload failed: ${i.status}`);return {success:!0,data:await i.json()}}catch(c){let i=c instanceof Error?c.message:"Unknown error";return console.error("[useLogRecorder] Failed to upload logs:",c),{success:false,error:i}}},[e.uploadEndpoint,x,E]),_=react.useCallback(()=>{if(r.current=[],p(0),h.current=0,e.enablePersistence&&typeof window<"u")try{localStorage.removeItem(e.persistenceKey);}catch{console.warn("[useLogRecorder] Failed to clear persisted logs");}},[e.enablePersistence,e.persistenceKey]),M=react.useCallback(()=>[...r.current],[]),D=react.useCallback(()=>n,[n]),oe=react.useCallback(()=>(E(),{...s.current}),[E]);return {downloadLogs:T,uploadLogs:N,clearLogs:_,getLogs:M,getLogCount:D,getMetadata:oe,sessionId:l.current}}var le=goober.css`
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -37,21 +38,21 @@ ${"=".repeat(80)}`).join(`
   &:active {
     transform: translateY(0);
   }
-`,J=goober.css`
+`,V=goober.css`
   background: #e5e7eb;
   color: #6b7280;
   padding: 2px 6px;
   border-radius: 10px;
   font-size: 11px;
   font-weight: 600;
-`,ae=goober.css`
+`,ce=goober.css`
   background: #fee2e2;
   color: #dc2626;
   padding: 2px 6px;
   border-radius: 10px;
   font-size: 11px;
   font-weight: 600;
-`,ie=goober.css`
+`,de=goober.css`
   position: fixed;
   bottom: 100px;
   right: 20px;
@@ -65,7 +66,7 @@ ${"=".repeat(80)}`).join(`
   max-height: 580px;
   overflow: auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-`,le=goober.css`
+`,ue=goober.css`
   background: #fafafa;
   color: #374151;
   padding: 12px 16px;
@@ -74,20 +75,20 @@ ${"=".repeat(80)}`).join(`
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e5e7eb;
-`,Ee=goober.css`
+`,Ie=goober.css`
   display: flex;
   gap: 8px;
-`,ce=goober.css`
+`,pe=goober.css`
   margin: 0;
   font-size: 14px;
   font-weight: 600;
   color: #111827;
-`,de=goober.css`
+`,ge=goober.css`
   margin: 2px 0 0;
   font-size: 11px;
   color: #9ca3af;
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-`,ue=goober.css`
+`,fe=goober.css`
   background: transparent;
   border: none;
   color: #9ca3af;
@@ -102,7 +103,7 @@ ${"=".repeat(80)}`).join(`
     background: #f3f4f6;
     color: #6b7280;
   }
-`,pe=goober.css`
+`,be=goober.css`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
@@ -118,22 +119,22 @@ ${"=".repeat(80)}`).join(`
   font-weight: 700;
   color: #111827;
   line-height: 1;
-`,V=goober.css`
+`,Q=goober.css`
   font-size: 10px;
   color: #9ca3af;
   margin-top: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
-`,Le=goober.css`
+`,Me=goober.css`
   color: #dc2626;
-`,Ie=goober.css`
+`,De=goober.css`
   color: #ea580c;
-`,ge=goober.css`
+`,me=goober.css`
   padding: 12px 16px;
   border-bottom: 1px solid #f3f4f6;
   background: #fafafa;
-`,fe=goober.css`
+`,ye=goober.css`
   cursor: pointer;
   font-weight: 600;
   color: #6b7280;
@@ -148,7 +149,7 @@ ${"=".repeat(80)}`).join(`
   &::-webkit-details-marker {
     display: none;
   }
-`,be=goober.css`
+`,he=goober.css`
   margin-top: 10px;
   font-size: 11px;
   color: #6b7280;
@@ -165,22 +166,22 @@ ${"=".repeat(80)}`).join(`
     font-weight: 600;
     min-width: 75px;
   }
-`,Te=goober.css`
+`,Fe=goober.css`
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;
-`,Q=goober.css`
+`,Z=goober.css`
   display: flex;
   flex-direction: column;
   gap: 6px;
-`,me=goober.css`
+`,xe=goober.css`
   font-size: 11px;
   font-weight: 600;
   color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-`,Ne=goober.css`
+`,Oe=goober.css`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
@@ -216,7 +217,7 @@ ${"=".repeat(80)}`).join(`
     cursor: not-allowed;
     border-color: #f3f4f6;
   }
-`,Pe=goober.css`
+`,Ke=goober.css`
   width: 100%;
   padding: 9px 14px;
   background: #f0f4ff;
@@ -250,7 +251,7 @@ ${"=".repeat(80)}`).join(`
     border-color: #f3f4f6;
     opacity: 0.6;
   }
-`,ye=goober.css`
+`,we=goober.css`
   width: 100%;
   padding: 9px 14px;
   background: #f0fdf4;
@@ -283,7 +284,7 @@ ${"=".repeat(80)}`).join(`
     cursor: not-allowed;
     border-color: #f3f4f6;
   }
-`,he=goober.css`
+`,ve=goober.css`
   width: 100%;
   padding: 9px 14px;
   background: #fef2f2;
@@ -309,28 +310,28 @@ ${"=".repeat(80)}`).join(`
     transform: translateY(0);
     background: #fecaca;
   }
-`,X=goober.css`
+`,P=goober.css`
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 12px;
   background: #f0fdf4;
   color: #166534;
   border: 1px solid #bbf7d0;
-`,_=goober.css`
+`,A=goober.css`
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 12px;
   background: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
-`,xe=goober.css`
+`,Se=goober.css`
   padding: 12px 16px;
   background: #f3f4f6;
   border-top: 1px solid #e5e7eb;
   border-radius: 0 0 12px 12px;
   font-size: 12px;
   color: #9ca3af;
-`,we=goober.css`
+`,ke=goober.css`
   kbd {
     display: inline-block;
     padding: 2px 6px;
@@ -342,26 +343,26 @@ ${"=".repeat(80)}`).join(`
   }
 `;goober.css`
   @media (prefers-color-scheme: dark) {
-    ${ie} {
+    ${de} {
       background: #1e293b;
       border-color: #334155;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
 
-    ${le} {
+    ${ue} {
       background: #0f172a;
       border-color: #1e293b;
     }
 
-    ${ce} {
+    ${pe} {
       color: #f1f5f9;
     }
 
-    ${de} {
+    ${ge} {
       color: #64748b;
     }
 
-    ${ue} {
+    ${fe} {
       color: #64748b;
 
       &:hover {
@@ -370,7 +371,7 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${pe} {
+    ${be} {
       background: #0f172a;
       border-color: #334155;
     }
@@ -379,16 +380,16 @@ ${"=".repeat(80)}`).join(`
       color: #f1f5f9;
     }
 
-    ${ge} {
+    ${me} {
       background: #0f172a;
       border-color: #334155;
     }
 
-    ${fe} {
+    ${ye} {
       color: #e2e8f0;
     }
 
-    ${be} {
+    ${he} {
       color: #94a3b8;
 
       strong {
@@ -396,7 +397,7 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${me} {
+    ${xe} {
       color: #94a3b8;
     }
 
@@ -415,7 +416,7 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${Pe} {
+    ${Ke} {
       background: #1e293b;
       color: #818cf8;
       border-color: #334155;
@@ -430,7 +431,7 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${ye} {
+    ${we} {
       background: #1e293b;
       color: #4ade80;
       border-color: #334155;
@@ -445,7 +446,7 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${he} {
+    ${ve} {
       background: #1e293b;
       color: #f87171;
       border-color: #334155;
@@ -460,30 +461,30 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${X} {
+    ${P} {
       background: #064e3b;
       color: #6ee7b7;
       border-color: #065f46;
     }
 
-    ${_} {
+    ${A} {
       background: #7f1d1d;
       color: #fca5a5;
       border-color: #991b1b;
     }
 
-    ${xe} {
+    ${Se} {
       background: #0f172a;
       border-color: #334155;
       color: #94a3b8;
     }
 
-    ${we} kbd {
+    ${ke} kbd {
       background: #334155;
       color: #e2e8f0;
     }
 
-    ${se} {
+    ${le} {
       background: #1e293b;
       border-color: #334155;
       color: #e2e8f0;
@@ -495,9 +496,9 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${J} {
+    ${V} {
       background: #334155;
       color: #94a3b8;
     }
   }
-`;function qe({user:a,environment:e="production",uploadEndpoint:o,fileNameTemplate:t="{env}_{date}_{time}_{userId}_{errorCount}errors",maxLogs:c=2e3,showInProduction:i=false}){let[r,f]=react.useState(false),[h,v]=react.useState(false),[x,S]=react.useState(null),[k,R]=react.useState(null),[w,C]=react.useState(null),I=react.useRef(null),T=react.useRef(null),F=react.useRef(null),{downloadLogs:D,uploadLogs:H,clearLogs:te,getLogs:m,getLogCount:n,getMetadata:l,sessionId:s}=P({fileNameTemplate:t,environment:e,userId:a?.id||a?.email||"guest",includeMetadata:true,uploadEndpoint:o,maxLogs:c,captureConsole:true,captureFetch:true,captureXHR:true,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:["/api/analytics","google-analytics.com","facebook.com","vercel.com"]}),b=n(),p=l();react.useEffect(()=>{let g=E=>{E.ctrlKey&&E.shiftKey&&E.key==="D"&&(E.preventDefault(),f(oe=>!oe)),E.key==="Escape"&&r&&(E.preventDefault(),f(false),T.current?.focus());};return window.addEventListener("keydown",g),()=>window.removeEventListener("keydown",g)},[r]),react.useEffect(()=>{if(p.errorCount>=5&&o){let g=async()=>{try{await H();}catch{console.warn("[DebugPanel] Failed to auto-upload logs");}};return window.addEventListener("error",g),()=>window.removeEventListener("error",g)}},[p.errorCount,o,H]);let N=react.useCallback(async()=>{v(true),S(null);try{let g=await H();g.success?(S({type:"success",message:`Uploaded successfully! ${g.data?JSON.stringify(g.data):""}`}),g.data&&typeof g.data=="object"&&"url"in g.data&&await navigator.clipboard.writeText(String(g.data.url))):S({type:"error",message:`Upload failed: ${g.error}`});}catch(g){S({type:"error",message:`Error: ${g instanceof Error?g.message:"Unknown error"}`});}finally{v(false);}},[H]),Re=react.useCallback(g=>{let E=D(g);E&&S({type:"success",message:`Downloaded: ${E}`});},[D]),De=react.useCallback(async()=>{R(null);try{if(!("showDirectoryPicker"in window)){R({type:"error",message:"Feature only supported in Chrome/Edge"});return}await D("json",void 0,{showPicker:!0})&&R({type:"success",message:"Saved to directory"});}catch{R({type:"error",message:"Unable to save. Please try again or choose a different location."});}},[D]),He=react.useCallback(async()=>{C(null);try{let g=m(),E=l(),oe=JSON.stringify({metadata:E,logs:g},null,2);await navigator.clipboard.writeText(oe),C({type:"success",message:"Copied to clipboard!"});}catch{C({type:"error",message:"Failed to copy. Check clipboard permissions."});}},[m,l]);if(react.useEffect(()=>{if(k){let g=setTimeout(()=>{R(null);},3e3);return ()=>clearTimeout(g)}},[k]),react.useEffect(()=>{if(w){let g=setTimeout(()=>{C(null);},3e3);return ()=>clearTimeout(g)}},[w]),!(i||e==="development"||a?.role==="admin"))return null;let Me=()=>{f(true);},ze=()=>{f(false),T.current?.focus();};return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsxs("button",{ref:T,type:"button",onClick:Me,className:se,"aria-label":r?"Close debug panel":"Open debug panel (Ctrl+Shift+D)","aria-expanded":r,"aria-controls":"debug-panel",children:[jsxRuntime.jsx("span",{children:"Debug"}),jsxRuntime.jsx("span",{className:b>0?p.errorCount>0?ae:J:J,children:b}),p.errorCount>0&&jsxRuntime.jsxs("span",{className:ae,children:[p.errorCount," err"]})]}),r&&jsxRuntime.jsxs("div",{ref:I,id:"debug-panel",role:"dialog","aria-modal":"true","aria-label":"Debug Logger Panel",className:ie,children:[jsxRuntime.jsxs("div",{className:le,children:[jsxRuntime.jsxs("div",{className:Ee,children:[jsxRuntime.jsx("h3",{className:ce,children:"Debug"}),jsxRuntime.jsxs("p",{className:de,children:[s.substring(0,36),"..."]})]}),jsxRuntime.jsx("button",{ref:F,type:"button",onClick:ze,className:ue,"aria-label":"Close debug panel",children:"\u2715"})]}),jsxRuntime.jsxs("div",{className:pe,children:[jsxRuntime.jsxs("div",{className:G,children:[jsxRuntime.jsx("div",{className:q,children:b}),jsxRuntime.jsx("div",{className:V,children:"Logs"})]}),jsxRuntime.jsxs("div",{className:G,children:[jsxRuntime.jsx("div",{className:`${q} ${Le}`,children:p.errorCount}),jsxRuntime.jsx("div",{className:V,children:"Errors"})]}),jsxRuntime.jsxs("div",{className:G,children:[jsxRuntime.jsx("div",{className:`${q} ${Ie}`,children:p.networkErrorCount}),jsxRuntime.jsx("div",{className:V,children:"Network"})]})]}),jsxRuntime.jsxs("details",{className:ge,children:[jsxRuntime.jsx("summary",{className:fe,role:"button","aria-expanded":"false",children:jsxRuntime.jsx("span",{children:"\u25B8 Session Details"})}),jsxRuntime.jsxs("div",{className:be,children:[jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"User"}),jsxRuntime.jsx("span",{children:p.userId||"Anonymous"})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Browser"}),jsxRuntime.jsxs("span",{children:[p.browser," (",p.platform,")"]})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Screen"}),jsxRuntime.jsx("span",{children:p.screenResolution})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Timezone"}),jsxRuntime.jsx("span",{children:p.timezone})]})]})]}),jsxRuntime.jsxs("div",{className:Te,children:[jsxRuntime.jsx("div",{className:Q,children:jsxRuntime.jsxs("div",{className:Ne,children:[jsxRuntime.jsx("button",{type:"button",onClick:()=>Re("json"),className:z,"aria-label":"Download logs as JSON",children:"\u{1F4C4} JSON"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>Re("txt"),className:z,"aria-label":"Download logs as text file",children:"\u{1F4DD} TXT"}),jsxRuntime.jsx("button",{type:"button",onClick:He,disabled:b===0,className:z,"aria-label":"Copy logs to clipboard",title:"Copy logs as JSON to clipboard",children:"\u{1F4CB} Copy"}),jsxRuntime.jsx("button",{type:"button",onClick:De,disabled:!("showDirectoryPicker"in window),className:z,"aria-label":"Save logs to directory",title:"showDirectoryPicker"in window?"Choose directory to save file":"Feature only supported in Chrome/Edge",children:"\u{1F4C1} Folder"})]})}),o&&jsxRuntime.jsxs("div",{className:Q,children:[jsxRuntime.jsx("span",{className:me,children:"Upload"}),jsxRuntime.jsx("button",{type:"button",onClick:N,disabled:h,className:ye,"aria-label":h?"Uploading logs...":"Upload logs to server","aria-busy":h,children:h?"\u23F3 Uploading...":"\u2601\uFE0F Upload to Server"})]}),x&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:x.type==="success"?X:_,children:x.message}),k&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:k.type==="success"?X:_,children:k.message}),w&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:w.type==="success"?X:_,children:w.message}),jsxRuntime.jsx("div",{className:Q,children:jsxRuntime.jsx("button",{type:"button",onClick:()=>{confirm("Clear all logs? This cannot be undone.")&&(te(),S(null));},className:he,"aria-label":"Clear all logs",children:"\u{1F5D1}\uFE0F Clear All Logs"})})]}),jsxRuntime.jsx("div",{className:xe,children:jsxRuntime.jsxs("div",{className:we,children:["Press ",jsxRuntime.jsx("kbd",{children:"Ctrl+Shift+D"})," to toggle"]})})]})]})}function je({fileNameTemplate:a="debug_{timestamp}"}){let[e,o]=react.useState(false),{downloadLogs:t,clearLogs:c,getLogCount:i}=P({fileNameTemplate:a}),r=i();return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsx("button",{onClick:()=>o(f=>!f),style:{position:"fixed",bottom:"20px",right:"20px",zIndex:9999,padding:"12px 20px",background:"#1f2937",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,display:"flex",alignItems:"center",gap:"8px"},children:jsxRuntime.jsx("span",{children:r})}),e&&jsxRuntime.jsxs("div",{style:{position:"fixed",bottom:"80px",right:"20px",zIndex:9999,background:"#fff",padding:"20px",borderRadius:"8px",boxShadow:"0 4px 12px rgba(0,0,0,0.2)",width:"300px",display:"flex",flexDirection:"column",gap:"12px"},children:[jsxRuntime.jsx("button",{onClick:()=>t("json"),style:{width:"100%",padding:"10px",background:"#2563eb",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Download JSON"}),jsxRuntime.jsx("button",{onClick:()=>{confirm("Clear all logs?")&&c();},style:{width:"100%",padding:"10px",background:"#dc2626",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Clear Logs"}),jsxRuntime.jsx("button",{onClick:()=>o(false),style:{width:"100%",padding:"10px",background:"#6b7280",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Close"})]})]})}exports.DebugPanel=qe;exports.DebugPanelMinimal=je;exports.collectMetadata=Se;exports.generateExportFilename=We;exports.generateFilename=U;exports.generateSessionId=ke;exports.getBrowserInfo=re;exports.sanitizeData=K;exports.sanitizeFilename=O;exports.useLogRecorder=P;
+`;function Be({user:o,environment:e="production",uploadEndpoint:t,fileNameTemplate:r="{env}_{date}_{time}_{userId}_{errorCount}errors",maxLogs:l=2e3,showInProduction:s=false}){let[n,p]=react.useState(false),[h,v]=react.useState(false),[x,k]=react.useState(null),[R,S]=react.useState(null),[w,E]=react.useState(null),T=react.useRef(null),N=react.useRef(null),_=react.useRef(null),{downloadLogs:M,uploadLogs:D,clearLogs:oe,getLogs:m,getLogCount:a,getMetadata:c,sessionId:i}=X({fileNameTemplate:r,environment:e,userId:o?.id||o?.email||"guest",includeMetadata:true,uploadEndpoint:t,maxLogs:l,captureConsole:true,captureFetch:true,captureXHR:true,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:["/api/analytics","google-analytics.com","facebook.com","vercel.com"]}),b=a(),g=c();react.useEffect(()=>{let f=C=>{C.ctrlKey&&C.shiftKey&&C.key==="D"&&(C.preventDefault(),p(re=>!re)),C.key==="Escape"&&n&&(C.preventDefault(),p(false),N.current?.focus());};return window.addEventListener("keydown",f),()=>window.removeEventListener("keydown",f)},[n]),react.useEffect(()=>{if(g.errorCount>=5&&t){let f=async()=>{try{await D();}catch{console.warn("[DebugPanel] Failed to auto-upload logs");}};return window.addEventListener("error",f),()=>window.removeEventListener("error",f)}},[g.errorCount,t,D]);let F=react.useCallback(async()=>{v(true),k(null);try{let f=await D();f.success?(k({type:"success",message:`Uploaded successfully! ${f.data?JSON.stringify(f.data):""}`}),f.data&&typeof f.data=="object"&&"url"in f.data&&await navigator.clipboard.writeText(String(f.data.url))):k({type:"error",message:`Upload failed: ${f.error}`});}catch(f){k({type:"error",message:`Error: ${f instanceof Error?f.message:"Unknown error"}`});}finally{v(false);}},[D]),O=react.useCallback(f=>{let C=M(f);C&&k({type:"success",message:`Downloaded: ${C}`});},[M]),ze=react.useCallback(async()=>{S(null);try{if(!("showDirectoryPicker"in window)){S({type:"error",message:"Feature only supported in Chrome/Edge"});return}await M("json",void 0,{showPicker:!0})&&S({type:"success",message:"Saved to directory"});}catch{S({type:"error",message:"Unable to save. Please try again or choose a different location."});}},[M]),_e=react.useCallback(async()=>{E(null);try{let f=m(),C=c(),re=JSON.stringify({metadata:C,logs:f},null,2);await navigator.clipboard.writeText(re),E({type:"success",message:"Copied to clipboard!"});}catch{E({type:"error",message:"Failed to copy. Check clipboard permissions."});}},[m,c]);if(react.useEffect(()=>{if(R){let f=setTimeout(()=>{S(null);},3e3);return ()=>clearTimeout(f)}},[R]),react.useEffect(()=>{if(w){let f=setTimeout(()=>{E(null);},3e3);return ()=>clearTimeout(f)}},[w]),!(s||e==="development"||o?.role==="admin"))return null;let $e=()=>{p(true);},Ue=()=>{p(false),N.current?.focus();};return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsxs("button",{ref:N,type:"button",onClick:$e,className:le,"aria-label":n?"Close debug panel":"Open debug panel (Ctrl+Shift+D)","aria-expanded":n,"aria-controls":"debug-panel",children:[jsxRuntime.jsx("span",{children:"Debug"}),jsxRuntime.jsx("span",{className:b>0?g.errorCount>0?ce:V:V,children:b}),g.errorCount>0&&jsxRuntime.jsxs("span",{className:ce,children:[g.errorCount," err"]})]}),n&&jsxRuntime.jsxs("div",{ref:T,id:"debug-panel",role:"dialog","aria-modal":"true","aria-label":"Debug Logger Panel",className:de,children:[jsxRuntime.jsxs("div",{className:ue,children:[jsxRuntime.jsxs("div",{className:Ie,children:[jsxRuntime.jsx("h3",{className:pe,children:"Debug"}),jsxRuntime.jsxs("p",{className:ge,children:[i.substring(0,36),"..."]})]}),jsxRuntime.jsx("button",{ref:_,type:"button",onClick:Ue,className:fe,"aria-label":"Close debug panel",children:"\u2715"})]}),jsxRuntime.jsxs("div",{className:be,children:[jsxRuntime.jsxs("div",{className:G,children:[jsxRuntime.jsx("div",{className:q,children:b}),jsxRuntime.jsx("div",{className:Q,children:"Logs"})]}),jsxRuntime.jsxs("div",{className:G,children:[jsxRuntime.jsx("div",{className:`${q} ${Me}`,children:g.errorCount}),jsxRuntime.jsx("div",{className:Q,children:"Errors"})]}),jsxRuntime.jsxs("div",{className:G,children:[jsxRuntime.jsx("div",{className:`${q} ${De}`,children:g.networkErrorCount}),jsxRuntime.jsx("div",{className:Q,children:"Network"})]})]}),jsxRuntime.jsxs("details",{className:me,children:[jsxRuntime.jsx("summary",{className:ye,role:"button","aria-expanded":"false",children:jsxRuntime.jsx("span",{children:"\u25B8 Session Details"})}),jsxRuntime.jsxs("div",{className:he,children:[jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"User"}),jsxRuntime.jsx("span",{children:g.userId||"Anonymous"})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Browser"}),jsxRuntime.jsxs("span",{children:[g.browser," (",g.platform,")"]})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Screen"}),jsxRuntime.jsx("span",{children:g.screenResolution})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Timezone"}),jsxRuntime.jsx("span",{children:g.timezone})]})]})]}),jsxRuntime.jsxs("div",{className:Fe,children:[jsxRuntime.jsx("div",{className:Z,children:jsxRuntime.jsxs("div",{className:Oe,children:[jsxRuntime.jsx("button",{type:"button",onClick:()=>O("json"),className:z,"aria-label":"Download logs as JSON",children:"\u{1F4C4} JSON"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>O("txt"),className:z,"aria-label":"Download logs as text file",children:"\u{1F4DD} TXT"}),jsxRuntime.jsx("button",{type:"button",onClick:_e,disabled:b===0,className:z,"aria-label":"Copy logs to clipboard",title:"Copy logs as JSON to clipboard",children:"\u{1F4CB} Copy"}),jsxRuntime.jsx("button",{type:"button",onClick:ze,disabled:!("showDirectoryPicker"in window),className:z,"aria-label":"Save logs to directory",title:"showDirectoryPicker"in window?"Choose directory to save file":"Feature only supported in Chrome/Edge",children:"\u{1F4C1} Folder"})]})}),t&&jsxRuntime.jsxs("div",{className:Z,children:[jsxRuntime.jsx("span",{className:xe,children:"Upload"}),jsxRuntime.jsx("button",{type:"button",onClick:F,disabled:h,className:we,"aria-label":h?"Uploading logs...":"Upload logs to server","aria-busy":h,children:h?"\u23F3 Uploading...":"\u2601\uFE0F Upload to Server"})]}),x&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:x.type==="success"?P:A,children:x.message}),R&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:R.type==="success"?P:A,children:R.message}),w&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:w.type==="success"?P:A,children:w.message}),jsxRuntime.jsx("div",{className:Z,children:jsxRuntime.jsx("button",{type:"button",onClick:()=>{confirm("Clear all logs? This cannot be undone.")&&(oe(),k(null));},className:ve,"aria-label":"Clear all logs",children:"\u{1F5D1}\uFE0F Clear All Logs"})})]}),jsxRuntime.jsx("div",{className:Se,children:jsxRuntime.jsxs("div",{className:ke,children:["Press ",jsxRuntime.jsx("kbd",{children:"Ctrl+Shift+D"})," to toggle"]})})]})]})}function Je({fileNameTemplate:o="debug_{timestamp}"}){let[e,t]=react.useState(false),{downloadLogs:r,clearLogs:l,getLogCount:s}=X({fileNameTemplate:o}),n=s();return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsx("button",{onClick:()=>t(p=>!p),style:{position:"fixed",bottom:"20px",right:"20px",zIndex:9999,padding:"12px 20px",background:"#1f2937",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,display:"flex",alignItems:"center",gap:"8px"},children:jsxRuntime.jsx("span",{children:n})}),e&&jsxRuntime.jsxs("div",{style:{position:"fixed",bottom:"80px",right:"20px",zIndex:9999,background:"#fff",padding:"20px",borderRadius:"8px",boxShadow:"0 4px 12px rgba(0,0,0,0.2)",width:"300px",display:"flex",flexDirection:"column",gap:"12px"},children:[jsxRuntime.jsx("button",{onClick:()=>r("json"),style:{width:"100%",padding:"10px",background:"#2563eb",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Download JSON"}),jsxRuntime.jsx("button",{onClick:()=>{confirm("Clear all logs?")&&l();},style:{width:"100%",padding:"10px",background:"#dc2626",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Clear Logs"}),jsxRuntime.jsx("button",{onClick:()=>t(false),style:{width:"100%",padding:"10px",background:"#6b7280",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Close"})]})]})}exports.DebugPanel=Be;exports.DebugPanelMinimal=Je;exports.collectMetadata=Ee;exports.filterStackTrace=se;exports.generateExportFilename=et;exports.generateFilename=$;exports.generateSessionId=Ce;exports.getBrowserInfo=ne;exports.sanitizeData=B;exports.sanitizeFilename=I;exports.transformMetadataToECS=ae;exports.transformToECS=Te;exports.useLogRecorder=X;

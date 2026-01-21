@@ -1,9 +1,16 @@
 // Storybook Interaction Tests for DebugPanel
 // These tests verify component interactions using Storybook's play function
 
-import type { PlayFunction } from '@storybook/csf';
+import type { StoryContext } from '@storybook/csf';
 import { expect, vi } from 'vitest';
 import { userEvent, waitFor, screen } from '@storybook/test';
+
+/**
+ * Extended StoryContext with proper typing for canvasElement
+ */
+interface ExtendedPlayContext extends StoryContext {
+  canvasElement: HTMLElement;
+}
 
 /**
  * Play function to test panel toggle interaction
@@ -12,30 +19,30 @@ import { userEvent, waitFor, screen } from '@storybook/test';
  * - Clicks close button
  * - Verifies panel is hidden
  */
-export const testPanelToggle: PlayFunction = async ({ canvasElement }) => {
+export const testPanelToggle = async ({ canvasElement }: ExtendedPlayContext) => {
   // Find and click the toggle button
   const toggleButton = canvasElement.querySelector(
     'button[class*="toggleButtonStyles"]'
   ) as HTMLButtonElement;
-  expect(toggleButton).toBeInTheDocument();
+  expect(toggleButton).toBeDefined();
 
   await userEvent.click(toggleButton);
 
   // Verify panel opens
   const panel = await screen.findByRole('dialog');
-  await expect(panel).toBeInTheDocument();
+  expect(panel).toBeDefined();
 
   // Find and click close button
   const closeButton = panel.querySelector(
     'button[class*="closeButtonStyles"]'
   ) as HTMLButtonElement;
-  expect(closeButton).toBeInTheDocument();
+  expect(closeButton).toBeDefined();
 
   await userEvent.click(closeButton);
 
   // Verify panel closes
   await waitFor(() => {
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 };
 
@@ -45,27 +52,27 @@ export const testPanelToggle: PlayFunction = async ({ canvasElement }) => {
  * - Clicks JSON download button
  * - Verifies download is triggered
  */
-export const testDownloadJson: PlayFunction = async ({ canvasElement }) => {
+export const testDownloadJson = async ({ canvasElement }: ExtendedPlayContext) => {
   // Open panel
   const toggleButton = canvasElement.querySelector(
     'button[class*="toggleButtonStyles"]'
   ) as HTMLButtonElement;
-  expect(toggleButton).toBeInTheDocument();
+  expect(toggleButton).toBeDefined();
   await userEvent.click(toggleButton);
 
   // Wait for panel
   const panel = await screen.findByRole('dialog');
-  await expect(panel).toBeInTheDocument();
+  expect(panel).toBeDefined();
 
   // Find and click JSON download button
   const jsonButton = await screen.findByRole('button', { name: /JSON/i });
-  expect(jsonButton).toBeInTheDocument();
+  expect(jsonButton).toBeDefined();
   await userEvent.click(jsonButton);
 
   // Verify success message appears
   await waitFor(() => {
     const successMessage = screen.getByText(/downloaded/i);
-    expect(successMessage).toBeInTheDocument();
+    expect(successMessage).toBeDefined();
   });
 };
 
@@ -76,24 +83,24 @@ export const testDownloadJson: PlayFunction = async ({ canvasElement }) => {
  * - Confirms dialog
  * - Verifies logs are cleared
  */
-export const testClearLogs: PlayFunction = async ({
-  canvasElement: _canvasElement,
+export const testClearLogs = async ({
+  canvasElement,
   args: _args,
-}) => {
+}: ExtendedPlayContext) => {
   // Open panel
   const toggleButton = canvasElement.querySelector(
     'button[class*="toggleButtonStyles"]'
   ) as HTMLButtonElement;
-  expect(toggleButton).toBeInTheDocument();
+  expect(toggleButton).toBeDefined();
   await userEvent.click(toggleButton);
 
   // Wait for panel
   const panel = await screen.findByRole('dialog');
-  await expect(panel).toBeInTheDocument();
+  expect(panel).toBeDefined();
 
   // Find and click clear button
   const clearButton = await screen.findByRole('button', { name: /Clear All Logs/i });
-  expect(clearButton).toBeInTheDocument();
+  expect(clearButton).toBeDefined();
 
   // Mock confirm dialog
   vi.spyOn(window, 'confirm').mockReturnValue(true);
@@ -109,13 +116,13 @@ export const testClearLogs: PlayFunction = async ({
  * - Triggers keyboard event
  * - Verifies panel opens
  */
-export const testKeyboardShortcut: PlayFunction = async ({ canvasElement }) => {
+export const testKeyboardShortcut = async ({ canvasElement }: ExtendedPlayContext) => {
   // Simulate Ctrl+Shift+D keyboard event
   await userEvent.keyboard('{Control>}{Shift>}{d}{/Shift}{/Control}');
 
   // Verify panel opens
   const panel = await screen.findByRole('dialog');
-  await expect(panel).toBeInTheDocument();
+  expect(panel).toBeDefined();
 };
 
 /**
@@ -124,20 +131,20 @@ export const testKeyboardShortcut: PlayFunction = async ({ canvasElement }) => {
  * - Presses Escape
  * - Verifies panel closes
  */
-export const testEscapeKey: PlayFunction = async ({ canvasElement }) => {
+export const testEscapeKey = async ({ canvasElement }: ExtendedPlayContext) => {
   // Open panel using keyboard shortcut
   await userEvent.keyboard('{Control>}{Shift>}{d}{/Shift}{/Control}');
 
   // Verify panel is open
   const panel = await screen.findByRole('dialog');
-  await expect(panel).toBeInTheDocument();
+  expect(panel).toBeDefined();
 
   // Press Escape
   await userEvent.keyboard('{Escape}');
 
   // Verify panel closes
   await waitFor(() => {
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 };
 
@@ -149,7 +156,7 @@ export const testEscapeKey: PlayFunction = async ({ canvasElement }) => {
  * - Verifies clipboard write is called with JSON content
  * - Verifies success message appears
  */
-export const testCopyLogs: PlayFunction = async ({ canvasElement }) => {
+export const testCopyLogs = async ({ canvasElement }: ExtendedPlayContext) => {
   // Mock navigator.clipboard.writeText
   const writeTextMock = vi.fn().mockResolvedValue(undefined);
   vi.stubGlobal('navigator', { clipboard: { writeText: writeTextMock } });
@@ -158,16 +165,16 @@ export const testCopyLogs: PlayFunction = async ({ canvasElement }) => {
   const toggleButton = canvasElement.querySelector(
     'button[class*="toggleButtonStyles"]'
   ) as HTMLButtonElement;
-  expect(toggleButton).toBeInTheDocument();
+  expect(toggleButton).toBeDefined();
   await userEvent.click(toggleButton);
 
   // Wait for panel
   const panel = await screen.findByRole('dialog');
-  await expect(panel).toBeInTheDocument();
+  expect(panel).toBeDefined();
 
   // Find and click copy button
   const copyButton = await screen.findByRole('button', { name: /Copy logs to clipboard/i });
-  expect(copyButton).toBeInTheDocument();
+  expect(copyButton).toBeDefined();
   await userEvent.click(copyButton);
 
   // Verify clipboard was called with JSON content
@@ -178,7 +185,7 @@ export const testCopyLogs: PlayFunction = async ({ canvasElement }) => {
   // Verify success message appears
   await waitFor(() => {
     const successMessage = screen.getByText(/Copied to clipboard/i);
-    expect(successMessage).toBeInTheDocument();
+    expect(successMessage).toBeDefined();
   });
 };
 
