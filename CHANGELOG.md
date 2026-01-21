@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.4.2...v1.5.0) (2026-01-21)
+
+
+### Features
+
+* test release trigger ([c2f515e](https://github.com/maemreyo/glean-debug-logger/commit/c2f515ed647a45cfeccab46543aa39de3e50f68f))
+
 ## [1.4.2](https://github.com/maemreyo/glean-debug-logger/compare/v1.4.1...v1.4.2) (2026-01-21)
 
 
