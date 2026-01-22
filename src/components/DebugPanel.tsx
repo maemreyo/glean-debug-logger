@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLogRecorder } from '../hooks/useLogRecorder';
-import { ExportFormat } from '../types';
+import { ExportFormat, LogEntry, ConsoleLogEntry } from '../types';
 import { transformToECS, transformMetadataToECS } from '../utils/ecsTransform';
 import { stringifyJSONL } from '../utils/jsonl';
 import {
@@ -88,6 +88,36 @@ export function DebugPanel({
   useEffect(() => {
     localStorage.setItem('debug-panel-copy-format', copyFormat);
   }, [copyFormat]);
+
+  // Copy Filter type
+  type CopyFilter = 'all' | 'logs' | 'errors' | 'network' | 'networkErrors';
+
+  // Helper function to filter logs by type
+  function filterLogsByType(logs: LogEntry[], filter: CopyFilter): LogEntry[] {
+    switch (filter) {
+      case 'logs':
+        return logs.filter((log): log is ConsoleLogEntry => log.type === 'CONSOLE');
+      case 'errors':
+        return logs.filter(
+          (log): log is ConsoleLogEntry => log.type === 'CONSOLE' && log.level === 'error'
+        );
+      case 'network':
+        return logs.filter(
+          (log) =>
+            log.type === 'FETCH_REQ' ||
+            log.type === 'FETCH_RES' ||
+            log.type === 'XHR_REQ' ||
+            log.type === 'XHR_RES'
+        );
+      case 'networkErrors':
+        return logs.filter((log) => log.type === 'FETCH_ERR' || log.type === 'XHR_ERR');
+      case 'all':
+      default:
+        return logs;
+    }
+  }
+
+
 
   // Refs for focus management
   const panelRef = useRef<HTMLDivElement>(null);
@@ -216,18 +246,12 @@ export function DebugPanel({
     }
   }, [downloadLogs]);
 
-  const handleCopy = useCallback(async () => {
-    setCopyStatus(null);
-    try {
-      const logs = getLogs();
-      const metadata = getMetadata();
-
-      let content: string;
-
-      // Generate content based on selected format
+  // Helper function to generate content from logs and metadata
+  const generateCopyContent = useCallback(
+    (logs: LogEntry[], metadata: ReturnType<typeof getMetadata>): string => {
       if (copyFormat === 'json') {
         // Original JSON format
-        content = JSON.stringify({ metadata, logs }, null, 2);
+        return JSON.stringify({ metadata, logs }, null, 2);
       } else if (copyFormat === 'ecs.json') {
         // ECS-compliant JSON with metadata wrapper
         const ecsLogs = logs.map((log) => transformToECS(log, metadata));
@@ -235,7 +259,7 @@ export function DebugPanel({
           metadata: transformMetadataToECS(metadata),
           logs: ecsLogs,
         };
-        content = JSON.stringify(output, null, 2);
+        return JSON.stringify(output, null, 2);
       } else if (copyFormat === 'ai.txt') {
         // AI-optimized TXT format
         const metaSection = `# METADATA
@@ -261,15 +285,25 @@ timestamp=${new Date().toISOString()}
           if (ecs.error?.message) line += ` | error="${ecs.error.message}"`;
           return line;
         });
-        content = metaSection + logLines.join('\n');
+        return metaSection + logLines.join('\n');
       } else if (copyFormat === 'jsonl') {
         // JSONL format
         const ecsLogs = logs.map((log) => transformToECS(log, metadata));
-        content = stringifyJSONL(ecsLogs);
+        return stringifyJSONL(ecsLogs);
       } else {
         // Default to original JSON
-        content = JSON.stringify({ metadata, logs }, null, 2);
+        return JSON.stringify({ metadata, logs }, null, 2);
       }
+    },
+    [copyFormat]
+  );
+
+  const handleCopy = useCallback(async () => {
+    setCopyStatus(null);
+    try {
+      const logs = getLogs();
+      const metadata = getMetadata();
+      const content = generateCopyContent(logs, metadata);
 
       await navigator.clipboard.writeText(content);
       setCopyStatus({
@@ -282,7 +316,61 @@ timestamp=${new Date().toISOString()}
         message: 'Failed to copy. Check clipboard permissions.',
       });
     }
-  }, [getLogs, getMetadata, copyFormat]);
+  }, [getLogs, getMetadata, generateCopyContent]);
+
+  // Export handleCopyFiltered for external use (e.g., keyboard shortcuts, custom UI)
+  // @ts-expect-error -- Function will be used in future tasks (Task 3-5)
+  const handleCopyFiltered = useCallback(
+    async (filter: CopyFilter) => {
+      setCopyStatus(null);
+      try {
+        const allLogs = getLogs();
+        const metadata = getMetadata();
+        const filteredLogs = filterLogsByType(allLogs, filter);
+        const count = filteredLogs.length;
+
+        // Handle empty results
+        if (count === 0) {
+          const emptyMessages: Record<CopyFilter, string> = {
+            all: 'No logs to copy',
+            logs: 'No logs to copy',
+            errors: 'No errors to copy',
+            network: 'No network requests to copy',
+            networkErrors: 'No network errors to copy',
+          };
+          setCopyStatus({
+            type: 'error',
+            message: emptyMessages[filter],
+          });
+          return;
+        }
+
+        // Generate content using filteredLogs
+        const content = generateCopyContent(filteredLogs, metadata);
+
+        await navigator.clipboard.writeText(content);
+
+        // Update status with count and filter type
+        const filterLabels: Record<CopyFilter, string> = {
+          all: 'all entries',
+          logs: 'logs',
+          errors: 'errors',
+          network: 'network requests',
+          networkErrors: 'network errors',
+        };
+        setCopyStatus({
+          type: 'success',
+          message: `Copied ${count} ${filterLabels[filter]} to clipboard`,
+        });
+      } catch {
+        setCopyStatus({
+          type: 'error',
+          message: 'Failed to copy. Check clipboard permissions.',
+        });
+      }
+    },
+    [getLogs, getMetadata, generateCopyContent, filterLogsByType]
+  );
 
   useEffect(() => {
     if (directoryStatus) {
