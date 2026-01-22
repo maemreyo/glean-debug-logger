@@ -117,7 +117,10 @@ export function DebugPanel({
     }
   }
 
-
+  // Helper function to count filtered logs
+  function getFilteredLogCount(logs: LogEntry[], filter: CopyFilter): number {
+    return filterLogsByType(logs, filter).length;
+  }
 
   // Refs for focus management
   const panelRef = useRef<HTMLDivElement>(null);
@@ -319,7 +322,6 @@ timestamp=${new Date().toISOString()}
   }, [getLogs, getMetadata, generateCopyContent]);
 
   // Export handleCopyFiltered for external use (e.g., keyboard shortcuts, custom UI)
-  // @ts-expect-error -- Function will be used in future tasks (Task 3-5)
   const handleCopyFiltered = useCallback(
     async (filter: CopyFilter) => {
       setCopyStatus(null);
@@ -591,6 +593,33 @@ timestamp=${new Date().toISOString()}
                 disabled={logCount === 0}
               >
                 🤖 AI
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopyFiltered('logs')}
+                className={actionButtonStyles}
+                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'logs') === 0}
+                aria-label="Copy only console logs"
+              >
+                📋 Logs
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopyFiltered('errors')}
+                className={actionButtonStyles}
+                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'errors') === 0}
+                aria-label="Copy only errors"
+              >
+                ⚠️ Errors
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopyFiltered('network')}
+                className={actionButtonStyles}
+                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'network') === 0}
+                aria-label="Copy only network requests"
+              >
+                🌐 Network
               </button>
               {uploadEndpoint ? (
                 <button
