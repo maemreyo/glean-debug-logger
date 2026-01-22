@@ -21,11 +21,13 @@ curl -sL https://raw.githubusercontent.com/maemreyo/glean-debug-logger/refs/head
 ```
 
 This command will:
+
 1. Fetch the latest installation prompt from the repository
 2. Execute the installation steps for your package manager
 3. Provide integration code
 
 **Note:** This command requires the user to:
+
 - Have curl installed
 - Be in a React/Next.js project directory
 - Have internet access to fetch the raw file
@@ -54,32 +56,84 @@ npm install @zaob/glean-debug-logger
 
 ## 🏁 Quick Start
 
+### Option 1: GleanDebugger Component (Recommended)
+
+The simplest way to add debug logging to your app. Just drop the component and it handles everything automatically:
+
 ```tsx
-import { useLogRecorder, DebugPanel } from "@zaob/glean-debug-logger";
+import GleanDebugger from '@zaob/glean-debug-logger';
 
 function App() {
-  const { downloadLogs, uploadLogs } = useLogRecorder({
-    fileNameTemplate: "{env}_{date}_{userId}_{errorCount}errors",
-    environment: "production",
-    userId: "user_123",
-    uploadEndpoint: "/api/logs/upload",
-  });
-
   return (
     <div>
       <h1>My Awesome App</h1>
-      <button onClick={() => downloadLogs("json")}>Download Logs</button>
-      
-      {/* Fixed-position debug panel (Ctrl+Shift+D to toggle) */}
-      <DebugPanel 
-        environment="production" 
-        userId="user_123" 
+      <GleanDebugger
+        environment="production"
+        user={{ id: 'user_123', email: 'user@example.com', role: 'admin' }}
         uploadEndpoint="/api/logs/upload"
       />
     </div>
   );
 }
 ```
+
+The `GleanDebugger` component provides:
+
+- **Auto-activation** based on environment, user role, or URL params
+- **Console commands API** via `window.glean` (`show()`, `hide()`, `toggle()`, `isEnabled()`)
+- **Smart visibility** - hidden by default in production unless explicitly enabled
+
+### Option 2: useLogRecorder Hook + DebugPanel
+
+For more control, use the hook and component separately:
+
+```tsx
+import { useLogRecorder, DebugPanel } from '@zaob/glean-debug-logger';
+
+function App() {
+  const { downloadLogs, uploadLogs } = useLogRecorder({
+    fileNameTemplate: '{env}_{date}_{userId}_{errorCount}errors',
+    environment: 'production',
+    userId: 'user_123',
+    uploadEndpoint: '/api/logs/upload',
+  });
+
+  return (
+    <div>
+      <h1>My Awesome App</h1>
+      <button onClick={() => downloadLogs('json')}>Download Logs</button>
+
+      {/* Fixed-position debug panel (Ctrl+Shift+D to toggle) */}
+      <DebugPanel environment="production" userId="user_123" uploadEndpoint="/api/logs/upload" />
+    </div>
+  );
+}
+```
+
+## 🔧 Activation Methods
+
+When using `GleanDebugger`, the debug panel activates automatically when ANY of these conditions are met:
+
+| Condition                          | How to Enable                                                         |
+| :--------------------------------- | :-------------------------------------------------------------------- |
+| Development mode                   | `environment="development"`                                           |
+| Production with `showInProduction` | `showInProduction={true}`                                             |
+| Admin user                         | `user={{ role: "admin" }}`                                            |
+| URL parameter                      | Add `?debug=true` to your URL                                         |
+| localStorage                       | Run in console: `localStorage.setItem('glean-debug-enabled', 'true')` |
+
+### Console Commands API
+
+When `GleanDebugger` is loaded, you can control it from the browser console:
+
+```javascript
+window.glean.show(); // Show the debug panel
+window.glean.hide(); // Hide the debug panel
+window.glean.toggle(); // Toggle visibility
+window.glean.isEnabled(); // Returns true/false
+```
+
+**Note**: In production mode, these commands warn that debug mode is disabled.
 
 ## 📖 Detailed Documentation
 
@@ -98,7 +152,7 @@ Placeholders are replaced with real values at the time of export:
 
 ```typescript
 const config = {
-  fileNameTemplate: "{env}_{date}_{userId}_{errorCount}errors_{browser}",
+  fileNameTemplate: '{env}_{date}_{userId}_{errorCount}errors_{browser}',
 };
 // Result: production_2026-01-20_user123_5errors_chrome.json
 ```
@@ -118,7 +172,7 @@ The library can POST logs directly to your backend for persistence:
 
 ```typescript
 const { uploadLogs } = useLogRecorder({
-  uploadEndpoint: "/api/logs/upload",
+  uploadEndpoint: '/api/logs/upload',
   uploadOnError: true, // Auto-upload when a console.error occurs
 });
 ```
@@ -132,7 +186,7 @@ You can customize this list:
 
 ```tsx
 useLogRecorder({
-  sanitizeKeys: ["custom_secret_key", "session_id"],
+  sanitizeKeys: ['custom_secret_key', 'session_id'],
 });
 ```
 

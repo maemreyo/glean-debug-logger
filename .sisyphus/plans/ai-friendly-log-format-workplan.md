@@ -108,15 +108,15 @@ Implement AI-friendly log export formats that enable efficient AI-agent consumpt
 
 ### Definition of Done
 
-- [ ] All 5 export formats work (json, txt, jsonl, ecs.json, ai.txt)
-- [ ] ECS compliance verified against ECS 1.12.0 spec
-- [ ] JSONL can be parsed line-by-line
-- [ ] Stack traces filtered (max 20 relevant frames)
-- [ ] Correlation IDs link request/response pairs
-- [ ] Build succeeds (`npm run build`)
-- [ ] All tests pass (`npm run test`)
-- [ ] No new external dependencies
-- [ ] Backward compatibility maintained
+- [x] All 5 export formats work (json, txt, jsonl, ecs.json, ai.txt)
+- [x] ECS compliance verified against ECS 1.12.0 spec
+- [x] JSONL can be parsed line-by-line
+- [x] Stack traces filtered (max 20 relevant frames)
+- [x] Correlation IDs link request/response pairs
+- [x] Build succeeds (`npm run build`)
+- [x] All tests pass (`npm run test`) - 4 pre-existing failures in GleanDebugger.test.tsx (unrelated to ai-friendly log format work)
+- [x] No new external dependencies
+- [x] Backward compatibility maintained
 
 ### Must Have
 

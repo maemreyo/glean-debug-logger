@@ -15,7 +15,7 @@ const recorder = useLogRecorder(config);
 ### Configuration Options (`RecorderConfig`)
 
 | Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
+| | :--- | :--- | :--- | :--- |
 | `maxLogs` | `number` | `1000` | Maximum number of log entries to store in memory. |
 | `enablePersistence` | `boolean` | `true` | If true, logs are saved to `localStorage`. |
 | `persistenceKey` | `string` | `'debug_logs'` | The key used for `localStorage` persistence. |
@@ -35,7 +35,7 @@ const recorder = useLogRecorder(config);
 ### Returned Values (`RecorderInstance`)
 
 | Value | Type | Description |
-| :--- | :--- | :--- |
+| | :--- | :--- | :--- |
 | `logs` | `LogEntry[]` | Reactive array of current logs. |
 | `getLogs` | `() => LogEntry[]` | Returns the current array of logs. |
 | `getLogCount` | `() => number` | Returns the total number of logs. |
@@ -49,6 +49,66 @@ const recorder = useLogRecorder(config);
 
 ---
 
+## `GleanDebugger` Component
+
+A wrapper component that provides smart activation and console commands API for the debug panel.
+
+### Usage
+
+```tsx
+import GleanDebugger from '@zaob/glean-debug-logger';
+
+<GleanDebugger
+  environment="production"
+  user={{ id: 'user_123', email: 'user@example.com', role: 'admin' }}
+  uploadEndpoint="/api/logs/upload"
+/>;
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+| | :--- | :--- | :--- | :--- |
+| `environment` | `string` | `'development'` | Current environment name. |
+| `user` | `User` | `undefined` | User object with optional `id`, `email`, `role`. |
+| `uploadEndpoint` | `string` | `undefined` | Backend URL for log uploads. |
+| `fileNameTemplate` | `string` | `undefined` | Custom filename template for exports. |
+| `maxLogs` | `number` | `1000` | Maximum logs to store. |
+| `showInProduction` | `boolean` | `false` | If true, panel is visible in production environments. |
+
+### Activation Logic
+
+The `GleanDebugger` component automatically activates (renders the debug panel) when ANY of the following conditions are true:
+
+1. `showInProduction={true}` - Always show in production
+2. `environment === "development"` - Always show in development
+3. `user?.role === "admin"` - Show for admin users
+4. `?debug=true` URL parameter - Show when `?debug=true` is in the URL
+5. `localStorage.getItem('glean-debug-enabled') === 'true'` - Show when localStorage flag is set
+
+### Console Commands API
+
+When `GleanDebugger` is mounted, it exposes a global API for controlling the debugger from the browser console:
+
+```typescript
+interface GleanConsoleAPI {
+  show(): void; // Show the debug panel
+  hide(): void; // Hide the debug panel
+  toggle(): void; // Toggle visibility
+  isEnabled(): boolean; // Returns current enabled state
+}
+
+// Access via:
+window.glean.show();
+window.glean.hide();
+window.glean.toggle();
+window.glean.isEnabled();
+```
+
+**Note**: In production mode, the API methods show warnings instead of performing actions.
+
+---
+
 ## `DebugPanel` Component
 
 A full-featured UI component for interacting with the log recorder.
@@ -56,24 +116,20 @@ A full-featured UI component for interacting with the log recorder.
 ### Usage
 
 ```tsx
-<DebugPanel 
-  environment="production"
-  userId="user-123"
-  uploadEndpoint="/api/logs/upload"
-/>
+<DebugPanel environment="production" userId="user-123" uploadEndpoint="/api/logs/upload" />
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `environment` | `string` | `'development'` | Passed to `useLogRecorder`. |
-| `userId` | `string` | `'anonymous'` | Passed to `useLogRecorder`. |
-| `uploadEndpoint` | `string` | `undefined` | Backend URL for the upload button. |
-| `fileNameTemplate`| `string` | `undefined` | Custom filename template. |
-| `maxLogs` | `number` | `1000` | Maximum logs to display. |
-| `showInProduction` | `boolean` | `false` | If false, panel is hidden in production envs. |
-| `customActions` | `ReactNode` | `undefined` | Additional buttons to show in the panel. |
+| Prop               | Type        | Default         | Description                                   |
+| :----------------- | :---------- | :-------------- | :-------------------------------------------- |
+| `environment`      | `string`    | `'development'` | Passed to `useLogRecorder`.                   |
+| `userId`           | `string`    | `'anonymous'`   | Passed to `useLogRecorder`.                   |
+| `uploadEndpoint`   | `string`    | `undefined`     | Backend URL for the upload button.            |
+| `fileNameTemplate` | `string`    | `undefined`     | Custom filename template.                     |
+| `maxLogs`          | `number`    | `1000`          | Maximum logs to display.                      |
+| `showInProduction` | `boolean`   | `false`         | If false, panel is hidden in production envs. |
+| `customActions`    | `ReactNode` | `undefined`     | Additional buttons to show in the panel.      |
 
 **Keyboard Shortcut**: `Ctrl + Shift + D` toggles the panel visibility.
 
@@ -91,10 +147,10 @@ A lightweight, unobtrusive version of the debug panel.
 
 ### Props
 
-| Prop | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
+| Prop       | Type                                                           | Default          | Description               |
+| :--------- | :------------------------------------------------------------- | :--------------- | :------------------------ |
 | `position` | `'bottom-right' \| 'bottom-left' \| 'top-right' \| 'top-left'` | `'bottom-right'` | Panel position on screen. |
-| `format` | `'json' \| 'txt'` | `'json'` | Default download format. |
+| `format`   | `'json' \| 'txt'`                                              | `'json'`         | Default download format.  |
 
 ---
 

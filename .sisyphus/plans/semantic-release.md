@@ -55,14 +55,14 @@ npm install --save-dev @semantic-release/changelog @semantic-release/git
 
 ```javascript
 module.exports = {
-  branches: ["main"],
+  branches: ['main'],
   plugins: [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    "@semantic-release/changelog",
-    "@semantic-release/npm",
-    "@semantic-release/github",
-    "@semantic-release/git",
+    '@semantic-release/commit-analyzer',
+    '@semantic-release/release-notes-generator',
+    '@semantic-release/changelog',
+    '@semantic-release/npm',
+    '@semantic-release/github',
+    '@semantic-release/git',
   ],
 };
 ```
@@ -89,8 +89,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          registry-url: "https://registry.npmjs.org"
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
       - run: npm ci
 
@@ -184,7 +184,7 @@ npm install --save-dev @commitlint/cli @commitlint/config-conventional
 ```javascript
 // commitlint.config.js
 module.exports = {
-  extends: ["@commitlint/config-conventional"],
+  extends: ['@commitlint/config-conventional'],
 };
 ```
 
@@ -235,11 +235,11 @@ GitHub Actions commit linting also available.
 
 ## Verification Checklist
 
-- [ ] semantic-release installed
-- [ ] release.config.js created
-- [ ] GitHub Actions workflow created
-- [ ] NPM_TOKEN added to GitHub secrets
-- [ ] First push triggers workflow
-- [ ] GitHub release created
-- [ ] Package published to npm
-- [ ] Version bumped correctly
+- [x] semantic-release installed (verified via npm list)
+- [x] release.config.js created (.releaserc created)
+- [x] GitHub Actions workflow created (release.yml exists)
+- [ ] NPM_TOKEN added to GitHub secrets (manual step, requires GitHub repo access)
+- [ ] First push triggers workflow (requires manual push to main branch)
+- [ ] GitHub release created (requires workflow to run)
+- [ ] Package published to npm (requires workflow to run)
+- [ ] Version bumped correctly (requires workflow to run)
