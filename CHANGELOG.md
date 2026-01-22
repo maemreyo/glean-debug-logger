@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/maemreyo/glean-debug-logger/compare/v2.0.0...v2.1.0) (2026-01-22)
+
+
+### Features
+
+* **components:** add GleanDebugger component with activation detection ([c54e279](https://github.com/maemreyo/glean-debug-logger/commit/c54e279857e55e5c8b9bcb5dae0e92e56b23c6fc))
+
 # [2.0.0](https://github.com/maemreyo/glean-debug-logger/compare/v1.5.0...v2.0.0) (2026-01-21)
 
 
