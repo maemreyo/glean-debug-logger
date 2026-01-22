@@ -1,3 +1,35 @@
+# [4.0.0](https://github.com/maemreyo/glean-debug-logger/compare/v3.1.0...v4.0.0) (2026-01-22)
+
+
+### Code Refactoring
+
+* **hooks:** extract reusable helper functions in useLogRecorder ([ac9b3bb](https://github.com/maemreyo/glean-debug-logger/commit/ac9b3bb820737f99f3ed5704d557f29d827b6a78))
+
+
+### Features
+
+* **panel:** add filter button UI components ([c076fc7](https://github.com/maemreyo/glean-debug-logger/commit/c076fc796d5cc75c9deee8c0c54ed91586092b55))
+* **panel:** add handleCopyFiltered function ([16206b9](https://github.com/maemreyo/glean-debug-logger/commit/16206b95e0a7ff0c8b3fb88f6b2adf354d7682a1))
+* **plans:** mark all debugpanel-copy-filter TODO items complete ([a9d7eb0](https://github.com/maemreyo/glean-debug-logger/commit/a9d7eb0b3a261a4ed1c322535525aec610d0f2f7))
+* **plans:** mark debugpanel-copy-filter plan as complete ([57e1938](https://github.com/maemreyo/glean-debug-logger/commit/57e1938de8c0dd71888e4acd589c65df0d6c63a7))
+* **ui:** add new button styles and enhance debug panel interactions ([ff265e8](https://github.com/maemreyo/glean-debug-logger/commit/ff265e81d976f5173076d634d72ceb0eb6b3aa21))
+* **ui:** add session tooltip with metadata display ([3ea0112](https://github.com/maemreyo/glean-debug-logger/commit/3ea0112de63a9cbc66b2b1aa89320f1707585deb))
+* **ui:** enhance debug panel with improved status messages and controls ([5c6bf49](https://github.com/maemreyo/glean-debug-logger/commit/5c6bf49c068e837bab5f419828b11887f667a227))
+* **ui:** enhance debug panel with modern design and animations ([97430ca](https://github.com/maemreyo/glean-debug-logger/commit/97430ca3a94cdc784ef8a83ff84ed67752880873))
+* **ui:** refactor debug panel into modular components ([74eaf22](https://github.com/maemreyo/glean-debug-logger/commit/74eaf22454a997de01a581f2e94adda80292dd5e))
+* **ui:** reorganize debug panel action buttons ([f9bd7e1](https://github.com/maemreyo/glean-debug-logger/commit/f9bd7e1df7507cdc41ec77fe3b95a098389eaeb2))
+
+
+### Tests
+
+* **ui:** add comprehensive test coverage for toggle panel functionality ([be4f4df](https://github.com/maemreyo/glean-debug-logger/commit/be4f4dfdb1546762293a9465ad495655c9cee68c))
+
+
+### BREAKING CHANGES
+
+* **ui:** Adds new test infrastructure and extends existing test suite
+* **hooks:** None
+
 # [3.1.0](https://github.com/maemreyo/glean-debug-logger/compare/v3.0.0...v3.1.0) (2026-01-22)
 
 
