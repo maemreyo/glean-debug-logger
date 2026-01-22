@@ -116,7 +116,7 @@ State Management → Filter Logic → UI Components → Status Messages → Test
 
 ## TODOs
 
-- [ ] 1. Add copy filter state and helper functions
+- [x] 1. Add copy filter state and helper functions
 
   **What to do**:
   - Add `copyFilter` state with values: 'all' | 'logs' | 'errors' | 'network' | 'networkErrors'
@@ -171,7 +171,7 @@ State Management → Filter Logic → UI Components → Status Messages → Test
   - Files: `src/components/DebugPanel.tsx`
   - Pre-commit: N/A
 
-- [ ] 2. Create filter-specific handleCopyFiltered function
+- [x] 2. Create filter-specific handleCopyFiltered function
 
   **What to do**:
   - Create `handleCopyFiltered(filter: CopyFilter)` function
@@ -214,7 +214,7 @@ State Management → Filter Logic → UI Components → Status Messages → Test
   - Files: `src/components/DebugPanel.tsx`
   - Pre-commit: N/A
 
-- [ ] 3. Add filter button UI components
+- [x] 3. Add filter button UI components
 
   **What to do**:
   - Add 3 new buttons in the action button grid:
@@ -263,7 +263,7 @@ State Management → Filter Logic → UI Components → Status Messages → Test
   - Files: `src/components/DebugPanel.tsx`
   - Pre-commit: N/A
 
-- [ ] 4. Update status messages to show filter info
+- [x] 4. Update status messages to show filter info
 
   **What to do**:
   - Modify copyStatus state to include filter type
@@ -303,7 +303,7 @@ State Management → Filter Logic → UI Components → Status Messages → Test
   - Files: `src/components/DebugPanel.tsx`
   - Pre-commit: N/A
 
-- [ ] 5. Manual verification and edge case testing
+- [x] 5. Manual verification and edge case testing
 
   **What to do**:
   - Test all filter combinations
