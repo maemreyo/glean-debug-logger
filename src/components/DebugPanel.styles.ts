@@ -247,6 +247,56 @@ export const closeButtonStyles = css`
 `;
 
 // ============================================
+// SESSION TOOLTIP - Compact info popup
+// ============================================
+export const sessionTooltipStyles = css`
+  position: fixed;
+  top: auto;
+  left: auto;
+  margin-top: ${theme.space.xs};
+  min-width: 180px;
+  max-width: 220px;
+  padding: ${theme.space.sm} ${theme.space.md};
+  background: ${theme.glassBg};
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid ${theme.glassBorder};
+  border-radius: ${theme.radius.md};
+  box-shadow: ${theme.glassShadow};
+  z-index: 10000;
+  font-size: 11px;
+  line-height: 1.6;
+  pointer-events: none;
+`;
+
+export const sessionTooltipRowStyles = css`
+  display: flex;
+  justify-content: space-between;
+  gap: ${theme.space.md};
+  padding: ${theme.space.xs} 0;
+  border-bottom: 1px solid ${theme.colors.border};
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+export const sessionTooltipLabelStyles = css`
+  color: ${theme.colors.muted};
+  font-weight: 500;
+`;
+
+export const sessionTooltipValueStyles = css`
+  color: ${theme.colors.primary};
+  font-weight: 500;
+  text-align: right;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+// ============================================
 // STATS - Elegant Metrics Display
 // ============================================
 export const statsGridStyles = css`
@@ -722,6 +772,19 @@ export const darkModeStyles = css`
         background: rgba(255, 255, 255, 0.08);
         color: rgba(255, 255, 255, 0.8);
       }
+    }
+
+    ${sessionTooltipStyles} {
+      background: rgba(30, 30, 46, 0.95);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    ${sessionTooltipLabelStyles} {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    ${sessionTooltipValueStyles} {
+      color: rgba(255, 255, 255, 0.9);
     }
 
     ${statsGridStyles} {

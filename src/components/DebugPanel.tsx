@@ -13,7 +13,6 @@ import { DebugPanelHeader } from './DebugPanelHeader';
 import { DebugPanelStats } from './DebugPanelStats';
 import { DebugPanelActions } from './DebugPanelActions';
 import { DebugPanelStatus } from './DebugPanelStatus';
-import { DebugPanelSessionDetails } from './DebugPanelSessionDetails';
 import { DebugPanelFooter } from './DebugPanelFooter';
 import { Bug } from 'lucide-react';
 
@@ -352,6 +351,7 @@ timestamp=${new Date().toISOString()}
           >
             <DebugPanelHeader
               sessionId={sessionId}
+              metadata={metadata}
               onClose={close}
               onSaveToDirectory={handleSaveToDirectory}
               onClear={() => {
@@ -384,8 +384,6 @@ timestamp=${new Date().toISOString()}
               directoryStatus={directoryStatus}
               copyStatus={copyStatus}
             />
-
-            <DebugPanelSessionDetails metadata={metadata} />
 
             <DebugPanelFooter />
           </motion.div>
