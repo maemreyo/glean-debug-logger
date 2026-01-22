@@ -305,3 +305,242 @@ describe('useDebugPanelControls - API Interface', () => {
     expect(typeof result.current.supportsDirectoryPicker).toBe('boolean');
   });
 });
+
+describe('useDebugPanelControls - State Management', () => {
+  it('should start with isOpen as false', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should toggle isOpen when toggle is called', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+
+    expect(result.current.isOpen).toBe(false);
+
+    act(() => {
+      result.current.toggle();
+    });
+    expect(result.current.isOpen).toBe(true);
+
+    act(() => {
+      result.current.toggle();
+    });
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should set isOpen to true when open is called', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+
+    expect(result.current.isOpen).toBe(false);
+
+    act(() => {
+      result.current.open();
+    });
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it('should set isOpen to false when close is called', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+
+    act(() => {
+      result.current.open();
+    });
+    expect(result.current.isOpen).toBe(true);
+
+    act(() => {
+      result.current.close();
+    });
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should handle multiple toggle calls correctly', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+
+    act(() => {
+      result.current.toggle();
+    });
+    expect(result.current.isOpen).toBe(true);
+
+    act(() => {
+      result.current.toggle();
+    });
+    expect(result.current.isOpen).toBe(false);
+
+    act(() => {
+      result.current.toggle();
+    });
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it('should handle open followed by close', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+
+    act(() => {
+      result.current.open();
+      result.current.close();
+    });
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should handle close followed by open', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+
+    act(() => {
+      result.current.close();
+      result.current.open();
+    });
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it('should have correct types', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+
+    expect(typeof result.current.isOpen).toBe('boolean');
+    expect(typeof result.current.toggle).toBe('function');
+    expect(typeof result.current.open).toBe('function');
+    expect(typeof result.current.close).toBe('function');
+    expect(typeof result.current.supportsDirectoryPicker).toBe('boolean');
+  });
+});
+
+describe('useDebugPanelControls - Custom Events (glean-debug-toggle)', () => {
+  it('should set isOpen to true on glean-debug-toggle event with visible=true', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+    expect(result.current.isOpen).toBe(false);
+
+    const event = new CustomEvent('glean-debug-toggle', {
+      detail: { visible: true },
+    });
+
+    act(() => {
+      window.dispatchEvent(event);
+    });
+
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it('should set isOpen to false on glean-debug-toggle event with visible=false', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+
+    act(() => {
+      result.current.open();
+    });
+    expect(result.current.isOpen).toBe(true);
+
+    const event = new CustomEvent('glean-debug-toggle', {
+      detail: { visible: false },
+    });
+
+    act(() => {
+      window.dispatchEvent(event);
+    });
+
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should ignore event with missing detail', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+    expect(result.current.isOpen).toBe(false);
+
+    const event = new CustomEvent('glean-debug-toggle', {
+      detail: undefined,
+    });
+
+    act(() => {
+      window.dispatchEvent(event);
+    });
+
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should ignore event with missing visible property', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+    expect(result.current.isOpen).toBe(false);
+
+    const event = new CustomEvent('glean-debug-toggle', {
+      detail: { otherProp: true },
+    });
+
+    act(() => {
+      window.dispatchEvent(event);
+    });
+
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should ignore event with non-boolean visible value', () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+    expect(result.current.isOpen).toBe(false);
+
+    // Test with string
+    const event1 = new CustomEvent('glean-debug-toggle', {
+      detail: { visible: 'true' as unknown as boolean },
+    });
+
+    act(() => {
+      window.dispatchEvent(event1);
+    });
+
+    expect(result.current.isOpen).toBe(false);
+  });
+
+  it('should debounce rapid toggle events', async () => {
+    const { result } = renderHook(() => useDebugPanelControls());
+    expect(result.current.isOpen).toBe(false);
+
+    // Rapid events
+    const events = [
+      new CustomEvent('glean-debug-toggle', { detail: { visible: true } }),
+      new CustomEvent('glean-debug-toggle', { detail: { visible: false } }),
+      new CustomEvent('glean-debug-toggle', { detail: { visible: true } }),
+      new CustomEvent('glean-debug-toggle', { detail: { visible: false } }),
+    ];
+
+    act(() => {
+      events.forEach((event) => {
+        window.dispatchEvent(event);
+      });
+    });
+
+    // Wait for debounce
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Should have last value (false)
+    expect(result.current.isOpen).toBe(false);
+  });
+});
+
+describe('useDebugPanelControls - Event Listener Optimization', () => {
+  it('should not re-register keydown listener when isOpen changes', () => {
+    const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
+    const addEventListenerCalls = addEventListenerSpy.mock.calls.length;
+
+    const { result, unmount } = renderHook(() => useDebugPanelControls());
+
+    // Open and close multiple times
+    act(() => {
+      result.current.toggle();
+    });
+    act(() => {
+      result.current.toggle();
+    });
+    act(() => {
+      result.current.toggle();
+    });
+
+    // Should not have added more keydown listeners
+    expect(addEventListenerSpy).toHaveBeenCalledTimes(addEventListenerCalls);
+
+    unmount();
+  });
+
+  it('should properly clean up glean-debug-toggle listener on unmount', () => {
+    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+
+    const { unmount } = renderHook(() => useDebugPanelControls());
+
+    unmount();
+
+    expect(removeEventListenerSpy).toHaveBeenCalledWith('glean-debug-toggle', expect.any(Function));
+  });
+});
