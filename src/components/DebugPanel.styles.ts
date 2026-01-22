@@ -543,24 +543,30 @@ export const dangerActionButtonStyles = css`
 `;
 
 // ============================================
-// STATUS MESSAGES - Toast Style
+// STATUS MESSAGES - Compact Toast Style
 // ============================================
+export const statusContainerStyles = css`
+  display: flex;
+  flex-direction: column;
+  gap: ${theme.space.xs};
+  padding: 0 ${theme.space.lg} ${theme.space.sm};
+`;
+
 export const successMessageStyles = css`
   display: flex;
   align-items: center;
   gap: ${theme.space.sm};
-  padding: ${theme.space.md};
-  margin: 0 ${theme.space.lg};
+  padding: ${theme.space.sm} ${theme.space.md};
   background: ${theme.colors.successBg};
   border: 1px solid ${theme.colors.successBorder};
   border-radius: ${theme.radius.md};
-  font-size: 12px;
+  font-size: 11px;
   color: ${theme.colors.success};
   font-weight: 500;
 
   & svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
   }
 `;
@@ -569,20 +575,27 @@ export const errorMessageStyles = css`
   display: flex;
   align-items: center;
   gap: ${theme.space.sm};
-  padding: ${theme.space.md};
-  margin: 0 ${theme.space.lg};
+  padding: ${theme.space.sm} ${theme.space.md};
   background: ${theme.colors.errorBg};
   border: 1px solid ${theme.colors.errorBorder};
   border-radius: ${theme.radius.md};
-  font-size: 12px;
+  font-size: 11px;
   color: ${theme.colors.error};
   font-weight: 500;
 
   & svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
   }
+`;
+
+export const statusMessageContentStyles = css`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 // ============================================

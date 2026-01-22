@@ -112,10 +112,18 @@ export function DebugPanel({
     return undefined;
   }, [metadata.errorCount, uploadEndpoint, uploadLogs]);
 
-  // Close panel when clicking outside
+  // Close panel when clicking outside (exclude toggle button to prevent race with its onClick)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (isOpen && panelRef.current && !panelRef.current.contains(e.target as Node)) {
+      // Skip if clicking the toggle button (check by aria-label)
+      const target = e.target as HTMLElement;
+      if (
+        target.closest('[aria-label="Open debug panel"]') ||
+        target.closest('[aria-label="Close debug panel"]')
+      ) {
+        return;
+      }
+      if (isOpen && panelRef.current && !panelRef.current.contains(target)) {
         close();
       }
     };
@@ -123,23 +131,6 @@ export function DebugPanel({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, close]);
-
-  // Keyboard shortcut
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        e.preventDefault();
-        if (isOpen) {
-          close();
-        } else {
-          open();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, open, close]);
 
   const generateCopyContent = useCallback(
     (logs: LogEntry[], meta: ReturnType<typeof getMetadata>): string => {
@@ -322,7 +313,10 @@ timestamp=${new Date().toISOString()}
     <>
       <motion.button
         type="button"
-        onClick={isOpen ? close : open}
+        onClick={(e) => {
+          e.stopPropagation();
+          isOpen ? close() : open();
+        }}
         className={toggleButtonStyles}
         aria-label={isOpen ? 'Close debug panel' : 'Open debug panel (Ctrl+Shift+D)'}
         aria-expanded={isOpen}
@@ -342,7 +336,7 @@ timestamp=${new Date().toISOString()}
         )}
       </motion.button>
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
             ref={panelRef}
