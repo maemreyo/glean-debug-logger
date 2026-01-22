@@ -66,24 +66,43 @@ describe('GleanDebugger - Activation Logic', () => {
 
   describe('Original Logic Activation', () => {
     it('should activate when showInProduction is true', () => {
-      const shouldShow = true || 'development' === 'development' || undefined?.role === 'admin';
+      const showInProduction = true;
+      const env: string = 'development';
+      const shouldShow =
+        showInProduction || env === 'development' || (undefined as any)?.role === 'admin';
       expect(shouldShow).toBe(true);
     });
 
     it('should activate when environment is development', () => {
-      const shouldShow = false || 'development' === 'development' || undefined?.role === 'admin';
+      const showInProduction = false;
+      const env: string = 'development';
+      const shouldShow =
+        showInProduction || env === 'development' || (undefined as any)?.role === 'admin';
       expect(shouldShow).toBe(true);
     });
 
     it('should activate when user role is admin', () => {
-      const user = { role: 'admin' };
-      const shouldShow = false || 'test' === 'development' || user?.role === 'admin';
+      const user: any = { role: 'admin' };
+      const showInProduction = false;
+      const env: string = 'test';
+      const devEnv: string = 'development';
+      const shouldShow = showInProduction || env === devEnv || user?.role === 'admin';
       expect(shouldShow).toBe(true);
     });
 
     it('should not activate by default in production', () => {
-      vi.stubGlobal('process', { env: { NODE_ENV: 'production' } });
-      const shouldShow = false || 'production' === 'development' || undefined?.role === 'admin';
+      const showInProduction = false;
+      const env: string = 'production';
+      const devEnv: string = 'development';
+      const shouldShow = showInProduction || env === devEnv || (undefined as any)?.role === 'admin';
+      expect(shouldShow).toBe(false);
+    });
+
+    it('should not activate by default in production', () => {
+      const showInProduction = false;
+      const env: string = 'production';
+      const shouldShow =
+        showInProduction || env === 'development' || (undefined as any)?.role === 'admin';
       expect(shouldShow).toBe(false);
     });
   });
@@ -116,25 +135,40 @@ describe('GleanDebugger - Activation Logic', () => {
 
   describe('localStorage Activation', () => {
     it('should activate when glean-debug-enabled is set to true', () => {
-      mockLocalStorage.setItem('glean-debug-enabled', 'true');
-      const localStorageEnabled = mockLocalStorage.getItem('glean-debug-enabled') === 'true';
+      const store: Record<string, string> = {};
+      const setItem = vi.fn((key: string, value: string): void => {
+        store[key] = value;
+      });
+      const getItem = vi.fn((key: string): string | null => store[key] || null);
+
+      setItem('glean-debug-enabled', 'true');
+      const localStorageEnabled = getItem('glean-debug-enabled') === 'true';
       expect(localStorageEnabled).toBe(true);
     });
 
     it('should not activate when glean-debug-enabled is not set', () => {
-      const localStorageEnabled = mockLocalStorage.getItem('glean-debug-enabled') === 'true';
+      const store: Record<string, string> = {};
+      const getItem = vi.fn((key: string): string | null => store[key] || null);
+
+      const localStorageEnabled = getItem('glean-debug-enabled') === 'true';
       expect(localStorageEnabled).toBe(false);
     });
 
     it('should not activate when glean-debug-enabled is empty string', () => {
-      mockLocalStorage.setItem('glean-debug-enabled', '');
-      const localStorageEnabled = mockLocalStorage.getItem('glean-debug-enabled') === 'true';
+      const store: Record<string, string> = {};
+      const setItem = vi.fn((key: string, value: string): void => {
+        store[key] = value;
+      });
+      const getItem = vi.fn((key: string): string | null => store[key] || null);
+
+      setItem('glean-debug-enabled', '');
+      const localStorageEnabled = getItem('glean-debug-enabled') === 'true';
       expect(localStorageEnabled).toBe(false);
     });
 
     it('should handle localStorage errors gracefully', () => {
       const errorLocalStorage = {
-        getItem: vi.fn(() => {
+        getItem: vi.fn((_key: string) => {
           throw new Error('Private browsing mode');
         }),
         setItem: vi.fn(),
@@ -459,7 +493,26 @@ describe('GleanDebugger - Edge Cases', () => {
   });
 
   it('should handle rapid toggle operations', () => {
+    const store: Record<string, string> = {};
     const operations: string[] = [];
+    const getItem = vi.fn((key: string): string | null => store[key] || null);
+    const setItem = vi.fn((key: string, value: string): void => {
+      store[key] = value;
+    });
+    const removeItem = vi.fn((key: string): void => {
+      delete store[key];
+    });
+
+    vi.stubGlobal('localStorage', {
+      getItem,
+      setItem,
+      removeItem,
+      clear: vi.fn(),
+      key: vi.fn(),
+      get length() {
+        return Object.keys(store).length;
+      },
+    });
 
     for (let i = 0; i < 10; i++) {
       const isEnabled = localStorage.getItem('glean-debug-enabled') === 'true';
@@ -473,6 +526,7 @@ describe('GleanDebugger - Edge Cases', () => {
     }
 
     expect(operations.length).toBe(10);
+    // First is 'on' (starts false), then toggles back and forth
     expect(operations.filter((op) => op === 'on').length).toBe(5);
     expect(operations.filter((op) => op === 'off').length).toBe(5);
   });
