@@ -545,13 +545,43 @@ timestamp=${new Date().toISOString()}
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '6px',
-                marginBottom: '8px',
               }}
             >
               <button
                 type="button"
+                onClick={() => handleCopyFiltered('logs')}
+                className={actionButtonStyles}
+                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'logs') === 0}
+                aria-label="Copy only console logs"
+              >
+                📋 Logs
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopyFiltered('errors')}
+                className={actionButtonStyles}
+                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'errors') === 0}
+                aria-label="Copy only errors"
+              >
+                ⚠️ Errors
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCopyFiltered('network')}
+                className={actionButtonStyles}
+                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'network') === 0}
+                aria-label="Copy only network requests"
+              >
+                🌐 Network
+              </button>
+              <hr />
+              <hr />
+              <hr />
+              <button
+                type="button"
                 onClick={() => handleDownload('json')}
                 className={actionButtonStyles}
+                disabled={logCount === 0}
               >
                 📄 JSON
               </button>
@@ -559,6 +589,7 @@ timestamp=${new Date().toISOString()}
                 type="button"
                 onClick={() => handleDownload('txt')}
                 className={actionButtonStyles}
+                disabled={logCount === 0}
               >
                 📝 TXT
               </button>
@@ -594,33 +625,7 @@ timestamp=${new Date().toISOString()}
               >
                 🤖 AI
               </button>
-              <button
-                type="button"
-                onClick={() => handleCopyFiltered('logs')}
-                className={actionButtonStyles}
-                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'logs') === 0}
-                aria-label="Copy only console logs"
-              >
-                📋 Logs
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCopyFiltered('errors')}
-                className={actionButtonStyles}
-                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'errors') === 0}
-                aria-label="Copy only errors"
-              >
-                ⚠️ Errors
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCopyFiltered('network')}
-                className={actionButtonStyles}
-                disabled={logCount === 0 || getFilteredLogCount(getLogs(), 'network') === 0}
-                aria-label="Copy only network requests"
-              >
-                🌐 Network
-              </button>
+
               {uploadEndpoint ? (
                 <button
                   type="button"
