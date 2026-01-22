@@ -66,7 +66,7 @@ export function DebugPanel({
   showInProduction = false,
 }: DebugPanelProps) {
   const { isOpen, open, close } = useDebugPanelControls();
-  const { isSettingsOpen } = useSettingsDropdown();
+  const { isSettingsOpen, openSettings, closeSettings } = useSettingsDropdown();
   const { copyFormat } = useCopyFormat();
   const {
     uploadStatus,
@@ -373,6 +373,9 @@ timestamp=${new Date().toISOString()}
                     }
                   }}
                   ref={closeButtonRef}
+                  isSettingsOpen={isSettingsOpen}
+                  openSettings={openSettings}
+                  closeSettings={closeSettings}
                 />
 
                 <DebugPanelStats

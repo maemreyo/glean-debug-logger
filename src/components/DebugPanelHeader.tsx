@@ -14,7 +14,6 @@ import {
   sessionTooltipValueStyles,
 } from './DebugPanel.styles';
 import { useCopyFormat, CopyFormat } from '../hooks/useCopyFormat';
-import { useSettingsDropdown } from '../hooks/useSettingsDropdown';
 import { Settings, FileJson, FileText, Save, Trash2, X, Info } from 'lucide-react';
 import type { LogMetadata } from '../types';
 
@@ -24,6 +23,9 @@ interface DebugPanelHeaderProps {
   onClose: () => void;
   onSaveToDirectory: () => void;
   onClear: () => void;
+  isSettingsOpen: boolean;
+  openSettings: () => void;
+  closeSettings: () => void;
 }
 
 // Custom styled dropdown content component
@@ -145,11 +147,19 @@ function SettingsDropdownContent({
 
 export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderProps>(
   function DebugPanelHeader(
-    { sessionId, metadata, onClose, onSaveToDirectory, onClear },
+    {
+      sessionId,
+      metadata,
+      onClose,
+      onSaveToDirectory,
+      onClear,
+      isSettingsOpen,
+      openSettings,
+      closeSettings,
+    },
     closeButtonRef
   ) {
     const { copyFormat, setCopyFormat } = useCopyFormat();
-    const { isSettingsOpen, openSettings, closeSettings } = useSettingsDropdown();
     const [showSessionTooltip, setShowSessionTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
     const tooltipRef = useRef<HTMLDivElement>(null);
