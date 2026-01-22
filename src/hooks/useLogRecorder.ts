@@ -36,6 +36,18 @@ const DEFAULT_CONFIG: LogRecorderConfig = {
   uploadOnErrorCount: 5,
 };
 
+// Helper functions for code reuse
+function generateRequestId(): string {
+  return Math.random().toString(36).substring(7);
+}
+
+function sanitizeHeaders(
+  headers: Record<string, unknown>,
+  sanitizeKeys: string[]
+): Record<string, unknown> {
+  return sanitizeData(headers, { keys: sanitizeKeys });
+}
+
 export function useLogRecorder(
   customConfig: Partial<LogRecorderConfig> = {}
 ): UseLogRecorderReturn {
@@ -235,7 +247,7 @@ export function useLogRecorder(
       >();
 
       networkInterceptor.onFetchRequest((url, options) => {
-        const requestId = Math.random().toString(36).substring(7);
+        const requestId = generateRequestId();
         let requestBody: unknown = null;
         if (options?.body) {
           try {
@@ -250,9 +262,10 @@ export function useLogRecorder(
         requestIdMap.set(requestId, {
           url,
           method: options?.method || 'GET',
-          headers: sanitizeData(options?.headers as Record<string, unknown>, {
-            keys: config.sanitizeKeys,
-          }),
+          headers: sanitizeHeaders(
+            options?.headers as Record<string, unknown>,
+            config.sanitizeKeys
+          ),
           body: requestBody,
         });
 
@@ -261,9 +274,10 @@ export function useLogRecorder(
           id: requestId,
           url,
           method: options?.method || 'GET',
-          headers: sanitizeData(options?.headers as Record<string, unknown>, {
-            keys: config.sanitizeKeys,
-          }),
+          headers: sanitizeHeaders(
+            options?.headers as Record<string, unknown>,
+            config.sanitizeKeys
+          ),
           body: requestBody,
           time: new Date().toISOString(),
         });
@@ -314,7 +328,7 @@ export function useLogRecorder(
       xhrInterceptor.onXHRRequest((xhrConfig) => {
         addLog({
           type: 'XHR_REQ',
-          id: Math.random().toString(36).substring(7),
+          id: generateRequestId(),
           url: xhrConfig.url,
           method: xhrConfig.method,
           headers: xhrConfig.headers as Record<string, string>,
@@ -326,7 +340,7 @@ export function useLogRecorder(
       xhrInterceptor.onXHRResponse((xhrConfig, status, duration) => {
         addLog({
           type: 'XHR_RES',
-          id: Math.random().toString(36).substring(7),
+          id: generateRequestId(),
           url: xhrConfig.url,
           status,
           statusText: '',
@@ -339,7 +353,7 @@ export function useLogRecorder(
       xhrInterceptor.onXHRError((xhrConfig, error) => {
         addLog({
           type: 'XHR_ERR',
-          id: Math.random().toString(36).substring(7),
+          id: generateRequestId(),
           url: xhrConfig.url,
           error: error.message,
           duration: '[unknown]ms',
