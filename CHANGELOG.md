@@ -1,3 +1,21 @@
+# [3.0.0](https://github.com/maemreyo/glean-debug-logger/compare/v2.1.0...v3.0.0) (2026-01-22)
+
+
+### Bug Fixes
+
+* **release:** rename .releaserc to .releaserc.js ([6a27118](https://github.com/maemreyo/glean-debug-logger/commit/6a2711811baecfbef04d1d166c578a8f3b1f305f))
+* **tests:** resolve GleanDebugger.test.tsx failures ([e32abd2](https://github.com/maemreyo/glean-debug-logger/commit/e32abd2598e7adb0e588d4dd8191ecc5eab6699c))
+
+
+### Features
+
+* **components:** add GleanDebugger component with smart activation logic ([04722f7](https://github.com/maemreyo/glean-debug-logger/commit/04722f71435ab3e0120f0a818d1437b6dcd39fe9))
+
+
+### BREAKING CHANGES
+
+* **components:** The new GleanDebugger component replaces the previous DebugPanel activation logic with a more comprehensive system that includes URL parameter detection, localStorage persistence, and user role-based activation.
+
 # [2.1.0](https://github.com/maemreyo/glean-debug-logger/compare/v2.0.0...v2.1.0) (2026-01-22)
 
 
