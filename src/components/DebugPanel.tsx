@@ -1,25 +1,21 @@
 'use client';
 
 import { useCallback, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLogRecorder } from '../hooks/useLogRecorder/index';
 import { useDebugPanelControls } from '../hooks/useDebugPanelControls';
 import { useCopyFormat } from '../hooks/useCopyFormat';
 import { useStatusMessages } from '../hooks/useStatusMessages';
 import { LogEntry, ConsoleLogEntry, ExportFormat } from '../types';
 import { transformToECS, transformMetadataToECS } from '../utils/ecsTransform';
-import {
-  toggleButtonStyles,
-  badgeStyles,
-  errorBadgeStyles,
-  panelStyles,
-  dangerActionButtonStyles,
-} from './DebugPanel.styles';
+import { toggleButtonStyles, panelStyles, indicatorDotStyles } from './DebugPanel.styles';
 import { DebugPanelHeader } from './DebugPanelHeader';
 import { DebugPanelStats } from './DebugPanelStats';
 import { DebugPanelActions } from './DebugPanelActions';
 import { DebugPanelStatus } from './DebugPanelStatus';
 import { DebugPanelSessionDetails } from './DebugPanelSessionDetails';
 import { DebugPanelFooter } from './DebugPanelFooter';
+import { Bug } from 'lucide-react';
 
 interface DebugPanelProps {
   user?: {
@@ -127,6 +123,23 @@ export function DebugPanel({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, close]);
+
+  // Keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        if (isOpen) {
+          close();
+        } else {
+          open();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, open, close]);
 
   const generateCopyContent = useCallback(
     (logs: LogEntry[], meta: ReturnType<typeof getMetadata>): string => {
@@ -307,87 +320,83 @@ timestamp=${new Date().toISOString()}
 
   return (
     <>
-      <button
+      <motion.button
         type="button"
-        onClick={open}
+        onClick={isOpen ? close : open}
         className={toggleButtonStyles}
-        aria-label="Open debug panel (Ctrl+Shift+D)"
+        aria-label={isOpen ? 'Close debug panel' : 'Open debug panel (Ctrl+Shift+D)'}
         aria-expanded={isOpen}
         aria-controls="debug-panel"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        layout
       >
-        <span>Debug</span>
-        <span
-          className={
-            logCount > 0 ? (metadata.errorCount > 0 ? errorBadgeStyles : badgeStyles) : badgeStyles
-          }
-        >
-          {logCount}
-        </span>
+        <Bug size={18} />
         {metadata.errorCount > 0 && (
-          <span className={errorBadgeStyles}>{metadata.errorCount} err</span>
+          <motion.span
+            className={indicatorDotStyles}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            key={`err-${metadata.errorCount}`}
+          />
         )}
-      </button>
+      </motion.button>
 
-      {isOpen && (
-        <div
-          ref={panelRef}
-          id="debug-panel"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Debug Logger Panel"
-          className={panelStyles}
-        >
-          <DebugPanelHeader
-            sessionId={sessionId}
-            onClose={close}
-            onSaveToDirectory={handleSaveToDirectory}
-            ref={closeButtonRef}
-          />
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            ref={panelRef}
+            id="debug-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Debug Logger Panel"
+            className={panelStyles}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <DebugPanelHeader
+              sessionId={sessionId}
+              onClose={close}
+              onSaveToDirectory={handleSaveToDirectory}
+              onClear={() => {
+                if (confirm('Clear all logs?')) {
+                  clearLogs();
+                }
+              }}
+              ref={closeButtonRef}
+            />
 
-          <DebugPanelStats
-            logCount={logCount}
-            errorCount={metadata.errorCount}
-            networkErrorCount={metadata.networkErrorCount}
-          />
+            <DebugPanelStats
+              logCount={logCount}
+              errorCount={metadata.errorCount}
+              networkErrorCount={metadata.networkErrorCount}
+            />
 
-          <DebugPanelActions
-            logCount={logCount}
-            hasUploadEndpoint={!!uploadEndpoint}
-            isUploading={false}
-            getFilteredLogCount={getFilteredLogCount}
-            onCopyFiltered={handleCopyFiltered}
-            onDownload={handleDownload}
-            onCopy={handleCopy}
-            onUpload={handleUpload}
-          />
+            <DebugPanelActions
+              logCount={logCount}
+              hasUploadEndpoint={!!uploadEndpoint}
+              isUploading={false}
+              getFilteredLogCount={getFilteredLogCount}
+              onCopyFiltered={handleCopyFiltered}
+              onDownload={handleDownload}
+              onCopy={handleCopy}
+              onUpload={handleUpload}
+            />
 
-          <DebugPanelStatus
-            uploadStatus={uploadStatus}
-            directoryStatus={directoryStatus}
-            copyStatus={copyStatus}
-          />
+            <DebugPanelStatus
+              uploadStatus={uploadStatus}
+              directoryStatus={directoryStatus}
+              copyStatus={copyStatus}
+            />
 
-          <DebugPanelSessionDetails metadata={metadata} />
+            <DebugPanelSessionDetails metadata={metadata} />
 
-          <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'flex-end' }}>
-            {!uploadEndpoint && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm('Clear all logs?')) {
-                    clearLogs();
-                  }
-                }}
-                className={dangerActionButtonStyles}
-              >
-                🗑️ Clear
-              </button>
-            )}
-          </div>
-
-          <DebugPanelFooter />
-        </div>
-      )}
+            <DebugPanelFooter />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

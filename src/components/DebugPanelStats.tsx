@@ -17,15 +17,19 @@ export function DebugPanelStats({ logCount, errorCount, networkErrorCount }: Deb
   return (
     <div className={statsGridStyles}>
       <div className={statItemStyles}>
-        <div className={statValueStyles}>{logCount}</div>
+        <div className={statValueStyles}>{logCount.toLocaleString()}</div>
         <div className={statLabelStyles}>Logs</div>
       </div>
       <div className={statItemStyles}>
-        <div className={`${statValueStyles} ${errorValueStyles}`}>{errorCount}</div>
+        <div className={`${statValueStyles} ${errorValueStyles}`}>
+          {errorCount.toLocaleString()}
+        </div>
         <div className={statLabelStyles}>Errors</div>
       </div>
       <div className={statItemStyles}>
-        <div className={`${statValueStyles} ${networkErrorValueStyles}`}>{networkErrorCount}</div>
+        <div className={`${statValueStyles} ${networkErrorValueStyles}`}>
+          {networkErrorCount.toLocaleString()}
+        </div>
         <div className={statLabelStyles}>Network</div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { detailsStyles, summaryStyles, sessionInfoStyles } from './DebugPanel.styles';
 import type { LogMetadata } from '../types';
+import { ChevronRight } from 'lucide-react';
 
 interface DebugPanelSessionDetailsProps {
   metadata: LogMetadata;
@@ -7,9 +8,13 @@ interface DebugPanelSessionDetailsProps {
 
 export function DebugPanelSessionDetails({ metadata }: DebugPanelSessionDetailsProps) {
   return (
-    <details className={detailsStyles} style={{ borderTop: '1px solid #f3f4f6', borderRadius: 0 }}>
+    <details
+      className={detailsStyles}
+      style={{ borderTop: '1px solid var(--border-color, #f3f4f6)', borderRadius: 0 }}
+    >
       <summary className={summaryStyles}>
-        <span>▸ Session Details</span>
+        <ChevronRight size={12} />
+        <span>Session Details</span>
       </summary>
       <div className={sessionInfoStyles}>
         <div>

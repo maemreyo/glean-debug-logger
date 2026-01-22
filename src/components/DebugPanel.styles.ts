@@ -1,687 +1,875 @@
 import { css } from 'goober';
 
-// Toggle button
+// ============================================
+// DESIGN SYSTEM - Glassmorphism & Refined
+// ============================================
+
+// CSS Variables for consistent theming
+const theme = {
+  // Glass effect colors
+  glassBg: 'rgba(255, 255, 255, 0.75)',
+  glassBorder: 'rgba(255, 255, 255, 0.4)',
+  glassShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+
+  // Refined color palette - warm, sophisticated
+  colors: {
+    primary: '#1a1a2e',
+    secondary: '#4a5568',
+    muted: '#a0aec0',
+    background: '#f7fafc',
+    surface: '#ffffff',
+    border: 'rgba(0, 0, 0, 0.06)',
+
+    // Semantic colors - subtle and refined
+    success: '#059669',
+    successBg: 'rgba(5, 150, 105, 0.08)',
+    successBorder: 'rgba(5, 150, 105, 0.2)',
+
+    error: '#dc2626',
+    errorBg: 'rgba(220, 38, 38, 0.06)',
+    errorBorder: 'rgba(220, 38, 38, 0.15)',
+
+    warning: '#d97706',
+    warningBg: 'rgba(217, 119, 6, 0.06)',
+    warningBorder: 'rgba(217, 119, 6, 0.15)',
+
+    accent: '#0ea5e9',
+    accentBg: 'rgba(14, 165, 233, 0.08)',
+    accentBorder: 'rgba(14, 165, 233, 0.2)',
+  },
+
+  // Typography
+  fonts: {
+    display: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
+    mono: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+  },
+
+  // Spacing
+  space: {
+    xs: '4px',
+    sm: '8px',
+    md: '12px',
+    lg: '16px',
+    xl: '24px',
+  },
+
+  // Border radius
+  radius: {
+    sm: '6px',
+    md: '10px',
+    lg: '16px',
+    full: '9999px',
+  },
+
+  // Transitions
+  transitions: {
+    fast: '0.15s ease',
+    normal: '0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+    slow: '0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+  },
+};
+
+// ============================================
+// TOGGLE BUTTON - Floating Pill Design
+// ============================================
 export const toggleButtonStyles = css`
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: ${theme.space.lg};
+  right: ${theme.space.lg};
   z-index: 9998;
-  padding: 8px 14px;
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.15s ease;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: ${theme.colors.primary};
+  color: #ffffff;
+  border: none;
+  border-radius: ${theme.radius.full};
+  cursor: pointer;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: all ${theme.transitions.normal};
 
   &:hover {
-    background: #e5e7eb;
-    border-color: #d1d5db;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 30px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(255, 255, 255, 0.15);
   }
 
   &:active {
     transform: translateY(0);
+    box-shadow:
+      0 2px 10px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 `;
 
+// Subtle indicator dot for errors - soft red with blur
+export const indicatorDotStyles = css`
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  background: ${theme.colors.error};
+  border: 2px solid ${theme.colors.primary};
+  border-radius: ${theme.radius.full};
+  box-shadow: 0 1px 4px rgba(220, 38, 38, 0.4);
+`;
+
 export const badgeStyles = css`
-  background: #e5e7eb;
-  color: #6b7280;
-  padding: 2px 6px;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: ${theme.radius.full};
   font-size: 11px;
   font-weight: 600;
+  backdrop-filter: blur(4px);
 `;
 
 export const errorBadgeStyles = css`
-  background: #fee2e2;
-  color: #dc2626;
-  padding: 2px 6px;
-  border-radius: 10px;
+  background: ${theme.colors.error};
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: ${theme.radius.full};
   font-size: 11px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 `;
 
-// Panel container
+// ============================================
+// PANEL - Glassmorphism Container
+// ============================================
 export const panelStyles = css`
   position: fixed;
-  bottom: 100px;
-  right: 20px;
+  bottom: 90px;
+  right: ${theme.space.lg};
   z-index: 9999;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
-  width: 360px;
-  max-height: 580px;
-  overflow: auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 380px;
+  max-height: 520px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  background: ${theme.glassBg};
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: ${theme.radius.lg};
+  border: 1px solid ${theme.glassBorder};
+  box-shadow: ${theme.glassShadow};
+  font-family: ${theme.fonts.display};
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 `;
 
-// Panel header
+// ============================================
+// HEADER - Clean & Minimal
+// ============================================
 export const headerStyles = css`
-  background: #fafafa;
-  color: #374151;
-  padding: 12px 16px;
-  border-radius: 12px 12px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb;
+  padding: ${theme.space.lg};
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.3) 100%);
+  border-bottom: 1px solid ${theme.colors.border};
 `;
 
 export const headerTitleWrapperStyles = css`
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
 `;
 
 export const headerTitleStyles = css`
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: ${theme.colors.primary};
+  letter-spacing: -0.01em;
 `;
 
 export const headerSubtitleStyles = css`
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 11px;
-  color: #9ca3af;
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  color: ${theme.colors.muted};
+  font-family: ${theme.fonts.mono};
+  font-weight: 500;
 `;
 
 export const closeButtonStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   background: transparent;
   border: none;
-  color: #9ca3af;
-  font-size: 18px;
+  border-radius: ${theme.radius.sm};
+  color: ${theme.colors.muted};
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
-  transition: all 0.15s ease;
-  line-height: 1;
+  transition: all ${theme.transitions.fast};
 
   &:hover {
-    background: #f3f4f6;
-    color: #6b7280;
+    background: rgba(0, 0, 0, 0.05);
+    color: ${theme.colors.secondary};
   }
 `;
 
-// Stats grid
+// ============================================
+// STATS - Elegant Metrics Display
+// ============================================
 export const statsGridStyles = css`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  padding: 0;
-  background: #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
+  gap: 0;
+  background: ${theme.colors.border};
 `;
 
 export const statItemStyles = css`
-  text-align: center;
-  background: #fff;
-  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${theme.space.lg};
+  background: rgba(255, 255, 255, 0.6);
+  gap: ${theme.space.xs};
 `;
 
 export const statValueStyles = css`
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 700;
-  color: #111827;
+  color: ${theme.colors.primary};
   line-height: 1;
+  letter-spacing: -0.03em;
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
 `;
 
 export const statLabelStyles = css`
   font-size: 10px;
-  color: #9ca3af;
-  margin-top: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   font-weight: 600;
+  color: ${theme.colors.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 `;
 
 export const errorValueStyles = css`
-  color: #dc2626;
+  color: ${theme.colors.error};
 `;
 
 export const networkErrorValueStyles = css`
-  color: #ea580c;
+  color: ${theme.colors.warning};
 `;
 
-// Collapsible section
+// ============================================
+// DETAILS & SESSION INFO
+// ============================================
 export const detailsStyles = css`
-  padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
-  background: #fafafa;
+  padding: ${theme.space.md} ${theme.space.lg};
+  background: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid ${theme.colors.border};
 `;
 
 export const summaryStyles = css`
-  cursor: pointer;
-  font-weight: 600;
-  color: #6b7280;
-  font-size: 11px;
-  list-style: none;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: ${theme.space.sm};
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: ${theme.colors.secondary};
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
+  list-style: none;
+  padding: ${theme.space.sm} 0;
 
   &::-webkit-details-marker {
     display: none;
   }
+
+  &:hover {
+    color: ${theme.colors.primary};
+  }
 `;
 
 export const sessionInfoStyles = css`
-  margin-top: 10px;
+  margin-top: ${theme.space.md};
+  padding: ${theme.space.md};
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: ${theme.radius.md};
   font-size: 11px;
-  color: #6b7280;
-  line-height: 1.6;
+  color: ${theme.colors.secondary};
+  line-height: 1.7;
 
   & > div {
-    margin-bottom: 4px;
     display: flex;
-    gap: 6px;
+    gap: ${theme.space.sm};
+    margin-bottom: ${theme.space.xs};
   }
 
   strong {
-    color: #374151;
+    color: ${theme.colors.primary};
     font-weight: 600;
-    min-width: 75px;
+    min-width: 70px;
   }
 `;
 
-// Action buttons container
+// ============================================
+// ACTIONS - Icon-Based Button Grid
+// ============================================
 export const actionsStyles = css`
-  padding: 14px 16px;
+  padding: ${theme.space.lg};
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: ${theme.space.lg};
+  background: rgba(255, 255, 255, 0.3);
 `;
 
 export const actionGroupStyles = css`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: ${theme.space.sm};
 `;
 
 export const labelStyles = css`
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  color: #9ca3af;
+  color: ${theme.colors.muted};
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.1em;
 `;
 
 export const buttonRowStyles = css`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  gap: ${theme.space.sm};
 `;
 
 export const buttonGrid3Styles = css`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: ${theme.space.sm};
 `;
 
-// Download buttons - Subtle neutral palette
-export const downloadButtonStyles = css`
-  padding: 6px 8px;
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  transition: all 0.15s ease;
+// Base action button style
+const baseButtonStyles = css`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-
-  &:hover:not(:disabled) {
-    background: #e5e7eb;
-    border-color: #d1d5db;
-    transform: translateY(-1px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    background: #d1d5db;
-  }
-
-  &:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
-    cursor: not-allowed;
-    border-color: #f3f4f6;
-  }
-`;
-
-// Save to directory button - Soft indigo accent
-export const saveToDirectoryButtonStyles = css`
-  width: 100%;
-  padding: 6px 8px;
-  background: #f0f4ff;
-  color: #4f46e5;
-  border: 1px solid #e0e7ff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
-  &:hover:not(:disabled) {
-    background: #e0e7ff;
-    border-color: #c7d2fe;
-    transform: translateY(-1px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    background: #c7d2fe;
-  }
-
-  &:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
-    cursor: not-allowed;
-    border-color: #f3f4f6;
-    opacity: 0.6;
-  }
-`;
-
-// Upload button - Subtle green
-export const uploadButtonStyles = css`
-  width: 100%;
-  padding: 6px 8px;
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #dcfce7;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
-  &:hover:not(:disabled) {
-    background: #dcfce7;
-    border-color: #bbf7d0;
-    transform: translateY(-1px);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    background: #bbf7d0;
-  }
-
-  &:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
-    cursor: not-allowed;
-    border-color: #f3f4f6;
-  }
-`;
-
-// Danger button (clear logs) - Subtle red
-export const dangerButtonStyles = css`
-  width: 100%;
-  padding: 6px 8px;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fee2e2;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
-  &:hover {
-    background: #fee2e2;
-    border-color: #fecaca;
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-    background: #fecaca;
-  }
-`;
-
-// Status message
-export const successMessageStyles = css`
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-`;
-
-export const errorMessageStyles = css`
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
-`;
-
-// Footer
-export const footerStyles = css`
-  padding: 12px 16px;
-  background: #f3f4f6;
-  border-top: 1px solid #e5e7eb;
-  border-radius: 0 0 12px 12px;
-  font-size: 12px;
-  color: #9ca3af;
-`;
-
-export const footerTipStyles = css`
-  kbd {
-    display: inline-block;
-    padding: 2px 6px;
-    background: #e5e7eb;
-    border-radius: 4px;
-    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 11px;
-    color: #6b7280;
-  }
-`;
-
-// Settings dropdown styles - defined BEFORE darkModeStyles to avoid reference errors
-export const settingsDropdownStyles = css`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 10000;
-  min-width: 180px;
-  padding: 8px 0;
-`;
-
-export const settingsDropdownHeaderStyles = css`
-  padding: 8px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid #f3f4f6;
-`;
-
-export const settingsDropdownItemStyles = css`
-  display: block;
-  width: 100%;
-  padding: 6px 8px;
-  text-align: left;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 11px;
-  color: #374151;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: #f3f4f6;
-  }
-`;
-
-export const settingsDropdownItemSelectedStyles = css`
-  background: #f3f4f6;
-`;
-
-export const actionButtonStyles = css`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 12px;
-  background: #f8f9fa;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  gap: ${theme.space.xs};
+  padding: ${theme.space.sm} ${theme.space.md};
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.radius.md};
   cursor: pointer;
   font-size: 11px;
   font-weight: 500;
-  transition: all 0.15s ease;
+  color: ${theme.colors.secondary};
+  transition: all ${theme.transitions.fast};
 
   &:hover:not(:disabled) {
-    background: #f3f4f6;
-    border-color: #d1d5db;
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
   &:active:not(:disabled) {
-    background: #e5e7eb;
     transform: translateY(0);
   }
 
   &:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
+    opacity: 0.5;
     cursor: not-allowed;
-    border-color: #f3f4f6;
+  }
+`;
+
+export const downloadButtonStyles = css`
+  ${baseButtonStyles}
+`;
+
+export const saveToDirectoryButtonStyles = css`
+  ${baseButtonStyles}
+  background: ${theme.colors.accentBg};
+  border-color: ${theme.colors.accentBorder};
+  color: ${theme.colors.accent};
+
+  &:hover:not(:disabled) {
+    background: ${theme.colors.accent};
+    color: #ffffff;
+    border-color: ${theme.colors.accent};
+  }
+`;
+
+export const uploadButtonStyles = css`
+  ${baseButtonStyles}
+  background: ${theme.colors.successBg};
+  border-color: ${theme.colors.successBorder};
+  color: ${theme.colors.success};
+
+  &:hover:not(:disabled) {
+    background: ${theme.colors.success};
+    color: #ffffff;
+    border-color: ${theme.colors.success};
+  }
+`;
+
+export const dangerButtonStyles = css`
+  ${baseButtonStyles}
+  background: ${theme.colors.errorBg};
+  border-color: ${theme.colors.errorBorder};
+  color: ${theme.colors.error};
+
+  &:hover:not(:disabled) {
+    background: ${theme.colors.error};
+    color: #ffffff;
+    border-color: ${theme.colors.error};
+  }
+`;
+
+// ============================================
+// ACTION BUTTONS (Copy, Download, Upload) - Column layout
+// ============================================
+export const actionButtonStyles = css`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: ${theme.space.md} ${theme.space.sm};
+  min-height: 52px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.radius.md};
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 500;
+  color: ${theme.colors.secondary};
+  line-height: 1.2;
+  transition: all ${theme.transitions.fast};
+
+  & svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
 export const dangerActionButtonStyles = css`
-  ${actionButtonStyles}
-  color: #dc2626;
-  border-color: #fee2e2;
-  background: #fef2f2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: ${theme.space.md} ${theme.space.sm};
+  min-height: 52px;
+  background: ${theme.colors.errorBg};
+  border: 1px solid ${theme.colors.errorBorder};
+  border-radius: ${theme.radius.md};
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 500;
+  color: ${theme.colors.error};
+  line-height: 1.2;
+  transition: all ${theme.transitions.fast};
+
+  & svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
 
   &:hover:not(:disabled) {
-    background: #fee2e2;
-    border-color: #fecaca;
+    background: ${theme.colors.error};
+    color: #ffffff;
+    border-color: ${theme.colors.error};
   }
 
   &:active:not(:disabled) {
-    background: #fecaca;
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
-// Dark mode support
+// ============================================
+// STATUS MESSAGES - Toast Style
+// ============================================
+export const successMessageStyles = css`
+  display: flex;
+  align-items: center;
+  gap: ${theme.space.sm};
+  padding: ${theme.space.md};
+  margin: 0 ${theme.space.lg};
+  background: ${theme.colors.successBg};
+  border: 1px solid ${theme.colors.successBorder};
+  border-radius: ${theme.radius.md};
+  font-size: 12px;
+  color: ${theme.colors.success};
+  font-weight: 500;
+
+  & svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+`;
+
+export const errorMessageStyles = css`
+  display: flex;
+  align-items: center;
+  gap: ${theme.space.sm};
+  padding: ${theme.space.md};
+  margin: 0 ${theme.space.lg};
+  background: ${theme.colors.errorBg};
+  border: 1px solid ${theme.colors.errorBorder};
+  border-radius: ${theme.radius.md};
+  font-size: 12px;
+  color: ${theme.colors.error};
+  font-weight: 500;
+
+  & svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+`;
+
+// ============================================
+// FOOTER - Subtle Hint
+// ============================================
+export const footerStyles = css`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: ${theme.space.md};
+  background: rgba(255, 255, 255, 0.5);
+  border-top: 1px solid ${theme.colors.border};
+
+  kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: ${theme.radius.sm};
+    font-family: ${theme.fonts.mono};
+    font-size: 10px;
+    color: ${theme.colors.muted};
+    border: 1px solid ${theme.colors.border};
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+`;
+
+export const footerTipStyles = css`
+  font-size: 11px;
+  color: ${theme.colors.muted};
+`;
+
+// ============================================
+// SETTINGS DROPDOWN
+// ============================================
+export const settingsDropdownStyles = css`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: ${theme.space.sm};
+  min-width: 160px;
+  background: ${theme.glassBg};
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid ${theme.glassBorder};
+  border-radius: ${theme.radius.md};
+  box-shadow: ${theme.glassShadow};
+  z-index: 10000;
+  overflow: hidden;
+`;
+
+export const settingsDropdownHeaderStyles = css`
+  padding: ${theme.space.sm} ${theme.space.md};
+  font-size: 10px;
+  font-weight: 600;
+  color: ${theme.colors.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid ${theme.colors.border};
+`;
+
+export const settingsDropdownItemStyles = css`
+  display: flex;
+  align-items: center;
+  gap: ${theme.space.sm};
+  width: 100%;
+  padding: ${theme.space.sm} ${theme.space.md};
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: ${theme.colors.secondary};
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+`;
+
+export const settingsDropdownItemSelectedStyles = css`
+  ${settingsDropdownItemStyles}
+  background: rgba(0, 0, 0, 0.04);
+  color: ${theme.colors.primary};
+`;
+
+// ============================================
+// DARK MODE - Sophisticated Dark Theme
+// ============================================
 export const darkModeStyles = css`
   @media (prefers-color-scheme: dark) {
+    :root {
+      --glass-bg: rgba(30, 30, 46, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
     ${panelStyles} {
-      background: #1e293b;
-      border-color: #334155;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      background: rgba(30, 30, 46, 0.9);
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
     }
 
     ${headerStyles} {
-      background: #0f172a;
-      border-color: #1e293b;
+      background: linear-gradient(135deg, rgba(40, 40, 60, 0.8) 0%, rgba(30, 30, 46, 0.6) 100%);
+      border-color: rgba(255, 255, 255, 0.06);
     }
 
     ${headerTitleStyles} {
-      color: #f1f5f9;
+      color: rgba(255, 255, 255, 0.95);
     }
 
     ${headerSubtitleStyles} {
-      color: #64748b;
+      color: rgba(255, 255, 255, 0.4);
     }
 
     ${closeButtonStyles} {
-      color: #64748b;
+      color: rgba(255, 255, 255, 0.4);
 
       &:hover {
-        background: #1e293b;
-        color: #94a3b8;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.8);
       }
     }
 
     ${statsGridStyles} {
-      background: #0f172a;
-      border-color: #334155;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    ${statItemStyles} {
+      background: rgba(40, 40, 60, 0.5);
     }
 
     ${statValueStyles} {
-      color: #f1f5f9;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    ${statLabelStyles} {
+      color: rgba(255, 255, 255, 0.4);
     }
 
     ${detailsStyles} {
-      background: #0f172a;
-      border-color: #334155;
+      background: rgba(40, 40, 60, 0.4);
+      border-color: rgba(255, 255, 255, 0.06);
     }
 
     ${summaryStyles} {
-      color: #e2e8f0;
+      color: rgba(255, 255, 255, 0.7);
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.95);
+      }
     }
 
     ${sessionInfoStyles} {
-      color: #94a3b8;
+      background: rgba(40, 40, 60, 0.5);
+      color: rgba(255, 255, 255, 0.6);
 
       strong {
-        color: #e2e8f0;
+        color: rgba(255, 255, 255, 0.9);
       }
+    }
+
+    ${actionsStyles} {
+      background: rgba(40, 40, 60, 0.3);
     }
 
     ${labelStyles} {
-      color: #94a3b8;
+      color: rgba(255, 255, 255, 0.4);
     }
 
-    ${downloadButtonStyles} {
-      background: #1e293b;
-      color: #e2e8f0;
-      border-color: #334155;
+    ${baseButtonStyles} {
+      background: rgba(50, 50, 70, 0.8);
+      border-color: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.8);
 
       &:hover:not(:disabled) {
-        background: #334155;
-        border-color: #475569;
-      }
-
-      &:active:not(:disabled) {
-        background: #475569;
+        background: rgba(60, 60, 85, 0.9);
+        border-color: rgba(255, 255, 255, 0.12);
       }
     }
 
     ${saveToDirectoryButtonStyles} {
-      background: #1e293b;
-      color: #818cf8;
-      border-color: #334155;
+      background: rgba(14, 165, 233, 0.15);
+      border-color: rgba(14, 165, 233, 0.25);
+      color: #38bdf8;
 
       &:hover:not(:disabled) {
-        background: #334155;
-        border-color: #475569;
-      }
-
-      &:active:not(:disabled) {
-        background: #475569;
+        background: #0ea5e9;
+        color: #ffffff;
+        border-color: #0ea5e9;
       }
     }
 
     ${uploadButtonStyles} {
-      background: #1e293b;
-      color: #4ade80;
-      border-color: #334155;
+      background: rgba(5, 150, 105, 0.15);
+      border-color: rgba(5, 150, 105, 0.25);
+      color: #34d399;
 
       &:hover:not(:disabled) {
-        background: #334155;
-        border-color: #475569;
-      }
-
-      &:active:not(:disabled) {
-        background: #475569;
+        background: #059669;
+        color: #ffffff;
+        border-color: #059669;
       }
     }
 
-    ${dangerButtonStyles} {
-      background: #1e293b;
+    ${dangerButtonStyles},
+    ${dangerActionButtonStyles} {
+      background: rgba(220, 38, 38, 0.15);
+      border-color: rgba(220, 38, 38, 0.25);
       color: #f87171;
-      border-color: #334155;
 
-      &:hover {
-        background: #334155;
-        border-color: #475569;
-      }
-
-      &:active {
-        background: #475569;
+      &:hover:not(:disabled) {
+        background: #dc2626;
+        color: #ffffff;
+        border-color: #dc2626;
       }
     }
 
     ${successMessageStyles} {
-      background: #064e3b;
-      color: #6ee7b7;
-      border-color: #065f46;
+      background: rgba(5, 150, 105, 0.15);
+      border-color: rgba(5, 150, 105, 0.25);
+      color: #34d399;
     }
 
     ${errorMessageStyles} {
-      background: #7f1d1d;
-      color: #fca5a5;
-      border-color: #991b1b;
+      background: rgba(220, 38, 38, 0.15);
+      border-color: rgba(220, 38, 38, 0.25);
+      color: #f87171;
     }
 
     ${footerStyles} {
-      background: #0f172a;
-      border-color: #334155;
-      color: #94a3b8;
+      background: rgba(40, 40, 60, 0.4);
+      border-color: rgba(255, 255, 255, 0.06);
+
+      kbd {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.5);
+      }
     }
 
-    ${footerTipStyles} kbd {
-      background: #334155;
-      color: #e2e8f0;
+    ${footerTipStyles} {
+      color: rgba(255, 255, 255, 0.4);
     }
 
     ${toggleButtonStyles} {
-      background: #1e293b;
-      border-color: #334155;
-      color: #e2e8f0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
 
       &:hover {
-        background: #334155;
-        border-color: #475569;
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow:
+          0 6px 20px rgba(0, 0, 0, 0.4),
+          0 0 0 1px rgba(255, 255, 255, 0.08);
       }
-    }
-
-    ${badgeStyles} {
-      background: #334155;
-      color: #94a3b8;
     }
 
     ${settingsDropdownStyles} {
-      background: #1e293b;
-      border-color: #334155;
+      background: rgba(30, 30, 46, 0.95);
+      border-color: rgba(255, 255, 255, 0.08);
     }
 
     ${settingsDropdownHeaderStyles} {
-      color: #64748b;
-      border-color: #334155;
+      background: rgba(0, 0, 0, 0.2);
+      color: rgba(255, 255, 255, 0.4);
+      border-color: rgba(255, 255, 255, 0.06);
     }
 
     ${settingsDropdownItemStyles} {
-      color: #e2e8f0;
+      color: rgba(255, 255, 255, 0.8);
 
       &:hover {
-        background: #334155;
+        background: rgba(255, 255, 255, 0.08);
       }
+    }
+
+    ${settingsDropdownItemSelectedStyles} {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.95);
     }
   }
 `;
