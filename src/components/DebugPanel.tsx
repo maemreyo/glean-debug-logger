@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useEffect } from 'react';
-import { useLogRecorder } from '../hooks/useLogRecorder';
+import { useLogRecorder } from '../hooks/useLogRecorder/index';
 import { useDebugPanelControls } from '../hooks/useDebugPanelControls';
 import { useCopyFormat } from '../hooks/useCopyFormat';
 import { useStatusMessages } from '../hooks/useStatusMessages';

@@ -8,7 +8,7 @@
  */
 
 // Hooks
-export { useLogRecorder } from './hooks/useLogRecorder';
+export { useLogRecorder } from './hooks/useLogRecorder/index';
 
 // Components
 export { DebugPanel } from './components/DebugPanel';

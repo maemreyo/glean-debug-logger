@@ -1,23 +1,23 @@
 'use strict';var react=require('react'),goober=require('goober'),jsxRuntime=require('react/jsx-runtime');// @ts-nocheck
-var St=["password","token","apiKey","secret","authorization","creditCard","cardNumber","cvv","ssn"];function se(t,e={}){let o=e.keys||St;if(!t||typeof t!="object")return t;let r=Array.isArray(t)?[...t]:{...t},a=n=>{if(!n||typeof n!="object")return n;for(let s in n)if(Object.prototype.hasOwnProperty.call(n,s)){let c=s.toLowerCase();o.some(h=>c.includes(h.toLowerCase()))?n[s]="***REDACTED***":n[s]!==null&&typeof n[s]=="object"&&(n[s]=a(n[s]));}return n};return a(r)}function A(t){return t.replace(/[^a-z0-9_-]/gi,"_").replace(/_+/g,"_").replace(/^_|_$/g,"")}function ve(){if(typeof navigator>"u")return "unknown";let t=navigator.userAgent;return t.includes("Edg")?"edge":t.includes("Chrome")?"chrome":t.includes("Firefox")?"firefox":t.includes("Safari")?"safari":"unknown"}function Be(t,e,o,r){if(typeof window>"u")return {sessionId:t,environment:e,userId:o,timestamp:new Date().toISOString(),userAgent:"",browser:"unknown",platform:"",language:"",screenResolution:"0x0",viewport:"0x0",url:"",referrer:"",timezone:"",logCount:r,errorCount:0,networkErrorCount:0};let a=typeof window.screen<"u"?`${window.screen.width}x${window.screen.height}`:"0x0",n=typeof window.innerWidth<"u"&&typeof window.innerHeight<"u"?`${window.innerWidth}x${window.innerHeight}`:"0x0";return {sessionId:t,environment:e,userId:o,timestamp:new Date().toISOString(),userAgent:navigator.userAgent,browser:ve(),platform:navigator.platform,language:navigator.language,screenResolution:a,viewport:n,url:window.location.href,referrer:document.referrer,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,logCount:r,errorCount:0,networkErrorCount:0}}function Ge(){return `session_${Date.now()}_${Math.random().toString(36).substring(2,11)}`}function _(t="json",e={},o={}){let{fileNameTemplate:r="{env}_{userId}_{sessionId}_{timestamp}",environment:a="development",userId:n="anonymous",sessionId:s="unknown"}=o,c=new Date().toISOString().replace(/[:.]/g,"-").split(".")[0],u=new Date().toISOString().split("T")[0],h=new Date().toLocaleTimeString("en-US",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"}).replace(/:/g,"-"),m=o.browser||ve(),k=o.platform||(typeof navigator<"u"?navigator.platform:"unknown"),R=(o.url||(typeof window<"u"?window.location.pathname.replace(/\//g,"_"):"unknown")).split("?")[0]||"unknown",E=String(o.errorCount??e.errorCount??0),w=String(o.logCount??e.logCount??0),I=r.replace("{env}",A(a)).replace("{userId}",A(n??"anonymous")).replace("{sessionId}",A(s??"unknown")).replace("{timestamp}",c).replace("{date}",u).replace("{time}",h).replace(/\{errorCount\}/g,E).replace(/\{logCount\}/g,w).replace("{browser}",A(m)).replace("{platform}",A(k)).replace("{url}",A(R));for(let[Z,$]of Object.entries(e))I=I.replace(`{${Z}}`,String($));return `${I}.${t}`}function Wt(t,e="json"){let o=t.url.split("?")[0]||"unknown";return _(e,{},{environment:t.environment,userId:t.userId,sessionId:t.sessionId,browser:t.browser,platform:t.platform,url:o,errorCount:t.errorCount,logCount:t.logCount})}var vt={log:"info",info:"info",warn:"warn",error:"error",debug:"debug"};function Je(t){let e=parseFloat(t);return isNaN(e)?0:Math.round(e*1e6)}function kt(t){return vt[t.toLowerCase()]||"info"}function ke(t){return t.filter(e=>!e.ignored).slice(0,20)}function q(t){return {service:{environment:t.environment},user:t.userId?{id:t.userId}:void 0,host:{name:t.browser,type:t.platform}}}function M(t,e){let o={"@timestamp":t.time,event:{original:t,category:[]}},r=q(e);switch(Object.assign(o,r),t.type){case "CONSOLE":{o.log={level:kt(t.level)},o.message=t.data,o.event.category=["console"];break}case "FETCH_REQ":case "XHR_REQ":{o.http={request:{method:t.method}},o.url={full:t.url},o.event.category=["network","web"],o.event.action="request",o.event.id=t.id;break}case "FETCH_RES":case "XHR_RES":{o.http={response:{status_code:t.status}},o.url={full:t.url},o.event.duration=Je(t.duration),o.event.category=["network","web"],o.event.action="response",o.event.id=t.id;break}case "FETCH_ERR":case "XHR_ERR":{o.error={message:t.error},o.url={full:t.url},o.event.duration=Je(t.duration),o.event.category=["network","web"],o.event.action="error",o.event.id=t.id;let a=t;if(typeof a.body=="object"&&a.body!==null){let n=a.body;if(Array.isArray(n.frames)){let s=ke(n.frames);o.error.stack_trace=s.map(c=>`  at ${c.functionName||"?"} (${c.filename||"?"}:${c.lineNumber||0}:${c.columnNumber||0})`).join(`
-`);}}break}default:{o.message=JSON.stringify(t);break}}return o}function Ye(t){return !t||t.length===0?"":t.map(e=>Ct(e)).join("")}function Ct(t){return JSON.stringify(t)+`
-`}var ae=class{constructor(){this.originalConsole={log:console.log.bind(console),error:console.error.bind(console),warn:console.warn.bind(console),info:console.info.bind(console),debug:console.debug.bind(console)},this.callbacks=[];}attach(){Object.keys(this.originalConsole).forEach(e=>{let o=this.originalConsole[e];console[e]=(...r)=>{this.callbacks.forEach(a=>{a(e,r);}),o(...r);};});}detach(){Object.keys(this.originalConsole).forEach(e=>{console[e]=this.originalConsole[e];});}onLog(e){this.callbacks.push(e);}};var ie=class{constructor(e={}){this.originalFetch=window.fetch.bind(window),this.onRequest=[],this.onResponse=[],this.onError=[],this.excludeUrls=(e.excludeUrls||[]).map(o=>new RegExp(o));}attach(){window.fetch=async(...e)=>{let[o,r]=e,a=o.toString();if(this.excludeUrls.some(s=>s.test(a)))return this.originalFetch(...e);let n=Date.now();this.onRequest.forEach(s=>s(a,r||{}));try{let s=await this.originalFetch(...e),c=Date.now()-n;return this.onResponse.forEach(u=>u(a,s.status,c)),s}catch(s){throw this.onError.forEach(c=>c(a,s)),s}};}detach(){window.fetch=this.originalFetch;}onFetchRequest(e){this.onRequest.push(e);}onFetchResponse(e){this.onResponse.push(e);}onFetchError(e){this.onError.push(e);}};var le=class{constructor(e={}){this.isAttached=false;this.originalXHR=window.XMLHttpRequest,this.onRequest=[],this.onResponse=[],this.onError=[],this.requestTracker=new WeakMap,this.excludeUrls=(e.excludeUrls||[]).map(o=>new RegExp(o)),this.originalOpen=this.originalXHR.prototype.open,this.originalSend=this.originalXHR.prototype.send;}attach(){if(this.isAttached)return;this.isAttached=true;let e=this;this.originalXHR.prototype.open=function(o,r,a,n,s){let c=typeof r=="string"?r:r.href;if(e.requestTracker.set(this,{method:o,url:c,headers:{},body:null,startTime:Date.now()}),e.excludeUrls.some(h=>h.test(c)))return e.originalOpen.call(this,o,r,a??true,n,s);let u=e.requestTracker.get(this);for(let h of e.onRequest)h(u);return e.originalOpen.call(this,o,r,a??true,n,s)},this.originalXHR.prototype.send=function(o){let r=e.requestTracker.get(this);if(r){r.body=o;let a=this.onload,n=this.onerror;this.onload=function(s){let c=Date.now()-r.startTime;for(let u of e.onResponse)u(r,this.status,c);a&&a.call(this,s);},this.onerror=function(s){for(let c of e.onError)c(r,new Error("XHR Error"));n&&n.call(this,s);};}return e.originalSend.call(this,o)};}detach(){this.isAttached&&(this.isAttached=false,this.originalXHR.prototype.open=this.originalOpen,this.originalXHR.prototype.send=this.originalSend);}onXHRRequest(e){this.onRequest.push(e);}onXHRResponse(e){this.onResponse.push(e);}onXHRError(e){this.onError.push(e);}};var U=class{static isSupported(){return this.supported===null&&(this.supported=typeof window<"u"&&"showDirectoryPicker"in window),this.supported}static async saveToDirectory(e,o,r="application/json"){if(!this.isSupported())throw new Error("File System Access API not supported");try{let s=await(await(await window.showDirectoryPicker()).getFileHandle(o,{create:!0})).createWritable();await s.write(e),await s.close();}catch(a){if(a.name==="AbortError")return;throw a}}static download(e,o,r="application/json"){let a=new Blob([e],{type:r}),n=URL.createObjectURL(a),s=document.createElement("a");s.href=n,s.download=o,document.body.appendChild(s),s.click(),document.body.removeChild(s),URL.revokeObjectURL(n);}static async downloadWithFallback(e,o,r="application/json"){if(this.isSupported())try{await this.saveToDirectory(e,o,r);return}catch(a){if(a.name==="AbortError")return}this.download(e,o,r);}};U.supported=null;var Et={maxLogs:1e3,enablePersistence:true,persistenceKey:"debug_logs",captureConsole:true,captureFetch:true,captureXHR:true,enableDirectoryPicker:false,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:[],fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:"development",userId:null,sessionId:null,includeMetadata:true,uploadEndpoint:null,uploadOnError:false,uploadOnErrorCount:5};function ee(t={}){let e={...Et,...t},o=react.useRef({maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount});react.useEffect(()=>{o.current={maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount};},[e]);let r=react.useRef([]),a=react.useRef(e.sessionId||Ge()),n=react.useRef(Be(a.current,e.environment,e.userId,0)),[s,c]=react.useState(0),u=react.useRef(0),h=react.useRef(false),m=react.useCallback(b=>{let i=new Set;return JSON.stringify(b,(g,l)=>{if(typeof l=="object"&&l!==null){if(i.has(l))return "[Circular]";i.add(l);}return l})},[]),k=react.useMemo(()=>new ae,[]),N=react.useMemo(()=>new ie({excludeUrls:e.excludeUrls}),[e.excludeUrls]),R=react.useMemo(()=>new le({excludeUrls:e.excludeUrls}),[e.excludeUrls]),E=react.useCallback(b=>{let i=o.current;r.current.push(b),r.current.length>i.maxLogs&&r.current.shift(),c(r.current.length),b.type==="CONSOLE"?b.level==="ERROR"?u.current++:u.current=0:b.type==="FETCH_ERR"||b.type==="XHR_ERR"?u.current++:u.current=0;let g=i.uploadOnErrorCount??5;if(u.current>=g&&i.uploadEndpoint){let l={metadata:{...n.current,logCount:r.current.length},logs:r.current,fileName:_("json",{},e)};fetch(i.uploadEndpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:m(l)}).catch(()=>{}),u.current=0;}if(i.enablePersistence&&typeof window<"u")try{localStorage.setItem(i.persistenceKey,m(r.current));}catch{console.warn("[useLogRecorder] Failed to persist logs");}},[m]),w=react.useCallback(()=>{let b=r.current.filter(g=>g.type==="CONSOLE").reduce((g,l)=>l.level==="ERROR"?g+1:g,0),i=r.current.filter(g=>g.type==="FETCH_ERR"||g.type==="XHR_ERR").length;n.current={...n.current,logCount:r.current.length,errorCount:b,networkErrorCount:i};},[]);react.useEffect(()=>{if(typeof window>"u"||h.current)return;if(h.current=true,e.enablePersistence)try{let i=localStorage.getItem(e.persistenceKey);i&&(r.current=JSON.parse(i),c(r.current.length));}catch{console.warn("[useLogRecorder] Failed to load persisted logs");}let b=[];if(e.captureConsole&&(k.attach(),k.onLog((i,g)=>{let l=g.map(f=>{if(typeof f=="object")try{return m(f)}catch{return String(f)}return String(f)}).join(" ");E({type:"CONSOLE",level:i.toUpperCase(),time:new Date().toISOString(),data:l.substring(0,5e3)});}),b.push(()=>k.detach())),e.captureFetch){let i=new Map;N.onFetchRequest((g,l)=>{let f=Math.random().toString(36).substring(7),y=null;if(l?.body)try{y=typeof l.body=="string"?JSON.parse(l.body):l.body,y=se(y,{keys:e.sanitizeKeys});}catch{y=String(l.body).substring(0,1e3);}i.set(f,{url:g,method:l?.method||"GET",headers:se(l?.headers,{keys:e.sanitizeKeys}),body:y}),E({type:"FETCH_REQ",id:f,url:g,method:l?.method||"GET",headers:se(l?.headers,{keys:e.sanitizeKeys}),body:y,time:new Date().toISOString()});}),N.onFetchResponse((g,l,f)=>{for(let[y,C]of i.entries())if(C.url===g){i.delete(y),E({type:"FETCH_RES",id:y,url:g,status:l,statusText:"",duration:`${f}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});break}}),N.onFetchError((g,l)=>{for(let[f,y]of i.entries())if(y.url===g){i.delete(f),E({type:"FETCH_ERR",id:f,url:g,error:l.toString(),duration:"[unknown]ms",time:new Date().toISOString()});break}}),N.attach(),b.push(()=>N.detach());}return e.captureXHR&&(R.onXHRRequest(i=>{E({type:"XHR_REQ",id:Math.random().toString(36).substring(7),url:i.url,method:i.method,headers:i.headers,body:i.body,time:new Date().toISOString()});}),R.onXHRResponse((i,g,l)=>{E({type:"XHR_RES",id:Math.random().toString(36).substring(7),url:i.url,status:g,statusText:"",duration:`${l}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});}),R.onXHRError((i,g)=>{E({type:"XHR_ERR",id:Math.random().toString(36).substring(7),url:i.url,error:g.message,duration:"[unknown]ms",time:new Date().toISOString()});}),R.attach(),b.push(()=>R.detach())),()=>{b.forEach(i=>i()),h.current=false;}},[e,E,m,k,N,R]);let I=react.useCallback((b,i,g)=>{if(typeof window>"u")return null;w();let l=i||_(b,{},e),f,y;if(b==="json"){let C=e.includeMetadata?{metadata:n.current,logs:r.current}:r.current;f=m(C),y="application/json";}else if(b==="jsonl"){let C=r.current.map(F=>M(F,n.current));f=Ye(C),y="application/x-ndjson",l=i||_("jsonl",{},e);}else if(b==="ecs.json"){let C={metadata:q(n.current),logs:r.current.map(F=>M(F,n.current))};f=JSON.stringify(C,null,2),y="application/json",l=i||_("ecs-json",{},e);}else if(b==="ai.txt"){let C=n.current,F=`# METADATA
-service.name=${C.environment||"unknown"}
-user.id=${C.userId||"anonymous"}
+var Lt=["password","token","apiKey","secret","authorization","creditCard","cardNumber","cvv","ssn"];function re(t,e={}){let o=e.keys||Lt;if(!t||typeof t!="object")return t;let n=Array.isArray(t)?[...t]:{...t},a=s=>{if(!s||typeof s!="object")return s;for(let r in s)if(Object.prototype.hasOwnProperty.call(s,r)){let i=r.toLowerCase();o.some(p=>i.includes(p.toLowerCase()))?s[r]="***REDACTED***":s[r]!==null&&typeof s[r]=="object"&&(s[r]=a(s[r]));}return s};return a(n)}function $(t){return t.replace(/[^a-z0-9_-]/gi,"_").replace(/_+/g,"_").replace(/^_|_$/g,"")}function we(){if(typeof navigator>"u")return "unknown";let t=navigator.userAgent;return t.includes("Edg")?"edge":t.includes("Chrome")?"chrome":t.includes("Firefox")?"firefox":t.includes("Safari")?"safari":"unknown"}function Xe(t,e,o,n){if(typeof window>"u")return {sessionId:t,environment:e,userId:o,timestamp:new Date().toISOString(),userAgent:"",browser:"unknown",platform:"",language:"",screenResolution:"0x0",viewport:"0x0",url:"",referrer:"",timezone:"",logCount:n,errorCount:0,networkErrorCount:0};let a=typeof window.screen<"u"?`${window.screen.width}x${window.screen.height}`:"0x0",s=typeof window.innerWidth<"u"&&typeof window.innerHeight<"u"?`${window.innerWidth}x${window.innerHeight}`:"0x0";return {sessionId:t,environment:e,userId:o,timestamp:new Date().toISOString(),userAgent:navigator.userAgent,browser:we(),platform:navigator.platform,language:navigator.language,screenResolution:a,viewport:s,url:window.location.href,referrer:document.referrer,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,logCount:n,errorCount:0,networkErrorCount:0}}function Ke(){return `session_${Date.now()}_${Math.random().toString(36).substring(2,11)}`}function F(t="json",e={},o={}){let{fileNameTemplate:n="{env}_{userId}_{sessionId}_{timestamp}",environment:a="development",userId:s="anonymous",sessionId:r="unknown"}=o,i=new Date().toISOString().replace(/[:.]/g,"-").split(".")[0],l=new Date().toISOString().split("T")[0],p=new Date().toLocaleTimeString("en-US",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"}).replace(/:/g,"-"),u=o.browser||we(),f=o.platform||(typeof navigator<"u"?navigator.platform:"unknown"),v=(o.url||(typeof window<"u"?window.location.pathname.replace(/\//g,"_"):"unknown")).split("?")[0]||"unknown",y=String(o.errorCount??e.errorCount??0),b=String(o.logCount??e.logCount??0),w=n.replace("{env}",$(a)).replace("{userId}",$(s??"anonymous")).replace("{sessionId}",$(r??"unknown")).replace("{timestamp}",i).replace("{date}",l).replace("{time}",p).replace(/\{errorCount\}/g,y).replace(/\{logCount\}/g,b).replace("{browser}",$(u)).replace("{platform}",$(f)).replace("{url}",$(v));for(let[P,k]of Object.entries(e))w=w.replace(`{${P}}`,String(k));return `${w}.${t}`}function ro(t,e="json"){let o=t.url.split("?")[0]||"unknown";return F(e,{},{environment:t.environment,userId:t.userId,sessionId:t.sessionId,browser:t.browser,platform:t.platform,url:o,errorCount:t.errorCount,logCount:t.logCount})}var Dt={log:"info",info:"info",warn:"warn",error:"error",debug:"debug"};function Be(t){let e=parseFloat(t);return isNaN(e)?0:Math.round(e*1e6)}function It(t){return Dt[t.toLowerCase()]||"info"}function Se(t){return t.filter(e=>!e.ignored).slice(0,20)}function _(t){return {service:{environment:t.environment},user:t.userId?{id:t.userId}:void 0,host:{name:t.browser,type:t.platform}}}function T(t,e){let o={"@timestamp":t.time,event:{original:t,category:[]}},n=_(e);switch(Object.assign(o,n),t.type){case "CONSOLE":{o.log={level:It(t.level)},o.message=t.data,o.event.category=["console"];break}case "FETCH_REQ":case "XHR_REQ":{o.http={request:{method:t.method}},o.url={full:t.url},o.event.category=["network","web"],o.event.action="request",o.event.id=t.id;break}case "FETCH_RES":case "XHR_RES":{o.http={response:{status_code:t.status}},o.url={full:t.url},o.event.duration=Be(t.duration),o.event.category=["network","web"],o.event.action="response",o.event.id=t.id;break}case "FETCH_ERR":case "XHR_ERR":{o.error={message:t.error},o.url={full:t.url},o.event.duration=Be(t.duration),o.event.category=["network","web"],o.event.action="error",o.event.id=t.id;let a=t;if(typeof a.body=="object"&&a.body!==null){let s=a.body;if(Array.isArray(s.frames)){let r=Se(s.frames);o.error.stack_trace=r.map(i=>`  at ${i.functionName||"?"} (${i.filename||"?"}:${i.lineNumber||0}:${i.columnNumber||0})`).join(`
+`);}}break}default:{o.message=JSON.stringify(t);break}}return o}var ne=class{constructor(){this.originalConsole={log:console.log.bind(console),error:console.error.bind(console),warn:console.warn.bind(console),info:console.info.bind(console),debug:console.debug.bind(console)},this.callbacks=[];}attach(){Object.keys(this.originalConsole).forEach(e=>{let o=this.originalConsole[e];console[e]=(...n)=>{this.callbacks.forEach(a=>{a(e,n);}),o(...n);};});}detach(){Object.keys(this.originalConsole).forEach(e=>{console[e]=this.originalConsole[e];});}onLog(e){this.callbacks.push(e);}};var se=class{constructor(e={}){this.originalFetch=window.fetch.bind(window),this.onRequest=[],this.onResponse=[],this.onError=[],this.excludeUrls=(e.excludeUrls||[]).map(o=>new RegExp(o));}attach(){window.fetch=async(...e)=>{let[o,n]=e,a=o.toString();if(this.excludeUrls.some(r=>r.test(a)))return this.originalFetch(...e);let s=Date.now();this.onRequest.forEach(r=>r(a,n||{}));try{let r=await this.originalFetch(...e),i=Date.now()-s;return this.onResponse.forEach(l=>l(a,r.status,i)),r}catch(r){throw this.onError.forEach(i=>i(a,r)),r}};}detach(){window.fetch=this.originalFetch;}onFetchRequest(e){this.onRequest.push(e);}onFetchResponse(e){this.onResponse.push(e);}onFetchError(e){this.onError.push(e);}};var ae=class{constructor(e={}){this.isAttached=false;this.originalXHR=window.XMLHttpRequest,this.onRequest=[],this.onResponse=[],this.onError=[],this.requestTracker=new WeakMap,this.excludeUrls=(e.excludeUrls||[]).map(o=>new RegExp(o)),this.originalOpen=this.originalXHR.prototype.open,this.originalSend=this.originalXHR.prototype.send;}attach(){if(this.isAttached)return;this.isAttached=true;let e=this;this.originalXHR.prototype.open=function(o,n,a,s,r){let i=typeof n=="string"?n:n.href;if(e.requestTracker.set(this,{method:o,url:i,headers:{},body:null,startTime:Date.now()}),e.excludeUrls.some(p=>p.test(i)))return e.originalOpen.call(this,o,n,a??true,s,r);let l=e.requestTracker.get(this);for(let p of e.onRequest)p(l);return e.originalOpen.call(this,o,n,a??true,s,r)},this.originalXHR.prototype.send=function(o){let n=e.requestTracker.get(this);if(n){n.body=o;let a=this.onload,s=this.onerror;this.onload=function(r){let i=Date.now()-n.startTime;for(let l of e.onResponse)l(n,this.status,i);a&&a.call(this,r);},this.onerror=function(r){for(let i of e.onError)i(n,new Error("XHR Error"));s&&s.call(this,r);};}return e.originalSend.call(this,o)};}detach(){this.isAttached&&(this.isAttached=false,this.originalXHR.prototype.open=this.originalOpen,this.originalXHR.prototype.send=this.originalSend);}onXHRRequest(e){this.onRequest.push(e);}onXHRResponse(e){this.onResponse.push(e);}onXHRError(e){this.onError.push(e);}};var ve={maxLogs:1e3,enablePersistence:true,persistenceKey:"debug_logs",captureConsole:true,captureFetch:true,captureXHR:true,enableDirectoryPicker:false,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:[],fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:"development",userId:null,sessionId:null,includeMetadata:true,uploadEndpoint:null,uploadOnError:false,uploadOnErrorCount:5};function W(){return Math.random().toString(36).substring(7)}function ke(t,e){return re(t,{keys:e})}function Ge(t,e,o,n){return {addLog:r=>{t.logsRef.current.push(r),t.logsRef.current.length>e.maxLogs&&t.logsRef.current.shift(),n(t.logsRef.current.length),r.type==="CONSOLE"?r.level==="ERROR"?t.errorCountRef.current++:t.errorCountRef.current=0:r.type==="FETCH_ERR"||r.type==="XHR_ERR"?t.errorCountRef.current++:t.errorCountRef.current=0;let i=e.uploadOnErrorCount??5;if(t.errorCountRef.current>=i&&e.uploadEndpoint){let l={metadata:{...t.metadataRef.current,logCount:t.logsRef.current.length},logs:t.logsRef.current,fileName:F("json",{},{fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:e.environment,userId:e.userId,sessionId:null})};fetch(e.uploadEndpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:o(l)}).catch(()=>{}),t.errorCountRef.current=0;}if(e.enablePersistence&&typeof window<"u")try{localStorage.setItem(e.persistenceKey,o(t.logsRef.current));}catch{console.warn("[useLogRecorder] Failed to persist logs");}},updateMetadata:()=>{let r=t.logsRef.current.filter(l=>l.type==="CONSOLE").reduce((l,p)=>p.level==="ERROR"?l+1:l,0),i=t.logsRef.current.filter(l=>l.type==="FETCH_ERR"||l.type==="XHR_ERR").length;t.metadataRef.current={...t.metadataRef.current,logCount:t.logsRef.current.length,errorCount:r,networkErrorCount:i};}}}function Je(){return t=>{let e=new Set;return JSON.stringify(t,(o,n)=>{if(typeof n=="object"&&n!==null){if(e.has(n))return "[Circular]";e.add(n);}return n})}}function Ye(t){return !t||t.length===0?"":t.map(e=>Ft(e)).join("")}function Ft(t){return JSON.stringify(t)+`
+`}var z=class{static isSupported(){return this.supported===null&&(this.supported=typeof window<"u"&&"showDirectoryPicker"in window),this.supported}static async saveToDirectory(e,o,n="application/json"){if(!this.isSupported())throw new Error("File System Access API not supported");try{let r=await(await(await window.showDirectoryPicker()).getFileHandle(o,{create:!0})).createWritable();await r.write(e),await r.close();}catch(a){if(a.name==="AbortError")return;throw a}}static download(e,o,n="application/json"){let a=new Blob([e],{type:n}),s=URL.createObjectURL(a),r=document.createElement("a");r.href=s,r.download=o,document.body.appendChild(r),r.click(),document.body.removeChild(r),URL.revokeObjectURL(s);}static async downloadWithFallback(e,o,n="application/json"){if(this.isSupported())try{await this.saveToDirectory(e,o,n);return}catch(a){if(a.name==="AbortError")return}this.download(e,o,n);}};z.supported=null;function Ve(t,e,o,n){return (a,s)=>{if(typeof window>"u")return null;n();let r={fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:e.current.environment||"unknown",userId:e.current.userId,sessionId:null},i=s||F(a,{},r),l,p;if(a==="json"){let u=e.current?{metadata:e.current,logs:t.current}:t.current;l=o(u),p="application/json";}else if(a==="jsonl"){let u=t.current.map(f=>T(f,e.current));l=Ye(u),p="application/x-ndjson",i=s||F("jsonl",{},r);}else if(a==="ecs.json"){let u={metadata:_(e.current),logs:t.current.map(f=>T(f,e.current))};l=JSON.stringify(u,null,2),p="application/json",i=s||F("ecs-json",{},r);}else if(a==="ai.txt"){let u=e.current,f=`# METADATA
+service.name=${u.environment||"unknown"}
+user.id=${u.userId||"anonymous"}
 timestamp=${new Date().toISOString()}
 
 # LOGS
-`,he=r.current.map(we=>{let S=M(we,C),Se=S["@timestamp"],Xe=S.log?.level||"info",p=S.event?.category?.[0]||"unknown",x=`[${Se}] ${Xe} ${p}`;return S.message&&(x+=` | message="${S.message}"`),S.http?.request?.method&&(x+=` | req.method=${S.http.request.method}`),S.url?.full&&(x+=` | url=${S.url.full}`),S.http?.response?.status_code&&(x+=` | res.status=${S.http.response.status_code}`),S.error?.message&&(x+=` | error="${S.error.message}"`),x});f=F+he.join(`
-`),y="text/plain",l=i||_("ai-txt",{},e);}else f=(e.includeMetadata?`${"=".repeat(80)}
+`,D=t.current.map(v=>{let y=T(v,u),b=y["@timestamp"],w=y.log?.level||"info",P=y.event?.category?.[0]||"unknown",k=`[${b}] ${w} ${P}`;return y.message&&(k+=` | message="${y.message}"`),y.http?.request?.method&&(k+=` | req.method=${y.http.request.method}`),y.url?.full&&(k+=` | url=${y.url.full}`),y.http?.response?.status_code&&(k+=` | res.status=${y.http.response.status_code}`),y.error?.message&&(k+=` | error="${y.error.message}"`),k});l=f+D.join(`
+`),p="text/plain",i=s||F("ai-txt",{},r);}else l=(e.current?`${"=".repeat(80)}
 METADATA
 ${"=".repeat(80)}
-${m(n.current)}
+${o(e.current)}
 ${"=".repeat(80)}
 
-`:"")+r.current.map(F=>`[${F.time}] ${F.type}
-${m(F)}
+`:"")+t.current.map(f=>`[${f.time}] ${f.type}
+${o(f)}
 ${"=".repeat(80)}`).join(`
-`),y="text/plain";return U.downloadWithFallback(f,l,y),l},[e,m,w]),Z=react.useCallback(async b=>{let i=b||e.uploadEndpoint;if(!i)return {success:false,error:"No endpoint configured"};try{w();let g={metadata:n.current,logs:r.current,fileName:_("json",{},e)},l=await fetch(i,{method:"POST",headers:{"Content-Type":"application/json"},body:m(g)});if(!l.ok)throw new Error(`Upload failed: ${l.status}`);return {success:!0,data:await l.json()}}catch(g){let l=g instanceof Error?g.message:"Unknown error";return console.error("[useLogRecorder] Failed to upload logs:",g),{success:false,error:l}}},[e.uploadEndpoint,m,w]),$=react.useCallback(()=>{if(r.current=[],c(0),u.current=0,e.enablePersistence&&typeof window<"u")try{localStorage.removeItem(e.persistenceKey);}catch{console.warn("[useLogRecorder] Failed to clear persisted logs");}},[e.enablePersistence,e.persistenceKey]),B=react.useCallback(()=>[...r.current],[]),xe=react.useCallback(()=>s,[s]),H=react.useCallback(()=>(w(),{...n.current}),[w]);return {downloadLogs:I,uploadLogs:Z,clearLogs:$,getLogs:B,getLogCount:xe,getMetadata:H,sessionId:a.current}}function Ze(){let[t,e]=react.useState(false),[o,r]=react.useState(false);react.useEffect(()=>{r(U.isSupported());},[]);let a=react.useCallback(()=>{e(c=>!c);},[]),n=react.useCallback(()=>{e(true);},[]),s=react.useCallback(()=>{e(false);},[]);return react.useEffect(()=>{let c=u=>{u.ctrlKey&&u.shiftKey&&u.key==="D"&&(u.preventDefault(),a()),u.key==="Escape"&&t&&(u.preventDefault(),s());};return document.addEventListener("keydown",c),()=>document.removeEventListener("keydown",c)},[t,a,s]),{isOpen:t,toggle:a,open:n,close:s,supportsDirectoryPicker:o}}var et="debug-panel-copy-format",Ft=["json","ecs.json","ai.txt"];function ce(){let[t,e]=react.useState(()=>{if(typeof window<"u"){let o=localStorage.getItem(et);if(o&&Ft.includes(o))return o}return "ecs.json"});return react.useEffect(()=>{localStorage.setItem(et,t);},[t]),{copyFormat:t,setCopyFormat:e}}function tt(){let[t,e]=react.useState(null),[o,r]=react.useState(null),[a,n]=react.useState(null),[s,c]=react.useState(false);return react.useEffect(()=>{if(t){let u=setTimeout(()=>{e(null);},3e3);return ()=>clearTimeout(u)}},[t]),react.useEffect(()=>{if(o){let u=setTimeout(()=>{r(null);},3e3);return ()=>clearTimeout(u)}},[o]),react.useEffect(()=>{if(a){let u=setTimeout(()=>{n(null);},3e3);return ()=>clearTimeout(u)}},[a]),{uploadStatus:t,setUploadStatus:e,directoryStatus:o,setDirectoryStatus:r,copyStatus:a,setCopyStatus:n,showSettings:s,setShowSettings:c}}var Le=goober.css`
+`),p="text/plain";return z.downloadWithFallback(l,i,p),i}}function We(t,e,o,n){return async a=>{let s=a;if(!s)return {success:false,error:"No endpoint configured"};try{n();let r={fileNameTemplate:"{env}_{userId}_{sessionId}_{timestamp}",environment:e.current.environment||"unknown",userId:e.current.userId,sessionId:null},i={metadata:e.current,logs:t.current,fileName:F("json",{},r)},l=await fetch(s,{method:"POST",headers:{"Content-Type":"application/json"},body:o(i)});if(!l.ok)throw new Error(`Upload failed: ${l.status}`);return {success:!0,data:await l.json()}}catch(r){let i=r instanceof Error?r.message:"Unknown error";return console.error("[useLogRecorder] Failed to upload logs:",r),{success:false,error:i}}}}function Q(t={}){let e={...ve,...t},o=react.useRef({maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount});react.useEffect(()=>{o.current={maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,captureConsole:e.captureConsole,captureFetch:e.captureFetch,captureXHR:e.captureXHR,sanitizeKeys:e.sanitizeKeys,includeMetadata:e.includeMetadata,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount};},[e]);let n=react.useRef([]),a=react.useRef(e.sessionId||Ke()),s=react.useRef(Xe(a.current,e.environment,e.userId,0)),[r,i]=react.useState(0),l=react.useRef(0),p=react.useRef(false),u=react.useMemo(()=>Je(),[]),f=react.useMemo(()=>new ne,[]),D=react.useMemo(()=>new se({excludeUrls:e.excludeUrls}),[e.excludeUrls]),v=react.useMemo(()=>new ae({excludeUrls:e.excludeUrls}),[e.excludeUrls]),y=react.useMemo(()=>Ge({logsRef:n,metadataRef:s,errorCountRef:l},{maxLogs:e.maxLogs,enablePersistence:e.enablePersistence,persistenceKey:e.persistenceKey,uploadEndpoint:e.uploadEndpoint,uploadOnErrorCount:e.uploadOnErrorCount??5,sanitizeKeys:e.sanitizeKeys,environment:e.environment,userId:e.userId},u,i),[e,u,i]),b=y.addLog,w=y.updateMetadata,P=react.useMemo(()=>Ve(n,s,u,w),[u,w]),k=react.useMemo(()=>We(n,s,u,w),[u,w]);react.useEffect(()=>{if(typeof window>"u"||p.current)return;if(p.current=true,e.enablePersistence)try{let m=localStorage.getItem(e.persistenceKey);m&&(n.current=JSON.parse(m),i(n.current.length));}catch{console.warn("[useLogRecorder] Failed to load persisted logs");}let I=[];if(e.captureConsole&&(f.attach(),f.onLog((m,x)=>{let g=x.map(h=>{if(typeof h=="object")try{return u(h)}catch{return String(h)}return String(h)}).join(" ");b({type:"CONSOLE",level:m.toUpperCase(),time:new Date().toISOString(),data:g.substring(0,5e3)});}),I.push(()=>f.detach())),e.captureFetch){let m=new Map;D.onFetchRequest((x,g)=>{let h=W(),R=null;if(g?.body)try{R=typeof g.body=="string"?JSON.parse(g.body):g.body,R=re(R,{keys:e.sanitizeKeys});}catch{R=String(g.body).substring(0,1e3);}m.set(h,{url:x,method:g?.method||"GET",headers:ke(g?.headers,e.sanitizeKeys),body:R}),b({type:"FETCH_REQ",id:h,url:x,method:g?.method||"GET",headers:ke(g?.headers,e.sanitizeKeys),body:R,time:new Date().toISOString()});}),D.onFetchResponse((x,g,h)=>{for(let[R,he]of m.entries())if(he.url===x){m.delete(R),b({type:"FETCH_RES",id:R,url:x,status:g,statusText:"",duration:`${h}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});break}}),D.onFetchError((x,g)=>{for(let[h,R]of m.entries())if(R.url===x){m.delete(h),b({type:"FETCH_ERR",id:h,url:x,error:g.toString(),duration:"[unknown]ms",time:new Date().toISOString()});break}}),D.attach(),I.push(()=>D.detach());}return e.captureXHR&&(v.onXHRRequest(m=>{b({type:"XHR_REQ",id:W(),url:m.url,method:m.method,headers:m.headers,body:m.body,time:new Date().toISOString()});}),v.onXHRResponse((m,x,g)=>{b({type:"XHR_RES",id:W(),url:m.url,status:x,statusText:"",duration:`${g}ms`,body:"[Response captured by interceptor]",time:new Date().toISOString()});}),v.onXHRError((m,x)=>{b({type:"XHR_ERR",id:W(),url:m.url,error:x.message,duration:"[unknown]ms",time:new Date().toISOString()});}),v.attach(),I.push(()=>v.detach())),()=>{I.forEach(m=>m()),p.current=false;}},[e,b,u,f,D,v]);let X=react.useCallback(()=>{if(n.current=[],i(0),l.current=0,e.enablePersistence&&typeof window<"u")try{localStorage.removeItem(e.persistenceKey);}catch{console.warn("[useLogRecorder] Failed to clear persisted logs");}},[e.enablePersistence,e.persistenceKey]),ye=react.useCallback(()=>[...n.current],[]),N=react.useCallback(()=>r,[r]),xe=react.useCallback(()=>(w(),{...s.current}),[w]);return {downloadLogs:P,uploadLogs:k,clearLogs:X,getLogs:ye,getLogCount:N,getMetadata:xe,sessionId:a.current}}function tt(){let[t,e]=react.useState(false),[o,n]=react.useState(false);react.useEffect(()=>{n(z.isSupported());},[]);let a=react.useCallback(()=>{e(i=>!i);},[]),s=react.useCallback(()=>{e(true);},[]),r=react.useCallback(()=>{e(false);},[]);return react.useEffect(()=>{let i=l=>{l.ctrlKey&&l.shiftKey&&l.key==="D"&&(l.preventDefault(),a()),l.key==="Escape"&&t&&(l.preventDefault(),r());};return document.addEventListener("keydown",i),()=>document.removeEventListener("keydown",i)},[t,a,r]),{isOpen:t,toggle:a,open:s,close:r,supportsDirectoryPicker:o}}var ot="debug-panel-copy-format",Nt=["json","ecs.json","ai.txt"];function le(){let[t,e]=react.useState(()=>{if(typeof window<"u"){let o=localStorage.getItem(ot);if(o&&Nt.includes(o))return o}return "ecs.json"});return react.useEffect(()=>{localStorage.setItem(ot,t);},[t]),{copyFormat:t,setCopyFormat:e}}function rt(){let[t,e]=react.useState(null),[o,n]=react.useState(null),[a,s]=react.useState(null),[r,i]=react.useState(false);return react.useEffect(()=>{if(t){let l=setTimeout(()=>{e(null);},3e3);return ()=>clearTimeout(l)}},[t]),react.useEffect(()=>{if(o){let l=setTimeout(()=>{n(null);},3e3);return ()=>clearTimeout(l)}},[o]),react.useEffect(()=>{if(a){let l=setTimeout(()=>{s(null);},3e3);return ()=>clearTimeout(l)}},[a]),{uploadStatus:t,setUploadStatus:e,directoryStatus:o,setDirectoryStatus:n,copyStatus:a,setCopyStatus:s,showSettings:r,setShowSettings:i}}var Ee=goober.css`
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -46,21 +46,21 @@ ${"=".repeat(80)}`).join(`
   &:active {
     transform: translateY(0);
   }
-`,ue=goober.css`
+`,de=goober.css`
   background: #e5e7eb;
   color: #6b7280;
   padding: 2px 6px;
   border-radius: 10px;
   font-size: 11px;
   font-weight: 600;
-`,De=goober.css`
+`,Le=goober.css`
   background: #fee2e2;
   color: #dc2626;
   padding: 2px 6px;
   border-radius: 10px;
   font-size: 11px;
   font-weight: 600;
-`,Fe=goober.css`
+`,De=goober.css`
   position: fixed;
   bottom: 100px;
   right: 20px;
@@ -74,7 +74,7 @@ ${"=".repeat(80)}`).join(`
   max-height: 580px;
   overflow: auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-`,Te=goober.css`
+`,Ie=goober.css`
   background: #fafafa;
   color: #374151;
   padding: 12px 16px;
@@ -83,20 +83,20 @@ ${"=".repeat(80)}`).join(`
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e5e7eb;
-`,ot=goober.css`
+`,nt=goober.css`
   display: flex;
   gap: 8px;
-`,Ne=goober.css`
+`,Fe=goober.css`
   margin: 0;
   font-size: 14px;
   font-weight: 600;
   color: #111827;
-`,Ie=goober.css`
+`,Oe=goober.css`
   margin: 2px 0 0;
   font-size: 11px;
   color: #9ca3af;
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-`,pe=goober.css`
+`,ue=goober.css`
   background: transparent;
   border: none;
   color: #9ca3af;
@@ -111,38 +111,38 @@ ${"=".repeat(80)}`).join(`
     background: #f3f4f6;
     color: #6b7280;
   }
-`,Me=goober.css`
+`,Te=goober.css`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
   padding: 0;
   background: #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
-`,ge=goober.css`
+`,pe=goober.css`
   text-align: center;
   background: #fff;
   padding: 10px 8px;
-`,te=goober.css`
+`,Z=goober.css`
   font-size: 20px;
   font-weight: 700;
   color: #111827;
   line-height: 1;
-`,fe=goober.css`
+`,ge=goober.css`
   font-size: 10px;
   color: #9ca3af;
   margin-top: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
-`,rt=goober.css`
+`,st=goober.css`
   color: #dc2626;
-`,nt=goober.css`
+`,at=goober.css`
   color: #ea580c;
-`,Oe=goober.css`
+`,Me=goober.css`
   padding: 12px 16px;
   border-bottom: 1px solid #f3f4f6;
   background: #fafafa;
-`,Pe=goober.css`
+`,Ne=goober.css`
   cursor: pointer;
   font-weight: 600;
   color: #6b7280;
@@ -157,7 +157,7 @@ ${"=".repeat(80)}`).join(`
   &::-webkit-details-marker {
     display: none;
   }
-`,$e=goober.css`
+`,Pe=goober.css`
   margin-top: 10px;
   font-size: 11px;
   color: #6b7280;
@@ -183,7 +183,7 @@ ${"=".repeat(80)}`).join(`
   display: flex;
   flex-direction: column;
   gap: 6px;
-`;var Tt=goober.css`
+`;var Pt=goober.css`
   font-size: 11px;
   font-weight: 600;
   color: #9ca3af;
@@ -197,7 +197,7 @@ ${"=".repeat(80)}`).join(`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-`;var Nt=goober.css`
+`;var Ht=goober.css`
   padding: 6px 8px;
   background: #f3f4f6;
   color: #374151;
@@ -229,7 +229,7 @@ ${"=".repeat(80)}`).join(`
     cursor: not-allowed;
     border-color: #f3f4f6;
   }
-`,It=goober.css`
+`,$t=goober.css`
   width: 100%;
   padding: 6px 8px;
   background: #f0f4ff;
@@ -263,7 +263,7 @@ ${"=".repeat(80)}`).join(`
     border-color: #f3f4f6;
     opacity: 0.6;
   }
-`,Mt=goober.css`
+`,_t=goober.css`
   width: 100%;
   padding: 6px 8px;
   background: #f0fdf4;
@@ -296,7 +296,7 @@ ${"=".repeat(80)}`).join(`
     cursor: not-allowed;
     border-color: #f3f4f6;
   }
-`,Ot=goober.css`
+`,zt=goober.css`
   width: 100%;
   padding: 6px 8px;
   background: #fef2f2;
@@ -322,14 +322,14 @@ ${"=".repeat(80)}`).join(`
     transform: translateY(0);
     background: #fecaca;
   }
-`,oe=goober.css`
+`,ee=goober.css`
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 12px;
   background: #f0fdf4;
   color: #166534;
   border: 1px solid #bbf7d0;
-`,re=goober.css`
+`,te=goober.css`
   padding: 10px 12px;
   border-radius: 6px;
   font-size: 12px;
@@ -343,7 +343,7 @@ ${"=".repeat(80)}`).join(`
   border-radius: 0 0 12px 12px;
   font-size: 12px;
   color: #9ca3af;
-`,_e=goober.css`
+`,$e=goober.css`
   kbd {
     display: inline-block;
     padding: 2px 6px;
@@ -353,7 +353,7 @@ ${"=".repeat(80)}`).join(`
     font-size: 11px;
     color: #6b7280;
   }
-`,ze=goober.css`
+`,_e=goober.css`
   position: absolute;
   top: 100%;
   right: 0;
@@ -365,7 +365,7 @@ ${"=".repeat(80)}`).join(`
   z-index: 10000;
   min-width: 180px;
   padding: 8px 0;
-`,Ae=goober.css`
+`,ze=goober.css`
   padding: 8px 12px;
   font-size: 11px;
   font-weight: 600;
@@ -373,7 +373,7 @@ ${"=".repeat(80)}`).join(`
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 1px solid #f3f4f6;
-`,be=goober.css`
+`,fe=goober.css`
   display: block;
   width: 100%;
   padding: 6px 8px;
@@ -388,9 +388,9 @@ ${"=".repeat(80)}`).join(`
   &:hover {
     background: #f3f4f6;
   }
-`,st=goober.css`
+`,it=goober.css`
   background: #f3f4f6;
-`,L=goober.css`
+`,E=goober.css`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -421,8 +421,8 @@ ${"=".repeat(80)}`).join(`
     cursor: not-allowed;
     border-color: #f3f4f6;
   }
-`,at=goober.css`
-  ${L}
+`,lt=goober.css`
+  ${E}
   color: #dc2626;
   border-color: #fee2e2;
   background: #fef2f2;
@@ -437,26 +437,26 @@ ${"=".repeat(80)}`).join(`
   }
 `;goober.css`
   @media (prefers-color-scheme: dark) {
-    ${Fe} {
+    ${De} {
       background: #1e293b;
       border-color: #334155;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
 
-    ${Te} {
+    ${Ie} {
       background: #0f172a;
       border-color: #1e293b;
     }
 
-    ${Ne} {
+    ${Fe} {
       color: #f1f5f9;
     }
 
-    ${Ie} {
+    ${Oe} {
       color: #64748b;
     }
 
-    ${pe} {
+    ${ue} {
       color: #64748b;
 
       &:hover {
@@ -465,25 +465,25 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
+    ${Te} {
+      background: #0f172a;
+      border-color: #334155;
+    }
+
+    ${Z} {
+      color: #f1f5f9;
+    }
+
     ${Me} {
       background: #0f172a;
       border-color: #334155;
     }
 
-    ${te} {
-      color: #f1f5f9;
-    }
-
-    ${Oe} {
-      background: #0f172a;
-      border-color: #334155;
-    }
-
-    ${Pe} {
+    ${Ne} {
       color: #e2e8f0;
     }
 
-    ${$e} {
+    ${Pe} {
       color: #94a3b8;
 
       strong {
@@ -491,11 +491,11 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${Tt} {
+    ${Pt} {
       color: #94a3b8;
     }
 
-    ${Nt} {
+    ${Ht} {
       background: #1e293b;
       color: #e2e8f0;
       border-color: #334155;
@@ -510,7 +510,7 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${It} {
+    ${$t} {
       background: #1e293b;
       color: #818cf8;
       border-color: #334155;
@@ -525,7 +525,7 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${Mt} {
+    ${_t} {
       background: #1e293b;
       color: #4ade80;
       border-color: #334155;
@@ -540,7 +540,7 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${Ot} {
+    ${zt} {
       background: #1e293b;
       color: #f87171;
       border-color: #334155;
@@ -555,13 +555,13 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${oe} {
+    ${ee} {
       background: #064e3b;
       color: #6ee7b7;
       border-color: #065f46;
     }
 
-    ${re} {
+    ${te} {
       background: #7f1d1d;
       color: #fca5a5;
       border-color: #991b1b;
@@ -573,12 +573,12 @@ ${"=".repeat(80)}`).join(`
       color: #94a3b8;
     }
 
-    ${_e} kbd {
+    ${$e} kbd {
       background: #334155;
       color: #e2e8f0;
     }
 
-    ${Le} {
+    ${Ee} {
       background: #1e293b;
       border-color: #334155;
       color: #e2e8f0;
@@ -590,22 +590,22 @@ ${"=".repeat(80)}`).join(`
       }
     }
 
-    ${ue} {
+    ${de} {
       background: #334155;
       color: #94a3b8;
     }
 
-    ${ze} {
+    ${_e} {
       background: #1e293b;
       border-color: #334155;
     }
 
-    ${Ae} {
+    ${ze} {
       color: #64748b;
       border-color: #334155;
     }
 
-    ${be} {
+    ${fe} {
       color: #e2e8f0;
 
       &:hover {
@@ -613,11 +613,11 @@ ${"=".repeat(80)}`).join(`
       }
     }
   }
-`;var it=react.forwardRef(function({sessionId:e,onClose:o,onSaveToDirectory:r},a){let{copyFormat:n,setCopyFormat:s}=ce(),[c,u]=react.useState(false),h=["json","ecs.json","ai.txt"];return jsxRuntime.jsxs("div",{className:Te,children:[jsxRuntime.jsxs("div",{className:ot,children:[jsxRuntime.jsx("h3",{className:Ne,children:"Debug"}),jsxRuntime.jsxs("p",{className:Ie,children:[e.substring(0,36),"..."]})]}),jsxRuntime.jsxs("div",{style:{display:"flex",gap:"4px",alignItems:"center"},children:[jsxRuntime.jsxs("div",{style:{position:"relative"},children:[jsxRuntime.jsx("button",{type:"button",onClick:()=>u(!c),className:pe,"aria-label":"Actions and settings","aria-expanded":c,title:"Actions and settings",children:"\u2699\uFE0F"}),c&&jsxRuntime.jsxs("div",{className:ze,style:{width:"220px"},children:[jsxRuntime.jsx("div",{className:Ae,children:"Copy Format"}),h.map(m=>jsxRuntime.jsxs("button",{type:"button",onClick:()=>{s(m),u(false);},className:`${be} ${n===m?st:""}`,children:[n===m&&"\u2713 ",m==="json"&&"\u{1F4C4} JSON",m==="ecs.json"&&"\u{1F4CB} ECS (AI)",m==="ai.txt"&&"\u{1F916} AI-TXT"]},m)),jsxRuntime.jsx("div",{style:{borderTop:"1px solid #f3f4f6",margin:"8px 0"}}),jsxRuntime.jsx("button",{type:"button",onClick:()=>{r(),u(false);},className:be,children:"\u{1F4C1} Save to Folder"})]})]}),jsxRuntime.jsx("button",{ref:a,type:"button",onClick:o,className:pe,"aria-label":"Close debug panel",children:"\u2715"})]})]})});function lt({logCount:t,errorCount:e,networkErrorCount:o}){return jsxRuntime.jsxs("div",{className:Me,children:[jsxRuntime.jsxs("div",{className:ge,children:[jsxRuntime.jsx("div",{className:te,children:t}),jsxRuntime.jsx("div",{className:fe,children:"Logs"})]}),jsxRuntime.jsxs("div",{className:ge,children:[jsxRuntime.jsx("div",{className:`${te} ${rt}`,children:e}),jsxRuntime.jsx("div",{className:fe,children:"Errors"})]}),jsxRuntime.jsxs("div",{className:ge,children:[jsxRuntime.jsx("div",{className:`${te} ${nt}`,children:o}),jsxRuntime.jsx("div",{className:fe,children:"Network"})]})]})}function ct({logCount:t,hasUploadEndpoint:e,isUploading:o,getFilteredLogCount:r,onCopyFiltered:a,onDownload:n,onCopy:s,onUpload:c}){return jsxRuntime.jsx("div",{style:{padding:"12px 16px"},children:jsxRuntime.jsxs("div",{style:{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:"6px"},children:[jsxRuntime.jsx("button",{type:"button",onClick:()=>a("logs"),className:L,disabled:t===0||r("logs")===0,"aria-label":"Copy only console logs",children:"\u{1F4CB} Logs"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>a("errors"),className:L,disabled:t===0||r("errors")===0,"aria-label":"Copy only errors",children:"\u26A0\uFE0F Errors"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>a("network"),className:L,disabled:t===0||r("network")===0,"aria-label":"Copy only network requests",children:"\u{1F310} Network"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>n("json"),className:L,disabled:t===0,children:"\u{1F4C4} JSON"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>n("txt"),className:L,disabled:t===0,children:"\u{1F4DD} TXT"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>n("jsonl"),className:L,disabled:t===0,children:"\u{1F4E6} JSONL"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>n("ecs.json"),className:L,disabled:t===0,children:"\u{1F4CB} ECS"}),jsxRuntime.jsx("button",{type:"button",onClick:s,className:L,disabled:t===0,children:"\u{1F4CB} Copy"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>n("ai.txt"),className:L,disabled:t===0,children:"\u{1F916} AI"}),e?jsxRuntime.jsx("button",{type:"button",onClick:c,className:L,disabled:o,children:"\u2601\uFE0F Upload"}):jsxRuntime.jsx("div",{})]})})}function dt({uploadStatus:t,directoryStatus:e,copyStatus:o}){return jsxRuntime.jsxs("div",{style:{padding:"0 16px 12px"},children:[t&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:t.type==="success"?oe:re,children:t.message}),e&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:e.type==="success"?oe:re,children:e.message}),o&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:o.type==="success"?oe:re,children:o.message})]})}function ut({metadata:t}){return jsxRuntime.jsxs("details",{className:Oe,style:{borderTop:"1px solid #f3f4f6",borderRadius:0},children:[jsxRuntime.jsx("summary",{className:Pe,children:jsxRuntime.jsx("span",{children:"\u25B8 Session Details"})}),jsxRuntime.jsxs("div",{className:$e,children:[jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"User"}),jsxRuntime.jsx("span",{children:t.userId||"Anonymous"})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Browser"}),jsxRuntime.jsxs("span",{children:[t.browser," (",t.platform,")"]})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Screen"}),jsxRuntime.jsx("span",{children:t.screenResolution})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Timezone"}),jsxRuntime.jsx("span",{children:t.timezone})]})]})]})}function gt(){return jsxRuntime.jsx("div",{className:He,children:jsxRuntime.jsxs("div",{className:_e,children:["Press ",jsxRuntime.jsx("kbd",{children:"Ctrl+Shift+D"})," to toggle"]})})}function mt(t,e){switch(e){case "logs":return t.filter(o=>o.type==="CONSOLE");case "errors":return t.filter(o=>o.type==="CONSOLE"&&o.level==="error");case "network":return t.filter(o=>o.type==="FETCH_REQ"||o.type==="FETCH_RES"||o.type==="XHR_REQ"||o.type==="XHR_RES");case "networkErrors":return t.filter(o=>o.type==="FETCH_ERR"||o.type==="XHR_ERR");default:return t}}function Ue({user:t,environment:e="production",uploadEndpoint:o,fileNameTemplate:r="{env}_{date}_{time}_{userId}_{errorCount}errors",maxLogs:a=2e3,showInProduction:n=false}){let{isOpen:s,open:c,close:u}=Ze(),{copyFormat:h}=ce(),{uploadStatus:m,setUploadStatus:k,directoryStatus:N,setDirectoryStatus:R,copyStatus:E,setCopyStatus:w}=tt(),I=react.useRef(null),Z=react.useRef(null),{downloadLogs:$,uploadLogs:B,clearLogs:xe,getLogs:H,getLogCount:b,getMetadata:i,sessionId:g}=ee({fileNameTemplate:r,environment:e,userId:t?.id||t?.email||"guest",includeMetadata:true,uploadEndpoint:o,maxLogs:a,captureConsole:true,captureFetch:true,captureXHR:true,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:["/api/analytics","google-analytics.com","facebook.com","vercel.com"]}),l=b(),f=i();react.useEffect(()=>{if(f.errorCount>=5&&o){let p=async()=>{try{await B();}catch{console.warn("[DebugPanel] Failed to auto-upload logs");}};return window.addEventListener("error",p),()=>window.removeEventListener("error",p)}},[f.errorCount,o,B]),react.useEffect(()=>{let p=x=>{s&&I.current&&!I.current.contains(x.target)&&u();};return document.addEventListener("mousedown",p),()=>document.removeEventListener("mousedown",p)},[s,u]);let y=react.useCallback((p,x)=>{if(h==="json")return JSON.stringify({metadata:x,logs:p},null,2);if(h==="ecs.json"){let z=p.map(J=>M(J,x)),G={metadata:q(x),logs:z};return JSON.stringify(G,null,2)}else if(h==="ai.txt"){let z=`# METADATA
-service.name=${x.environment||"unknown"}
-user.id=${x.userId||"anonymous"}
+`;var ct=react.forwardRef(function({sessionId:e,onClose:o,onSaveToDirectory:n},a){let{copyFormat:s,setCopyFormat:r}=le(),[i,l]=react.useState(false),p=["json","ecs.json","ai.txt"];return jsxRuntime.jsxs("div",{className:Ie,children:[jsxRuntime.jsxs("div",{className:nt,children:[jsxRuntime.jsx("h3",{className:Fe,children:"Debug"}),jsxRuntime.jsxs("p",{className:Oe,children:[e.substring(0,36),"..."]})]}),jsxRuntime.jsxs("div",{style:{display:"flex",gap:"4px",alignItems:"center"},children:[jsxRuntime.jsxs("div",{style:{position:"relative"},children:[jsxRuntime.jsx("button",{type:"button",onClick:()=>l(!i),className:ue,"aria-label":"Actions and settings","aria-expanded":i,title:"Actions and settings",children:"\u2699\uFE0F"}),i&&jsxRuntime.jsxs("div",{className:_e,style:{width:"220px"},children:[jsxRuntime.jsx("div",{className:ze,children:"Copy Format"}),p.map(u=>jsxRuntime.jsxs("button",{type:"button",onClick:()=>{r(u),l(false);},className:`${fe} ${s===u?it:""}`,children:[s===u&&"\u2713 ",u==="json"&&"\u{1F4C4} JSON",u==="ecs.json"&&"\u{1F4CB} ECS (AI)",u==="ai.txt"&&"\u{1F916} AI-TXT"]},u)),jsxRuntime.jsx("div",{style:{borderTop:"1px solid #f3f4f6",margin:"8px 0"}}),jsxRuntime.jsx("button",{type:"button",onClick:()=>{n(),l(false);},className:fe,children:"\u{1F4C1} Save to Folder"})]})]}),jsxRuntime.jsx("button",{ref:a,type:"button",onClick:o,className:ue,"aria-label":"Close debug panel",children:"\u2715"})]})]})});function dt({logCount:t,errorCount:e,networkErrorCount:o}){return jsxRuntime.jsxs("div",{className:Te,children:[jsxRuntime.jsxs("div",{className:pe,children:[jsxRuntime.jsx("div",{className:Z,children:t}),jsxRuntime.jsx("div",{className:ge,children:"Logs"})]}),jsxRuntime.jsxs("div",{className:pe,children:[jsxRuntime.jsx("div",{className:`${Z} ${st}`,children:e}),jsxRuntime.jsx("div",{className:ge,children:"Errors"})]}),jsxRuntime.jsxs("div",{className:pe,children:[jsxRuntime.jsx("div",{className:`${Z} ${at}`,children:o}),jsxRuntime.jsx("div",{className:ge,children:"Network"})]})]})}function ut({logCount:t,hasUploadEndpoint:e,isUploading:o,getFilteredLogCount:n,onCopyFiltered:a,onDownload:s,onCopy:r,onUpload:i}){return jsxRuntime.jsx("div",{style:{padding:"12px 16px"},children:jsxRuntime.jsxs("div",{style:{display:"grid",gridTemplateColumns:"repeat(3, 1fr)",gap:"6px"},children:[jsxRuntime.jsx("button",{type:"button",onClick:()=>a("logs"),className:E,disabled:t===0||n("logs")===0,"aria-label":"Copy only console logs",children:"\u{1F4CB} Logs"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>a("errors"),className:E,disabled:t===0||n("errors")===0,"aria-label":"Copy only errors",children:"\u26A0\uFE0F Errors"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>a("network"),className:E,disabled:t===0||n("network")===0,"aria-label":"Copy only network requests",children:"\u{1F310} Network"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>s("json"),className:E,disabled:t===0,children:"\u{1F4C4} JSON"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>s("txt"),className:E,disabled:t===0,children:"\u{1F4DD} TXT"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>s("jsonl"),className:E,disabled:t===0,children:"\u{1F4E6} JSONL"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>s("ecs.json"),className:E,disabled:t===0,children:"\u{1F4CB} ECS"}),jsxRuntime.jsx("button",{type:"button",onClick:r,className:E,disabled:t===0,children:"\u{1F4CB} Copy"}),jsxRuntime.jsx("button",{type:"button",onClick:()=>s("ai.txt"),className:E,disabled:t===0,children:"\u{1F916} AI"}),e?jsxRuntime.jsx("button",{type:"button",onClick:i,className:E,disabled:o,children:"\u2601\uFE0F Upload"}):jsxRuntime.jsx("div",{})]})})}function pt({uploadStatus:t,directoryStatus:e,copyStatus:o}){return jsxRuntime.jsxs("div",{style:{padding:"0 16px 12px"},children:[t&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:t.type==="success"?ee:te,children:t.message}),e&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:e.type==="success"?ee:te,children:e.message}),o&&jsxRuntime.jsx("div",{role:"status","aria-live":"polite",className:o.type==="success"?ee:te,children:o.message})]})}function gt({metadata:t}){return jsxRuntime.jsxs("details",{className:Me,style:{borderTop:"1px solid #f3f4f6",borderRadius:0},children:[jsxRuntime.jsx("summary",{className:Ne,children:jsxRuntime.jsx("span",{children:"\u25B8 Session Details"})}),jsxRuntime.jsxs("div",{className:Pe,children:[jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"User"}),jsxRuntime.jsx("span",{children:t.userId||"Anonymous"})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Browser"}),jsxRuntime.jsxs("span",{children:[t.browser," (",t.platform,")"]})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Screen"}),jsxRuntime.jsx("span",{children:t.screenResolution})]}),jsxRuntime.jsxs("div",{children:[jsxRuntime.jsx("strong",{children:"Timezone"}),jsxRuntime.jsx("span",{children:t.timezone})]})]})]})}function mt(){return jsxRuntime.jsx("div",{className:He,children:jsxRuntime.jsxs("div",{className:$e,children:["Press ",jsxRuntime.jsx("kbd",{children:"Ctrl+Shift+D"})," to toggle"]})})}function xt(t,e){switch(e){case "logs":return t.filter(o=>o.type==="CONSOLE");case "errors":return t.filter(o=>o.type==="CONSOLE"&&o.level==="error");case "network":return t.filter(o=>o.type==="FETCH_REQ"||o.type==="FETCH_RES"||o.type==="XHR_REQ"||o.type==="XHR_RES");case "networkErrors":return t.filter(o=>o.type==="FETCH_ERR"||o.type==="XHR_ERR");default:return t}}function Ue({user:t,environment:e="production",uploadEndpoint:o,fileNameTemplate:n="{env}_{date}_{time}_{userId}_{errorCount}errors",maxLogs:a=2e3,showInProduction:s=false}){let{isOpen:r,open:i,close:l}=tt(),{copyFormat:p}=le(),{uploadStatus:u,setUploadStatus:f,directoryStatus:D,setDirectoryStatus:v,copyStatus:y,setCopyStatus:b}=rt(),w=react.useRef(null),P=react.useRef(null),{downloadLogs:k,uploadLogs:X,clearLogs:ye,getLogs:N,getLogCount:xe,getMetadata:I,sessionId:m}=Q({fileNameTemplate:n,environment:e,userId:t?.id||t?.email||"guest",includeMetadata:true,uploadEndpoint:o,maxLogs:a,captureConsole:true,captureFetch:true,captureXHR:true,sanitizeKeys:["password","token","apiKey","secret","authorization","creditCard"],excludeUrls:["/api/analytics","google-analytics.com","facebook.com","vercel.com"]}),x=xe(),g=I();react.useEffect(()=>{if(g.errorCount>=5&&o){let d=async()=>{try{await X();}catch{console.warn("[DebugPanel] Failed to auto-upload logs");}};return window.addEventListener("error",d),()=>window.removeEventListener("error",d)}},[g.errorCount,o,X]),react.useEffect(()=>{let d=S=>{r&&w.current&&!w.current.contains(S.target)&&l();};return document.addEventListener("mousedown",d),()=>document.removeEventListener("mousedown",d)},[r,l]);let h=react.useCallback((d,S)=>{if(p==="json")return JSON.stringify({metadata:S,logs:d},null,2);if(p==="ecs.json"){let H=d.map(B=>T(B,S)),K={metadata:_(S),logs:H};return JSON.stringify(K,null,2)}else if(p==="ai.txt"){let H=`# METADATA
+service.name=${S.environment||"unknown"}
+user.id=${S.userId||"anonymous"}
 timestamp=${new Date().toISOString()}
 
 # LOGS
-`,G=p.map(J=>{let v=M(J,x),je=v["@timestamp"],Ke=v["log.level"],wt=v["event.category"]?.[0]||"unknown",Y=`[${je}] ${Ke} ${wt}`;return v.message&&(Y+=` | message="${v.message}"`),v.http?.request?.method&&(Y+=` | req.method=${v.http.request.method}`),v.url?.full&&(Y+=` | url=${v.url.full}`),v.http?.response?.status_code&&(Y+=` | res.status=${v.http.response.status_code}`),v.error?.message&&(Y+=` | error="${v.error.message}"`),Y});return z+G.join(`
-`)}return JSON.stringify({metadata:x,logs:p},null,2)},[h]),C=react.useCallback(async()=>{k(null);try{let p=await B();p.success?(k({type:"success",message:`Uploaded successfully! ${p.data?JSON.stringify(p.data):""}`}),p.data&&typeof p.data=="object"&&"url"in p.data&&await navigator.clipboard.writeText(String(p.data.url))):k({type:"error",message:`Upload failed: ${p.error}`});}catch(p){k({type:"error",message:`Error: ${p instanceof Error?p.message:"Unknown error"}`});}},[B,k]),F=react.useCallback(p=>{let x=$(p);x&&k({type:"success",message:`Downloaded: ${x}`});},[$,k]),he=react.useCallback(async()=>{R(null);try{await $("json",void 0,{showPicker:!0})&&R({type:"success",message:"Saved to directory"});}catch{R({type:"error",message:"Unable to save. Please try again or choose a different location."});}},[$,R]),we=react.useCallback(async()=>{w(null);try{let p=H(),x=i(),z=y(p,x);await navigator.clipboard.writeText(z),w({type:"success",message:"Copied to clipboard!"});}catch{w({type:"error",message:"Failed to copy. Check clipboard permissions."});}},[H,i,y,w]),S=react.useCallback(async p=>{w(null);try{let x=H(),z=i(),G=mt(x,p),J=G.length;if(J===0){w({type:"error",message:{all:"No logs to copy",logs:"No logs to copy",errors:"No errors to copy",network:"No network requests to copy",networkErrors:"No network errors to copy"}[p]});return}let v=y(G,z);await navigator.clipboard.writeText(v),w({type:"success",message:`Copied ${J} ${{all:"all entries",logs:"logs",errors:"errors",network:"network requests",networkErrors:"network errors"}[p]} to clipboard`});}catch{w({type:"error",message:"Failed to copy. Check clipboard permissions."});}},[H,i,y,w]),Se=react.useCallback(p=>mt(H(),p).length,[H]);return n||e==="development"||t?.role==="admin"?jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsxs("button",{type:"button",onClick:c,className:Le,"aria-label":"Open debug panel (Ctrl+Shift+D)","aria-expanded":s,"aria-controls":"debug-panel",children:[jsxRuntime.jsx("span",{children:"Debug"}),jsxRuntime.jsx("span",{className:l>0?f.errorCount>0?De:ue:ue,children:l}),f.errorCount>0&&jsxRuntime.jsxs("span",{className:De,children:[f.errorCount," err"]})]}),s&&jsxRuntime.jsxs("div",{ref:I,id:"debug-panel",role:"dialog","aria-modal":"true","aria-label":"Debug Logger Panel",className:Fe,children:[jsxRuntime.jsx(it,{sessionId:g,onClose:u,onSaveToDirectory:he,ref:Z}),jsxRuntime.jsx(lt,{logCount:l,errorCount:f.errorCount,networkErrorCount:f.networkErrorCount}),jsxRuntime.jsx(ct,{logCount:l,hasUploadEndpoint:!!o,isUploading:false,getFilteredLogCount:Se,onCopyFiltered:S,onDownload:F,onCopy:we,onUpload:C}),jsxRuntime.jsx(dt,{uploadStatus:m,directoryStatus:N,copyStatus:E}),jsxRuntime.jsx(ut,{metadata:f}),jsxRuntime.jsx("div",{style:{padding:"8px 16px",display:"flex",justifyContent:"flex-end"},children:!o&&jsxRuntime.jsx("button",{type:"button",onClick:()=>{confirm("Clear all logs?")&&xe();},className:at,children:"\u{1F5D1}\uFE0F Clear"})}),jsxRuntime.jsx(gt,{})]})]}):null}function Ut({fileNameTemplate:t="debug_{timestamp}"}){let[e,o]=react.useState(false),{downloadLogs:r,clearLogs:a,getLogCount:n}=ee({fileNameTemplate:t}),s=n();return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsx("button",{onClick:()=>o(c=>!c),style:{position:"fixed",bottom:"20px",right:"20px",zIndex:9999,padding:"12px 20px",background:"#1f2937",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,display:"flex",alignItems:"center",gap:"8px"},children:jsxRuntime.jsx("span",{children:s})}),e&&jsxRuntime.jsxs("div",{style:{position:"fixed",bottom:"80px",right:"20px",zIndex:9999,background:"#fff",padding:"20px",borderRadius:"8px",boxShadow:"0 4px 12px rgba(0,0,0,0.2)",width:"300px",display:"flex",flexDirection:"column",gap:"12px"},children:[jsxRuntime.jsx("button",{onClick:()=>r("json"),style:{width:"100%",padding:"10px",background:"#2563eb",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Download JSON"}),jsxRuntime.jsx("button",{onClick:()=>{confirm("Clear all logs?")&&a();},style:{width:"100%",padding:"10px",background:"#dc2626",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Clear Logs"}),jsxRuntime.jsx("button",{onClick:()=>o(false),style:{width:"100%",padding:"10px",background:"#6b7280",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Close"})]})]})}function Bt(t){return react.useMemo(()=>t.showInProduction||t.environment==="development"||t.user?.role==="admin"||(()=>{try{return typeof window<"u"?new URLSearchParams(window.location.search).get("debug")==="true":!1}catch{return  false}})()?true:(()=>{try{return typeof window<"u"?localStorage.getItem("glean-debug-enabled")==="true":!1}catch{return  false}})(),[t.showInProduction,t.environment,t.user])}function Gt(){let t=react.useCallback(o=>{try{typeof window<"u"&&(o?localStorage.setItem("glean-debug-enabled","true"):localStorage.removeItem("glean-debug-enabled"),window.dispatchEvent(new CustomEvent("glean-debug-toggle",{detail:{visible:o}})));}catch{}},[]),e=react.useMemo(()=>typeof process<"u"&&true,[]);react.useEffect(()=>{if(typeof window>"u")return;let o=e?{show:()=>console.warn("[GleanDebugger] Debug mode is disabled in production"),hide:()=>console.warn("[GleanDebugger] Debug mode is disabled in production"),toggle:()=>console.warn("[GleanDebugger] Debug mode is disabled in production"),isEnabled:()=>false}:{show:()=>t(true),hide:()=>t(false),toggle:()=>{try{let r=localStorage.getItem("glean-debug-enabled")==="true";t(!r);}catch{}},isEnabled:()=>{try{return typeof window<"u"?localStorage.getItem("glean-debug-enabled")==="true":!1}catch{return  false}}};if(window.glean!==void 0){console.warn("[GleanDebugger] window.glean already exists. Skipping registration.");return}return window.glean=o,()=>{typeof window<"u"&&window.glean===o&&delete window.glean;}},[t,e]);}function ht(t){let e=Bt(t);return Gt(),e?jsxRuntime.jsx(Ue,{...t}):null}exports.DebugPanel=Ue;exports.DebugPanelMinimal=Ut;exports.GleanDebugger=ht;exports.collectMetadata=Be;exports.filterStackTrace=ke;exports.generateExportFilename=Wt;exports.generateFilename=_;exports.generateSessionId=Ge;exports.getBrowserInfo=ve;exports.sanitizeData=se;exports.sanitizeFilename=A;exports.transformMetadataToECS=q;exports.transformToECS=M;exports.useLogRecorder=ee;
+`,K=d.map(B=>{let C=T(B,S),Ae=C["@timestamp"],qe=C["log.level"],Et=C["event.category"]?.[0]||"unknown",G=`[${Ae}] ${qe} ${Et}`;return C.message&&(G+=` | message="${C.message}"`),C.http?.request?.method&&(G+=` | req.method=${C.http.request.method}`),C.url?.full&&(G+=` | url=${C.url.full}`),C.http?.response?.status_code&&(G+=` | res.status=${C.http.response.status_code}`),C.error?.message&&(G+=` | error="${C.error.message}"`),G});return H+K.join(`
+`)}return JSON.stringify({metadata:S,logs:d},null,2)},[p]),R=react.useCallback(async()=>{f(null);try{let d=await X();d.success?(f({type:"success",message:`Uploaded successfully! ${d.data?JSON.stringify(d.data):""}`}),d.data&&typeof d.data=="object"&&"url"in d.data&&await navigator.clipboard.writeText(String(d.data.url))):f({type:"error",message:`Upload failed: ${d.error}`});}catch(d){f({type:"error",message:`Error: ${d instanceof Error?d.message:"Unknown error"}`});}},[X,f]),he=react.useCallback(d=>{let S=k(d);S&&f({type:"success",message:`Downloaded: ${S}`});},[k,f]),vt=react.useCallback(async()=>{v(null);try{await k("json",void 0,{showPicker:!0})&&v({type:"success",message:"Saved to directory"});}catch{v({type:"error",message:"Unable to save. Please try again or choose a different location."});}},[k,v]),kt=react.useCallback(async()=>{b(null);try{let d=N(),S=I(),H=h(d,S);await navigator.clipboard.writeText(H),b({type:"success",message:"Copied to clipboard!"});}catch{b({type:"error",message:"Failed to copy. Check clipboard permissions."});}},[N,I,h,b]),Ct=react.useCallback(async d=>{b(null);try{let S=N(),H=I(),K=xt(S,d),B=K.length;if(B===0){b({type:"error",message:{all:"No logs to copy",logs:"No logs to copy",errors:"No errors to copy",network:"No network requests to copy",networkErrors:"No network errors to copy"}[d]});return}let C=h(K,H);await navigator.clipboard.writeText(C),b({type:"success",message:`Copied ${B} ${{all:"all entries",logs:"logs",errors:"errors",network:"network requests",networkErrors:"network errors"}[d]} to clipboard`});}catch{b({type:"error",message:"Failed to copy. Check clipboard permissions."});}},[N,I,h,b]),Rt=react.useCallback(d=>xt(N(),d).length,[N]);return s||e==="development"||t?.role==="admin"?jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsxs("button",{type:"button",onClick:i,className:Ee,"aria-label":"Open debug panel (Ctrl+Shift+D)","aria-expanded":r,"aria-controls":"debug-panel",children:[jsxRuntime.jsx("span",{children:"Debug"}),jsxRuntime.jsx("span",{className:x>0?g.errorCount>0?Le:de:de,children:x}),g.errorCount>0&&jsxRuntime.jsxs("span",{className:Le,children:[g.errorCount," err"]})]}),r&&jsxRuntime.jsxs("div",{ref:w,id:"debug-panel",role:"dialog","aria-modal":"true","aria-label":"Debug Logger Panel",className:De,children:[jsxRuntime.jsx(ct,{sessionId:m,onClose:l,onSaveToDirectory:vt,ref:P}),jsxRuntime.jsx(dt,{logCount:x,errorCount:g.errorCount,networkErrorCount:g.networkErrorCount}),jsxRuntime.jsx(ut,{logCount:x,hasUploadEndpoint:!!o,isUploading:false,getFilteredLogCount:Rt,onCopyFiltered:Ct,onDownload:he,onCopy:kt,onUpload:R}),jsxRuntime.jsx(pt,{uploadStatus:u,directoryStatus:D,copyStatus:y}),jsxRuntime.jsx(gt,{metadata:g}),jsxRuntime.jsx("div",{style:{padding:"8px 16px",display:"flex",justifyContent:"flex-end"},children:!o&&jsxRuntime.jsx("button",{type:"button",onClick:()=>{confirm("Clear all logs?")&&ye();},className:lt,children:"\u{1F5D1}\uFE0F Clear"})}),jsxRuntime.jsx(mt,{})]})]}):null}function Gt({fileNameTemplate:t="debug_{timestamp}"}){let[e,o]=react.useState(false),{downloadLogs:n,clearLogs:a,getLogCount:s}=Q({fileNameTemplate:t}),r=s();return jsxRuntime.jsxs(jsxRuntime.Fragment,{children:[jsxRuntime.jsx("button",{onClick:()=>o(i=>!i),style:{position:"fixed",bottom:"20px",right:"20px",zIndex:9999,padding:"12px 20px",background:"#1f2937",color:"#fff",border:"none",borderRadius:"8px",cursor:"pointer",fontSize:"14px",fontWeight:600,display:"flex",alignItems:"center",gap:"8px"},children:jsxRuntime.jsx("span",{children:r})}),e&&jsxRuntime.jsxs("div",{style:{position:"fixed",bottom:"80px",right:"20px",zIndex:9999,background:"#fff",padding:"20px",borderRadius:"8px",boxShadow:"0 4px 12px rgba(0,0,0,0.2)",width:"300px",display:"flex",flexDirection:"column",gap:"12px"},children:[jsxRuntime.jsx("button",{onClick:()=>n("json"),style:{width:"100%",padding:"10px",background:"#2563eb",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Download JSON"}),jsxRuntime.jsx("button",{onClick:()=>{confirm("Clear all logs?")&&a();},style:{width:"100%",padding:"10px",background:"#dc2626",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Clear Logs"}),jsxRuntime.jsx("button",{onClick:()=>o(false),style:{width:"100%",padding:"10px",background:"#6b7280",color:"#fff",border:"none",borderRadius:"6px",cursor:"pointer",fontSize:"14px"},children:"Close"})]})]})}function Wt(t){return react.useMemo(()=>t.showInProduction||t.environment==="development"||t.user?.role==="admin"||(()=>{try{return typeof window<"u"?new URLSearchParams(window.location.search).get("debug")==="true":!1}catch{return  false}})()?true:(()=>{try{return typeof window<"u"?localStorage.getItem("glean-debug-enabled")==="true":!1}catch{return  false}})(),[t.showInProduction,t.environment,t.user])}function Qt(){let t=react.useCallback(o=>{try{typeof window<"u"&&(o?localStorage.setItem("glean-debug-enabled","true"):localStorage.removeItem("glean-debug-enabled"),window.dispatchEvent(new CustomEvent("glean-debug-toggle",{detail:{visible:o}})));}catch{}},[]),e=react.useMemo(()=>typeof process<"u"&&true,[]);react.useEffect(()=>{if(typeof window>"u")return;let o=e?{show:()=>console.warn("[GleanDebugger] Debug mode is disabled in production"),hide:()=>console.warn("[GleanDebugger] Debug mode is disabled in production"),toggle:()=>console.warn("[GleanDebugger] Debug mode is disabled in production"),isEnabled:()=>false}:{show:()=>t(true),hide:()=>t(false),toggle:()=>{try{let n=localStorage.getItem("glean-debug-enabled")==="true";t(!n);}catch{}},isEnabled:()=>{try{return typeof window<"u"?localStorage.getItem("glean-debug-enabled")==="true":!1}catch{return  false}}};if(window.glean!==void 0){console.warn("[GleanDebugger] window.glean already exists. Skipping registration.");return}return window.glean=o,()=>{typeof window<"u"&&window.glean===o&&delete window.glean;}},[t,e]);}function St(t){let e=Wt(t);return Qt(),e?jsxRuntime.jsx(Ue,{...t}):null}exports.DebugPanel=Ue;exports.DebugPanelMinimal=Gt;exports.GleanDebugger=St;exports.collectMetadata=Xe;exports.filterStackTrace=Se;exports.generateExportFilename=ro;exports.generateFilename=F;exports.generateSessionId=Ke;exports.getBrowserInfo=we;exports.sanitizeData=re;exports.sanitizeFilename=$;exports.transformMetadataToECS=_;exports.transformToECS=T;exports.useLogRecorder=Q;
