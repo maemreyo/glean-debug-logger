@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/maemreyo/glean-debug-logger/compare/v3.0.0...v3.1.0) (2026-01-22)
+
+
+### Features
+
+* **demo:** add glean-debug-logger demo application ([0927ed3](https://github.com/maemreyo/glean-debug-logger/commit/0927ed382e97ab991e993c0cfc9a11d525f77479))
+
 # [3.0.0](https://github.com/maemreyo/glean-debug-logger/compare/v2.1.0...v3.0.0) (2026-01-22)
 
 
