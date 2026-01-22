@@ -5,6 +5,8 @@ import {
   headerTitleWrapperStyles,
   headerTitleStyles,
   closeButtonStyles,
+  deleteButtonStyles,
+  iconButtonStyles,
   settingsDropdownStyles,
   settingsDropdownHeaderStyles,
   settingsDropdownItemSelectedStyles,
@@ -170,7 +172,7 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
             <button
               type="button"
               onClick={onClear}
-              className={closeButtonStyles}
+              className={deleteButtonStyles}
               aria-label="Clear all logs"
               title="Clear logs"
             >
@@ -180,7 +182,7 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
               <button
                 type="button"
                 onClick={() => setShowSettings(!showSettings)}
-                className={closeButtonStyles}
+                className={iconButtonStyles}
                 aria-label="Actions and settings"
                 aria-expanded={showSettings}
                 title="Actions and settings"

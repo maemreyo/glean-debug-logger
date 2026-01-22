@@ -145,7 +145,7 @@ export const errorBadgeStyles = css`
 // ============================================
 export const panelStyles = css`
   position: fixed;
-  bottom: 90px;
+  bottom: 70px;
   right: ${theme.space.lg};
   z-index: 9999;
   width: 380px;
@@ -243,6 +243,62 @@ export const closeButtonStyles = css`
   &:hover {
     background: rgba(0, 0, 0, 0.05);
     color: ${theme.colors.secondary};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: none;
+  }
+`;
+
+export const deleteButtonStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: ${theme.radius.sm};
+  color: ${theme.colors.muted};
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    background: ${theme.colors.errorBg};
+    color: ${theme.colors.error};
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: none;
+  }
+`;
+
+export const iconButtonStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: ${theme.radius.sm};
+  color: ${theme.colors.muted};
+  cursor: pointer;
+  transition: all ${theme.transitions.fast};
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: ${theme.colors.accent};
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: none;
   }
 `;
 
@@ -452,16 +508,19 @@ const baseButtonStyles = css`
     background: rgba(255, 255, 255, 1);
     border-color: rgba(0, 0, 0, 0.1);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    background: rgba(245, 245, 245, 0.8);
+    border-color: ${theme.colors.border};
   }
 `;
 
@@ -533,22 +592,30 @@ export const actionButtonStyles = css`
     width: 18px;
     height: 18px;
     flex-shrink: 0;
+    transition: transform ${theme.transitions.fast};
   }
 
   &:hover:not(:disabled) {
     background: rgba(255, 255, 255, 1);
     border-color: rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+    & svg {
+      transform: scale(1.1);
+    }
   }
 
   &:active:not(:disabled) {
     transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    background: rgba(245, 245, 245, 0.8);
+    border-color: ${theme.colors.border};
   }
 `;
 
@@ -771,6 +838,26 @@ export const darkModeStyles = css`
       &:hover {
         background: rgba(255, 255, 255, 0.08);
         color: rgba(255, 255, 255, 0.8);
+      }
+    }
+
+    ${deleteButtonStyles} {
+      color: rgba(255, 255, 255, 0.4);
+
+      &:hover {
+        background: rgba(220, 38, 38, 0.2);
+        color: #f87171;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+      }
+    }
+
+    ${iconButtonStyles} {
+      color: rgba(255, 255, 255, 0.4);
+
+      &:hover {
+        background: rgba(14, 165, 233, 0.15);
+        color: #38bdf8;
+        box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
       }
     }
 
