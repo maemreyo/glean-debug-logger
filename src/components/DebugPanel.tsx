@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { useLogRecorder } from '../hooks/useLogRecorder/index';
 import { useDebugPanelControls } from '../hooks/useDebugPanelControls';
 import { useCopyFormat } from '../hooks/useCopyFormat';
@@ -349,43 +350,72 @@ timestamp=${new Date().toISOString()}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
-            <DebugPanelHeader
-              sessionId={sessionId}
-              metadata={metadata}
-              onClose={close}
-              onSaveToDirectory={handleSaveToDirectory}
-              onClear={() => {
-                if (confirm('Clear all logs?')) {
-                  clearLogs();
-                }
-              }}
-              ref={closeButtonRef}
-            />
+            <ScrollArea.Root className="glean-scroll-area" style={{ flex: 1, overflow: 'hidden' }}>
+              <ScrollArea.Viewport
+                className="glean-scroll-viewport"
+                style={{ width: '100%', height: '100%' }}
+              >
+                <DebugPanelHeader
+                  sessionId={sessionId}
+                  metadata={metadata}
+                  onClose={close}
+                  onSaveToDirectory={handleSaveToDirectory}
+                  onClear={() => {
+                    if (confirm('Clear all logs?')) {
+                      clearLogs();
+                    }
+                  }}
+                  ref={closeButtonRef}
+                />
 
-            <DebugPanelStats
-              logCount={logCount}
-              errorCount={metadata.errorCount}
-              networkErrorCount={metadata.networkErrorCount}
-            />
+                <DebugPanelStats
+                  logCount={logCount}
+                  errorCount={metadata.errorCount}
+                  networkErrorCount={metadata.networkErrorCount}
+                />
 
-            <DebugPanelActions
-              logCount={logCount}
-              hasUploadEndpoint={!!uploadEndpoint}
-              isUploading={false}
-              getFilteredLogCount={getFilteredLogCount}
-              onCopyFiltered={handleCopyFiltered}
-              onDownload={handleDownload}
-              onCopy={handleCopy}
-              onUpload={handleUpload}
-            />
+                <DebugPanelActions
+                  logCount={logCount}
+                  hasUploadEndpoint={!!uploadEndpoint}
+                  isUploading={false}
+                  getFilteredLogCount={getFilteredLogCount}
+                  onCopyFiltered={handleCopyFiltered}
+                  onDownload={handleDownload}
+                  onCopy={handleCopy}
+                  onUpload={handleUpload}
+                />
 
-            <DebugPanelStatus
-              uploadStatus={uploadStatus}
-              directoryStatus={directoryStatus}
-              copyStatus={copyStatus}
-            />
+                <DebugPanelStatus
+                  uploadStatus={uploadStatus}
+                  directoryStatus={directoryStatus}
+                  copyStatus={copyStatus}
+                />
 
-            <DebugPanelFooter />
+                <DebugPanelFooter />
+              </ScrollArea.Viewport>
+              <ScrollArea.Scrollbar
+                className="glean-scrollbar"
+                orientation="vertical"
+                style={{
+                  display: 'flex',
+                  width: '6px',
+                  userSelect: 'none',
+                  touchAction: 'none',
+                  padding: '2px',
+                  background: 'transparent',
+                }}
+              >
+                <ScrollArea.Thumb
+                  className="glean-scrollbar-thumb"
+                  style={{
+                    flex: 1,
+                    background: 'rgba(0, 0, 0, 0.15)',
+                    borderRadius: '3px',
+                    transition: 'background 0.15s ease',
+                  }}
+                />
+              </ScrollArea.Scrollbar>
+            </ScrollArea.Root>
           </motion.div>
         )}
       </AnimatePresence>

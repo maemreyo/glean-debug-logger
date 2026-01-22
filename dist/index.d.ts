@@ -1,4 +1,5 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
+import { ReactNode } from 'react';
 
 type LogType = 'CONSOLE' | 'FETCH_REQ' | 'FETCH_RES' | 'FETCH_ERR' | 'XHR_REQ' | 'XHR_RES' | 'XHR_ERR';
 type ConsoleLevel = 'log' | 'error' | 'warn' | 'info' | 'debug';
@@ -224,6 +225,7 @@ interface GleanDebuggerProps {
     fileNameTemplate?: string;
     maxLogs?: number;
     showInProduction?: boolean;
+    children?: ReactNode;
 }
 interface GleanConsoleAPI {
     show: () => void;

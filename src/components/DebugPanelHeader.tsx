@@ -1,5 +1,6 @@
 import { forwardRef, useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
   headerStyles,
   headerTitleWrapperStyles,
@@ -7,10 +8,6 @@ import {
   closeButtonStyles,
   deleteButtonStyles,
   iconButtonStyles,
-  settingsDropdownStyles,
-  settingsDropdownHeaderStyles,
-  settingsDropdownItemSelectedStyles,
-  settingsDropdownItemStyles,
   sessionTooltipStyles,
   sessionTooltipRowStyles,
   sessionTooltipLabelStyles,
@@ -28,6 +25,123 @@ interface DebugPanelHeaderProps {
   onClear: () => void;
 }
 
+// Custom styled dropdown content component
+function SettingsDropdownContent({
+  copyFormat,
+  setCopyFormat,
+  onSaveToDirectory,
+  onCloseDropdown,
+}: {
+  copyFormat: CopyFormat;
+  setCopyFormat: (format: CopyFormat) => void;
+  onSaveToDirectory: () => void;
+  onCloseDropdown: () => void;
+}) {
+  const formatOptions: CopyFormat[] = ['json', 'ecs.json', 'ai.txt'];
+
+  const formatIcons = {
+    json: <FileJson size={14} />,
+    'ecs.json': <FileText size={14} />,
+    'ai.txt': <FileText size={14} />,
+  };
+
+  return (
+    <div
+      style={{
+        minWidth: 180,
+        background: 'var(--glass-bg, rgba(255,255,255,0.95))',
+        backdropFilter: 'blur(20px)',
+        borderRadius: 10,
+        padding: 8,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05)',
+        animation: 'gleanDropdownIn 0.15s ease-out',
+      }}
+    >
+      <div
+        style={{
+          padding: '8px 10px 6px',
+          fontSize: 10,
+          fontWeight: 600,
+          color: 'var(--muted, #a0aec0)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+        }}
+      >
+        Copy Format
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {formatOptions.map((format) => (
+          <button
+            key={format}
+            type="button"
+            onClick={() => {
+              setCopyFormat(format);
+              onCloseDropdown();
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              width: '100%',
+              padding: '10px 12px',
+              textAlign: 'left',
+              background:
+                copyFormat === format ? 'var(--primary-bg, rgba(14,165,233,0.08))' : 'transparent',
+              border: 'none',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: 12,
+              color: copyFormat === format ? 'var(--accent, #0ea5e9)' : 'var(--secondary, #4a5568)',
+              transition: 'all 0.12s ease',
+            }}
+          >
+            {formatIcons[format]}
+            <span style={{ flex: 1 }}>
+              {format === 'json' && 'JSON'}
+              {format === 'ecs.json' && 'ECS (AI)'}
+              {format === 'ai.txt' && 'AI-TXT'}
+            </span>
+            {copyFormat === format && <span>✓</span>}
+          </button>
+        ))}
+      </div>
+
+      <div
+        style={{
+          borderTop: '1px solid var(--border-color, rgba(0,0,0,0.06))',
+          margin: '8px 0',
+        }}
+      />
+
+      <button
+        type="button"
+        onClick={() => {
+          onSaveToDirectory();
+          onCloseDropdown();
+        }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          width: '100%',
+          padding: '10px 12px',
+          textAlign: 'left',
+          background: 'transparent',
+          border: 'none',
+          borderRadius: 6,
+          cursor: 'pointer',
+          fontSize: 12,
+          color: 'var(--secondary, #4a5568)',
+          transition: 'all 0.12s ease',
+        }}
+      >
+        <Save size={14} />
+        <span>Save to Folder</span>
+      </button>
+    </div>
+  );
+}
+
 export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderProps>(
   function DebugPanelHeader(
     { sessionId, metadata, onClose, onSaveToDirectory, onClear },
@@ -37,17 +151,8 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
     const [showSettings, setShowSettings] = useState(false);
     const [showSessionTooltip, setShowSessionTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
-    const settingsRef = useRef<HTMLDivElement>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
     const iconButtonRef = useRef<HTMLButtonElement>(null);
-
-    const formatOptions: CopyFormat[] = ['json', 'ecs.json', 'ai.txt'];
-
-    const formatIcons = {
-      json: <FileJson size={14} />,
-      'ecs.json': <FileText size={14} />,
-      'ai.txt': <FileText size={14} />,
-    };
 
     const updateTooltipPosition = useCallback(() => {
       if (iconButtonRef.current) {
@@ -74,9 +179,6 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
 
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
-        if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
-          setShowSettings(false);
-        }
         if (tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
           setShowSessionTooltip(false);
         }
@@ -105,6 +207,7 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
 
     const tooltipElement = showSessionTooltip ? (
       <div
+        ref={tooltipRef}
         className={sessionTooltipStyles}
         style={{ top: tooltipPosition.top, left: tooltipPosition.left }}
       >
@@ -137,7 +240,6 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
           <div className={headerTitleWrapperStyles}>
             <h3 className={headerTitleStyles}>Debug</h3>
             <div
-              ref={tooltipRef}
               style={{
                 position: 'relative',
                 display: 'inline-flex',
@@ -178,60 +280,28 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
             >
               <Trash2 size={16} />
             </button>
-            <div ref={settingsRef} style={{ position: 'relative' }}>
-              <button
-                type="button"
-                onClick={() => setShowSettings(!showSettings)}
-                className={iconButtonStyles}
-                aria-label="Actions and settings"
-                aria-expanded={showSettings}
-                title="Actions and settings"
-              >
-                <Settings size={16} />
-              </button>
-              {showSettings && (
-                <div className={settingsDropdownStyles} style={{ width: '200px' }}>
-                  <div className={settingsDropdownHeaderStyles}>Copy Format</div>
-                  {formatOptions.map((format) => (
-                    <button
-                      key={format}
-                      type="button"
-                      onClick={() => {
-                        setCopyFormat(format);
-                        setShowSettings(false);
-                      }}
-                      className={`${settingsDropdownItemStyles} ${copyFormat === format ? settingsDropdownItemSelectedStyles : ''}`}
-                      style={{ gap: '8px' }}
-                    >
-                      {formatIcons[format]}
-                      <span>
-                        {format === 'json' && 'JSON'}
-                        {format === 'ecs.json' && 'ECS (AI)'}
-                        {format === 'ai.txt' && 'AI-TXT'}
-                      </span>
-                      {copyFormat === format && <span style={{ marginLeft: 'auto' }}>✓</span>}
-                    </button>
-                  ))}
-
-                  <div
-                    style={{ borderTop: '1px solid var(--border-color, #f3f4f6)', margin: '8px 0' }}
+            <DropdownMenu.Root open={showSettings} onOpenChange={(open) => setShowSettings(open)}>
+              <DropdownMenu.Trigger asChild>
+                <button
+                  type="button"
+                  className={iconButtonStyles}
+                  aria-label="Actions and settings"
+                  title="Actions and settings"
+                >
+                  <Settings size={16} />
+                </button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content sideOffset={6} align="end" style={{ zIndex: 100000 }}>
+                  <SettingsDropdownContent
+                    copyFormat={copyFormat}
+                    setCopyFormat={setCopyFormat}
+                    onSaveToDirectory={onSaveToDirectory}
+                    onCloseDropdown={() => setShowSettings(false)}
                   />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onSaveToDirectory();
-                      setShowSettings(false);
-                    }}
-                    className={settingsDropdownItemStyles}
-                    style={{ gap: '8px' }}
-                  >
-                    <Save size={14} />
-                    <span>Save to Folder</span>
-                  </button>
-                </div>
-              )}
-            </div>
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
             <button
               ref={closeButtonRef}
               type="button"
