@@ -58,21 +58,46 @@ npm install @zaob/glean-debug-logger
 
 ### Option 1: GleanDebugger Component (Recommended)
 
-The simplest way to add debug logging to your app. Just drop the component and it handles everything automatically:
+The simplest way to add debug logging to your Next.js app. Just add the provider and it handles everything automatically:
 
 ```tsx
-import GleanDebugger from '@zaob/glean-debug-logger';
+// app/providers.tsx
+'use client';
 
-function App() {
+import dynamic from 'next/dynamic';
+
+// Client-only dynamic import - prevents SSR hydration issues
+const GleanDebugger = dynamic(
+  () => import('@zaob/glean-debug-logger').then((mod) => mod.GleanDebugger),
+  { ssr: false }
+);
+
+export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-      <h1>My Awesome App</h1>
+    <>
+      {children}
       <GleanDebugger
-        environment="production"
+        environment="development"
         user={{ id: 'user_123', email: 'user@example.com', role: 'admin' }}
         uploadEndpoint="/api/logs/upload"
       />
-    </div>
+    </>
+  );
+}
+```
+
+Then wrap your app in `layout.tsx`:
+
+```tsx
+import { Providers } from './providers';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
   );
 }
 ```
@@ -83,9 +108,9 @@ The `GleanDebugger` component provides:
 - **Console commands API** via `window.glean` (`show()`, `hide()`, `toggle()`, `isEnabled()`)
 - **Smart visibility** - hidden by default in production unless explicitly enabled
 
-### Option 2: useLogRecorder Hook + DebugPanel
+### Option 2: useLogRecorder Hook + DebugPanel (Advanced)
 
-For more control, use the hook and component separately:
+For more control, use the hook and component separately. This is an advanced option for custom use cases:
 
 ```tsx
 import { useLogRecorder, DebugPanel } from '@zaob/glean-debug-logger';

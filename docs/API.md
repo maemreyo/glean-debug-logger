@@ -51,18 +51,50 @@ const recorder = useLogRecorder(config);
 
 ## `GleanDebugger` Component
 
-A wrapper component that provides smart activation and console commands API for the debug panel.
+A wrapper component that provides smart activation and console commands API for the debug panel. This is the **recommended** way to use the library in Next.js applications.
 
 ### Usage
 
-```tsx
-import GleanDebugger from '@zaob/glean-debug-logger';
+For Next.js App Router, use dynamic import with `ssr: false` to prevent hydration issues:
 
-<GleanDebugger
-  environment="production"
-  user={{ id: 'user_123', email: 'user@example.com', role: 'admin' }}
-  uploadEndpoint="/api/logs/upload"
-/>;
+```tsx
+// components/GleanDebuggerProvider.tsx
+'use client';
+
+import dynamic from 'next/dynamic';
+
+const GleanDebugger = dynamic(
+  () => import('@zaob/glean-debug-logger').then((mod) => mod.GleanDebugger),
+  { ssr: false }
+);
+
+export default function GleanDebuggerProvider() {
+  return (
+    <GleanDebugger
+      environment="development"
+      user={{ id: 'user_123', email: 'user@example.com', role: 'admin' }}
+      uploadEndpoint="/api/logs/upload"
+    />
+  );
+}
+```
+
+Then add to your root layout:
+
+```tsx
+// app/layout.tsx
+import GleanDebuggerProvider from '@/components/GleanDebuggerProvider';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <GleanDebuggerProvider />
+        {children}
+      </body>
+    </html>
+  );
+}
 ```
 
 ### Props

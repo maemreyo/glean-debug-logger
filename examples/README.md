@@ -2,6 +2,47 @@
 
 This folder contains reference implementations for uploading debug logs to various backends.
 
+## Quick Setup with GleanDebugger
+
+For Next.js apps, the recommended way is to use the `GleanDebugger` component with dynamic import:
+
+```tsx
+// app/providers.tsx
+'use client';
+
+import dynamic from 'next/dynamic';
+
+const GleanDebugger = dynamic(
+  () => import('@zaob/glean-debug-logger').then((mod) => mod.GleanDebugger),
+  { ssr: false }
+);
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      {children}
+      <GleanDebugger environment="development" uploadEndpoint="/api/logs/upload" />
+    </>
+  );
+}
+```
+
+Then wrap your app in `app/layout.tsx`:
+
+```tsx
+import { Providers } from './providers';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
 ## Setup
 
 Each example requires specific dependencies. Install them based on which backend you use:
@@ -42,7 +83,7 @@ Then configure the hook:
 
 ```typescript
 const { uploadLogs } = useLogRecorder({
-  uploadEndpoint: "/api/logs/upload",
+  uploadEndpoint: '/api/logs/upload',
 });
 ```
 
