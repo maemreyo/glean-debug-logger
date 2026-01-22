@@ -14,6 +14,7 @@ import {
   sessionTooltipValueStyles,
 } from './DebugPanel.styles';
 import { useCopyFormat, CopyFormat } from '../hooks/useCopyFormat';
+import { useSettingsDropdown } from '../hooks/useSettingsDropdown';
 import { Settings, FileJson, FileText, Save, Trash2, X, Info } from 'lucide-react';
 import type { LogMetadata } from '../types';
 
@@ -148,7 +149,7 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
     closeButtonRef
   ) {
     const { copyFormat, setCopyFormat } = useCopyFormat();
-    const [showSettings, setShowSettings] = useState(false);
+    const { isSettingsOpen, openSettings, closeSettings } = useSettingsDropdown();
     const [showSessionTooltip, setShowSessionTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
     const tooltipRef = useRef<HTMLDivElement>(null);
@@ -198,6 +199,7 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
           window.removeEventListener('scroll', updateTooltipPosition, true);
         };
       }
+      return undefined;
     }, [showSessionTooltip, updateTooltipPosition]);
 
     const shortSessionId =
@@ -280,13 +282,17 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
             >
               <Trash2 size={16} />
             </button>
-            <DropdownMenu.Root open={showSettings} onOpenChange={(open) => setShowSettings(open)}>
+            <DropdownMenu.Root
+              open={isSettingsOpen}
+              onOpenChange={(open) => (open ? openSettings() : closeSettings())}
+            >
               <DropdownMenu.Trigger asChild>
                 <button
                   type="button"
                   className={iconButtonStyles}
                   aria-label="Actions and settings"
                   title="Actions and settings"
+                  data-settings-trigger="true"
                 >
                   <Settings size={16} />
                 </button>
@@ -297,7 +303,7 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
                     copyFormat={copyFormat}
                     setCopyFormat={setCopyFormat}
                     onSaveToDirectory={onSaveToDirectory}
-                    onCloseDropdown={() => setShowSettings(false)}
+                    onCloseDropdown={() => closeSettings()}
                   />
                 </DropdownMenu.Content>
               </DropdownMenu.Portal>

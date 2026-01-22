@@ -7,6 +7,7 @@ import { useLogRecorder } from '../hooks/useLogRecorder/index';
 import { useDebugPanelControls } from '../hooks/useDebugPanelControls';
 import { useCopyFormat } from '../hooks/useCopyFormat';
 import { useStatusMessages } from '../hooks/useStatusMessages';
+import { useSettingsDropdown } from '../hooks/useSettingsDropdown';
 import { LogEntry, ConsoleLogEntry, ExportFormat } from '../types';
 import { transformToECS, transformMetadataToECS } from '../utils/ecsTransform';
 import { toggleButtonStyles, panelStyles, indicatorDotStyles } from './DebugPanel.styles';
@@ -65,6 +66,7 @@ export function DebugPanel({
   showInProduction = false,
 }: DebugPanelProps) {
   const { isOpen, open, close } = useDebugPanelControls();
+  const { isSettingsOpen } = useSettingsDropdown();
   const { copyFormat } = useCopyFormat();
   const {
     uploadStatus,
@@ -112,15 +114,20 @@ export function DebugPanel({
     return undefined;
   }, [metadata.errorCount, uploadEndpoint, uploadLogs]);
 
-  // Close panel when clicking outside (exclude toggle button to prevent race with its onClick)
+  // Close panel when clicking outside (exclude toggle button and settings dropdown to prevent race with its onClick)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      // Skip if clicking the toggle button (check by aria-label)
+      // Skip if clicking the toggle button or settings button (check by aria-label or data attribute)
       const target = e.target as HTMLElement;
       if (
         target.closest('[aria-label="Open debug panel"]') ||
-        target.closest('[aria-label="Close debug panel"]')
+        target.closest('[aria-label="Close debug panel"]') ||
+        target.closest('[data-settings-trigger="true"]')
       ) {
+        return;
+      }
+      // Don't close panel if settings dropdown is open (clicks on dropdown content would otherwise close panel)
+      if (isSettingsOpen) {
         return;
       }
       if (isOpen && panelRef.current && !panelRef.current.contains(target)) {
@@ -130,7 +137,7 @@ export function DebugPanel({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, close]);
+  }, [isOpen, close, isSettingsOpen]);
 
   const generateCopyContent = useCallback(
     (logs: LogEntry[], meta: ReturnType<typeof getMetadata>): string => {
