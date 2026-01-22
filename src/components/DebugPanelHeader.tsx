@@ -294,7 +294,10 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
             </button>
             <DropdownMenu.Root
               open={isSettingsOpen}
-              onOpenChange={(open) => (open ? openSettings() : closeSettings())}
+              onOpenChange={(open) => {
+                console.log('[DebugPanelHeader] Dropdown onOpenChange:', open);
+                open ? openSettings() : closeSettings();
+              }}
             >
               <DropdownMenu.Trigger asChild>
                 <button
@@ -308,7 +311,20 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
                 </button>
               </DropdownMenu.Trigger>
               <DropdownMenu.Portal>
-                <DropdownMenu.Content sideOffset={6} align="end" style={{ zIndex: 100000 }}>
+                <DropdownMenu.Content
+                  data-settings-dropdown="true"
+                  sideOffset={6}
+                  align="end"
+                  style={{ zIndex: 100000 }}
+                  onPointerDownOutside={(e) => {
+                    // Prevent Radix UI from closing the dropdown when clicking inside the debug panel
+                    // This allows the debug panel's mousedown handler to decide whether to close
+                    const target = e.target as HTMLElement;
+                    if (target.closest('#debug-panel')) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
                   <SettingsDropdownContent
                     copyFormat={copyFormat}
                     setCopyFormat={setCopyFormat}
