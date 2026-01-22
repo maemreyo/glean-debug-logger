@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect, useCallback } from 'react';
+import { useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import { DebugPanel } from './DebugPanel';
 
 interface GleanDebuggerProps {
@@ -14,6 +14,7 @@ interface GleanDebuggerProps {
   fileNameTemplate?: string;
   maxLogs?: number;
   showInProduction?: boolean;
+  children?: ReactNode;
 }
 
 // Console commands API type
