@@ -213,6 +213,31 @@ interface DebugPanelMinimalProps {
 }
 declare function DebugPanelMinimal({ fileNameTemplate, }: DebugPanelMinimalProps): react_jsx_runtime.JSX.Element;
 
+interface GleanDebuggerProps {
+    user?: {
+        id?: string;
+        email?: string;
+        role?: string;
+    };
+    environment?: string;
+    uploadEndpoint?: string;
+    fileNameTemplate?: string;
+    maxLogs?: number;
+    showInProduction?: boolean;
+}
+interface GleanConsoleAPI {
+    show: () => void;
+    hide: () => void;
+    toggle: () => void;
+    isEnabled: () => boolean;
+}
+declare global {
+    interface Window {
+        glean?: GleanConsoleAPI;
+    }
+}
+declare function GleanDebugger(props: GleanDebuggerProps): react_jsx_runtime.JSX.Element | null;
+
 interface SanitizeOptions {
     keys?: string[];
 }
@@ -301,4 +326,4 @@ declare function transformMetadataToECS(metadata: LogMetadata): Partial<ECSDocum
  */
 declare function transformToECS(log: LogEntry, metadata: LogMetadata): ECSDocument;
 
-export { type ConsoleLevel, type ConsoleLogEntry, DebugPanel, DebugPanelMinimal, type DownloadOptions, type ECSDocument$1 as ECSDocument, type ECSTransformOptions, type ExportFormat, type ExportOutput, type FetchErrorEntry, type FetchRequestEntry, type FetchResponseEntry, type FilenameOptions, type FilenamePlaceholder, type LogEntry, type LogMetadata, type LogRecorderConfig, type LogType, type SanitizeOptions, type StackFrame$1 as StackFrame, type UploadPayload, type UseLogRecorderReturn, type XHRErrorEntry, type XHRRequestEntry, type XHRResponseEntry, collectMetadata, filterStackTrace, generateExportFilename, generateFilename, generateSessionId, getBrowserInfo, sanitizeData, sanitizeFilename, transformMetadataToECS, transformToECS, useLogRecorder };
+export { type ConsoleLevel, type ConsoleLogEntry, DebugPanel, DebugPanelMinimal, type DownloadOptions, type ECSDocument$1 as ECSDocument, type ECSTransformOptions, type ExportFormat, type ExportOutput, type FetchErrorEntry, type FetchRequestEntry, type FetchResponseEntry, type FilenameOptions, type FilenamePlaceholder, GleanDebugger, type LogEntry, type LogMetadata, type LogRecorderConfig, type LogType, type SanitizeOptions, type StackFrame$1 as StackFrame, type UploadPayload, type UseLogRecorderReturn, type XHRErrorEntry, type XHRRequestEntry, type XHRResponseEntry, collectMetadata, filterStackTrace, generateExportFilename, generateFilename, generateSessionId, getBrowserInfo, sanitizeData, sanitizeFilename, transformMetadataToECS, transformToECS, useLogRecorder };

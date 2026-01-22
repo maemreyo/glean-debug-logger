@@ -213,7 +213,7 @@ GleanDebugger.tsx → index.ts exports → Console commands → Testing
 
 ## TODOs
 
-- [ ] 1. Create GleanDebugger.tsx component
+- [x] 1. Create GleanDebugger.tsx component
 
   **What to do**:
   - Create `src/components/GleanDebugger.tsx` file
@@ -308,7 +308,7 @@ GleanDebugger.tsx → index.ts exports → Console commands → Testing
   - Files: `src/components/GleanDebugger.tsx`
   - Pre-commit: `npm run typecheck`
 
-- [ ] 2. Update index.ts exports
+- [x] 2. Update index.ts exports
 
   **What to do**:
   - Add `export { default as GleanDebugger } from './components/GleanDebugger';`
@@ -341,7 +341,7 @@ GleanDebugger.tsx → index.ts exports → Console commands → Testing
   - Files: `src/index.ts`
   - Pre-commit: `npm run typecheck`
 
-- [ ] 3. Implement activation detection hook
+- [x] 3. Implement activation detection hook
 
   **What to do**:
   - Create `useGleanActivation` hook in GleanDebugger.tsx
@@ -381,7 +381,7 @@ GleanDebugger.tsx → index.ts exports → Console commands → Testing
 
   **Commit**: YES (part of task 1)
 
-- [ ] 4. Implement console commands API
+- [x] 4. Implement console commands API
 
   **What to do**:
   - Create `window.glean` namespace with:
@@ -480,7 +480,7 @@ GleanDebugger.tsx → index.ts exports → Console commands → Testing
 
   **Commit**: YES (part of task 1)
 
-- [ ] 5. Final integration testing
+- [x] 5. Final integration testing
 
   **What to do**:
   - Test all activation patterns work together
