@@ -372,6 +372,36 @@ timestamp=${new Date().toISOString()}
                   networkErrorCount={metadata.networkErrorCount}
                 />
 
+                {/* Test Button - For debugging interceptor only */}
+                <div
+                  style={{
+                    padding: '8px 16px',
+                    borderBottom: '1px solid var(--color-border, #e2e8f0)',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      console.log('[TEST] Console log test message');
+                      console.error('[TEST] Console error test message');
+                      console.warn('[TEST] Console warn test message');
+                      console.info('[TEST] Console info test message');
+                    }}
+                    style={{
+                      background: 'var(--color-primary, #6366f1)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    🧪 Test Logs (4x)
+                  </button>
+                </div>
+
                 <DebugPanelActions
                   logCount={logCount}
                   hasUploadEndpoint={!!uploadEndpoint}

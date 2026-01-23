@@ -560,6 +560,159 @@ describe('onXHRError()', () => {
   });
 });
 
+describe('removeXHRRequest()', () => {
+  it('should remove a registered request callback', () => {
+    const callback = vi.fn();
+    interceptor.onXHRRequest(callback);
+    expect((interceptor as any).onRequest).toHaveLength(1);
+
+    interceptor.removeXHRRequest(callback);
+    expect((interceptor as any).onRequest).toHaveLength(0);
+  });
+
+  it('should stop calling removed callback after XHR', () => {
+    const callback = vi.fn();
+    interceptor.onXHRRequest(callback);
+    interceptor.attach();
+
+    const xhr1 = new XMLHttpRequest();
+    xhr1.open('GET', 'https://example.com/test1');
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    interceptor.removeXHRRequest(callback);
+    callback.mockClear();
+
+    const xhr2 = new XMLHttpRequest();
+    xhr2.open('GET', 'https://example.com/test2');
+    expect(callback).not.toHaveBeenCalled();
+  });
+
+  it('should not affect other callbacks when removing one', () => {
+    const callback1 = vi.fn();
+    const callback2 = vi.fn();
+    interceptor.onXHRRequest(callback1);
+    interceptor.onXHRRequest(callback2);
+    interceptor.attach();
+
+    interceptor.removeXHRRequest(callback1);
+    callback1.mockClear();
+    callback2.mockClear();
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://example.com/test');
+    expect(callback1).not.toHaveBeenCalled();
+    expect(callback2).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('removeXHRResponse()', () => {
+  it('should remove a registered response callback', () => {
+    const callback = vi.fn();
+    interceptor.onXHRResponse(callback);
+    expect((interceptor as any).onResponse).toHaveLength(1);
+
+    interceptor.removeXHRResponse(callback);
+    expect((interceptor as any).onResponse).toHaveLength(0);
+  });
+
+  it('should stop calling removed callback after response', async () => {
+    const callback = vi.fn();
+    interceptor.onXHRResponse(callback);
+    interceptor.attach();
+
+    const xhr1 = new XMLHttpRequest();
+    xhr1.open('GET', 'https://example.com/test1');
+
+    const responsePromise1 = new Promise<void>((resolve) => {
+      xhr1.onload = () => {
+        expect(callback).toHaveBeenCalledTimes(1);
+        resolve();
+      };
+    });
+
+    xhr1.send();
+    setTimeout(() => {
+      if (xhr1.onload) xhr1.onload(new ProgressEvent('load'));
+    }, 10);
+
+    await responsePromise1;
+
+    interceptor.removeXHRResponse(callback);
+    callback.mockClear();
+
+    const xhr2 = new XMLHttpRequest();
+    xhr2.open('GET', 'https://example.com/test2');
+
+    const responsePromise2 = new Promise<void>((resolve) => {
+      xhr2.onload = () => {
+        expect(callback).not.toHaveBeenCalled();
+        resolve();
+      };
+    });
+
+    xhr2.send();
+    setTimeout(() => {
+      if (xhr2.onload) xhr2.onload(new ProgressEvent('load'));
+    }, 10);
+
+    await responsePromise2;
+  });
+});
+
+describe('removeXHRError()', () => {
+  it('should remove a registered error callback', () => {
+    const callback = vi.fn();
+    interceptor.onXHRError(callback);
+    expect((interceptor as any).onError).toHaveLength(1);
+
+    interceptor.removeXHRError(callback);
+    expect((interceptor as any).onError).toHaveLength(0);
+  });
+
+  it('should stop calling removed callback after error', async () => {
+    const callback = vi.fn();
+    interceptor.onXHRError(callback);
+    interceptor.attach();
+
+    const xhr1 = new XMLHttpRequest();
+    xhr1.open('GET', 'https://invalid-url');
+
+    const errorPromise1 = new Promise<void>((resolve) => {
+      xhr1.onerror = () => {
+        expect(callback).toHaveBeenCalledTimes(1);
+        resolve();
+      };
+    });
+
+    xhr1.send();
+    setTimeout(() => {
+      if (xhr1.onerror) xhr1.onerror(new ProgressEvent('error'));
+    }, 10);
+
+    await errorPromise1;
+
+    interceptor.removeXHRError(callback);
+    callback.mockClear();
+
+    const xhr2 = new XMLHttpRequest();
+    xhr2.open('GET', 'https://invalid-url2');
+
+    const errorPromise2 = new Promise<void>((resolve) => {
+      xhr2.onerror = () => {
+        expect(callback).not.toHaveBeenCalled();
+        resolve();
+      };
+    });
+
+    xhr2.send();
+    setTimeout(() => {
+      if (xhr2.onerror) xhr2.onerror(new ProgressEvent('error'));
+    }, 10);
+
+    await errorPromise2;
+  });
+});
+
 describe('constructor options', () => {
   it('initializes with no exclude URLs by default', () => {
     const interceptor = new XHRInterceptor();

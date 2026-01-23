@@ -55,7 +55,6 @@ export function useLogRecorder(
   );
   const [_logCount, setLogCount] = useState(0);
   const errorCountRef = useRef(0);
-  const isInitialized = useRef(false);
 
   const safeStringify = useMemo(() => createSafeStringify(), []);
 
@@ -86,7 +85,7 @@ export function useLogRecorder(
         safeStringify,
         setLogCount
       ),
-    [config, safeStringify, setLogCount]
+    [config, safeStringify]
   );
 
   const addLog = logOperations.addLog;
@@ -103,8 +102,7 @@ export function useLogRecorder(
   );
 
   useEffect(() => {
-    if (typeof window === 'undefined' || isInitialized.current) return;
-    isInitialized.current = true;
+    if (typeof window === 'undefined') return;
 
     if (config.enablePersistence) {
       try {
@@ -114,7 +112,7 @@ export function useLogRecorder(
           setLogCount(logsRef.current.length);
         }
       } catch {
-        console.warn('[useLogRecorder] Failed to load persisted logs');
+        // Silently fail
       }
     }
 
@@ -317,7 +315,6 @@ export function useLogRecorder(
       });
     }
 
-    // Clear persisted logs on page unload if persistAcrossReloads is false
     if (config.enablePersistence && config.persistAcrossReloads === false) {
       const clearOnUnload = () => {
         try {
@@ -332,9 +329,8 @@ export function useLogRecorder(
 
     return () => {
       cleanupFns.forEach((fn) => fn());
-      isInitialized.current = false;
     };
-  }, [config, addLog, safeStringify, consoleInterceptor, networkInterceptor, xhrInterceptor]);
+  }, [config, addLog, safeStringify]);
 
   const clearLogs = useCallback(() => {
     logsRef.current = [];
@@ -345,7 +341,7 @@ export function useLogRecorder(
       try {
         localStorage.removeItem(config.persistenceKey);
       } catch {
-        console.warn('[useLogRecorder] Failed to clear persisted logs');
+        // Silently fail
       }
     }
   }, [config.enablePersistence, config.persistenceKey]);
