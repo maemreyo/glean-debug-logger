@@ -1,7 +1,7 @@
 // Singleton pattern - only one instance exists even with HMR module reloads
-let singletonInstance: ConsoleInterceptor | null = null;
 
 export class ConsoleInterceptor {
+  private static instance: ConsoleInterceptor | null = null;
   private originalConsole!: {
     log: (...args: unknown[]) => void;
     error: (...args: unknown[]) => void;
@@ -16,7 +16,8 @@ export class ConsoleInterceptor {
   // Store reference to original log for debug output (avoids recursion)
   private originalLog: (...args: unknown[]) => void;
 
-  constructor() {
+  // Private constructor - use getInstance() instead
+  private constructor() {
     ConsoleInterceptor.instanceCount++;
     this.instanceId = ConsoleInterceptor.instanceCount;
     // Store original log before any patching
@@ -32,19 +33,24 @@ export class ConsoleInterceptor {
     };
     this.callbacks = [];
 
-    // Singleton: if instance already exists, return it instead of creating new one
-    if (singletonInstance) {
-      this.originalLog(
-        `[ConsoleInterceptor#${this.instanceId}] ⚠️  Singleton violation - returning existing instance #${singletonInstance.instanceId}`
-      );
-      // Don't copy callbacks - just return early and let the singleton handle everything
-      return;
-    }
-
-    singletonInstance = this;
+    ConsoleInterceptor.instance = this;
     this.originalLog(
       `[ConsoleInterceptor#${this.instanceId}] ✅ Created singleton instance (total: ${ConsoleInterceptor.instanceCount})`
     );
+  }
+
+  static getInstance(): ConsoleInterceptor {
+    if (!ConsoleInterceptor.instance) {
+      ConsoleInterceptor.instance = new ConsoleInterceptor();
+    }
+    return ConsoleInterceptor.instance;
+  }
+
+  static resetInstance(): void {
+    if (ConsoleInterceptor.instance) {
+      ConsoleInterceptor.instance.forceDetach();
+      ConsoleInterceptor.instance = null;
+    }
   }
 
   private debugLog(...args: unknown[]): void {
@@ -82,31 +88,36 @@ export class ConsoleInterceptor {
 
   // Only detach if no callbacks remain - prevents breaking other consumers
   detach(): void {
-    // Clear singleton instance so next mount creates a fresh one
-    // This handles React.StrictMode double-mount and HMR scenarios
-    singletonInstance = null;
-
-    if (this.callbacks.length > 0) {
-      this.debugLog(
-        `[ConsoleInterceptor#${this.instanceId}] detach() SKIPPED - ${this.callbacks.length} callbacks still active`
-      );
-      return;
-    }
-    this.debugLog(
-      `[ConsoleInterceptor#${this.instanceId}] detach() - isAttached=${this.isAttached}`
-    );
+    // Only remove callback of this instance
+    // Don't set singleton = null here
     if (!this.isAttached) {
       this.debugLog(
         `[ConsoleInterceptor#${this.instanceId}] ALREADY DETACHED - skipping duplicate detach`
       );
       return;
     }
+
+    // Only detach when NO callbacks remain
+    if (this.callbacks.length === 0) {
+      this.forceDetach();
+    } else {
+      this.debugLog(
+        `[ConsoleInterceptor#${this.instanceId}] detach() SKIPPED - ${this.callbacks.length} callbacks still active`
+      );
+    }
+  }
+
+  private forceDetach(): void {
+    if (!this.isAttached) return;
     this.isAttached = false;
+
     const levels: (keyof typeof this.originalConsole)[] = ['log', 'error', 'warn', 'info', 'debug'];
     levels.forEach((level) => {
       (console as unknown as Record<string, (...args: unknown[]) => void>)[level] =
         this.originalConsole[level];
     });
+
+    this.debugLog(`[ConsoleInterceptor#${this.instanceId}] Force detached`);
   }
 
   onLog(callback: (level: string, args: unknown[]) => void): void {

@@ -35,7 +35,7 @@ export function useLogRecorder(
 
   const safeStringify = useMemo(() => createSafeStringify(), []);
 
-  const consoleInterceptor = useMemo(() => new ConsoleInterceptor(), []);
+  const consoleInterceptor = useMemo(() => ConsoleInterceptor.getInstance(), []);
   const networkInterceptor = useMemo(
     () => new NetworkInterceptor({ excludeUrls: config.excludeUrls }),
     [config.excludeUrls]
@@ -139,7 +139,7 @@ export function useLogRecorder(
     if (currentConfig.captureFetch) {
       const requestIdMap = new Map<
         string,
-        { url: string; method: string; headers: unknown; body: unknown }
+        { url: string; method: string; headers: unknown; body: unknown; timeoutId: number }
       >();
 
       const fetchRequestCallback = (url: string, options: RequestInit) => {
@@ -155,6 +155,11 @@ export function useLogRecorder(
           }
         }
 
+        // Cleanup after 30s if no response comes (prevents memory leak)
+        const timeoutId = window.setTimeout(() => {
+          requestIdMap.delete(requestId);
+        }, 30000);
+
         requestIdMap.set(requestId, {
           url,
           method: options?.method || 'GET',
@@ -163,6 +168,7 @@ export function useLogRecorder(
             currentConfig.sanitizeKeys
           ),
           body: requestBody,
+          timeoutId,
         });
 
         addLog({
@@ -182,6 +188,7 @@ export function useLogRecorder(
       const fetchResponseCallback = (url: string, status: number, duration: number) => {
         for (const [requestId, reqInfo] of requestIdMap.entries()) {
           if (reqInfo.url === url) {
+            clearTimeout(reqInfo.timeoutId); // Clear timeout on response
             requestIdMap.delete(requestId);
             addLog({
               type: 'FETCH_RES',
@@ -201,6 +208,7 @@ export function useLogRecorder(
       const fetchErrorCallback = (url: string, error: Error) => {
         for (const [requestId, reqInfo] of requestIdMap.entries()) {
           if (reqInfo.url === url) {
+            clearTimeout(reqInfo.timeoutId); // Clear timeout on error
             requestIdMap.delete(requestId);
             addLog({
               type: 'FETCH_ERR',
@@ -229,15 +237,28 @@ export function useLogRecorder(
     }
 
     if (currentConfig.captureXHR) {
+      const xhrRequestIdMap = new Map<
+        string,
+        { url: string; method: string; headers: Record<string, string>; body: unknown }
+      >();
+
       const xhrRequestCallback = (xhrConfig: {
         method: string;
         url: string;
         headers: Record<string, string>;
         body: unknown;
       }) => {
+        const requestId = generateRequestId();
+        xhrRequestIdMap.set(requestId, {
+          url: xhrConfig.url,
+          method: xhrConfig.method,
+          headers: xhrConfig.headers,
+          body: xhrConfig.body,
+        });
+
         addLog({
           type: 'XHR_REQ',
-          id: generateRequestId(),
+          id: requestId,
           url: xhrConfig.url,
           method: xhrConfig.method,
           headers: xhrConfig.headers as Record<string, string>,
@@ -256,16 +277,23 @@ export function useLogRecorder(
         status: number,
         duration: number
       ) => {
-        addLog({
-          type: 'XHR_RES',
-          id: generateRequestId(),
-          url: xhrConfig.url,
-          status,
-          statusText: '',
-          duration: `${duration}ms`,
-          body: '[Response captured by interceptor]',
-          time: new Date().toISOString(),
-        });
+        // Find matching request by URL and method
+        for (const [requestId, reqInfo] of xhrRequestIdMap.entries()) {
+          if (reqInfo.url === xhrConfig.url && reqInfo.method === xhrConfig.method) {
+            xhrRequestIdMap.delete(requestId);
+            addLog({
+              type: 'XHR_RES',
+              id: requestId,
+              url: xhrConfig.url,
+              status,
+              statusText: '',
+              duration: `${duration}ms`,
+              body: '[Response captured by interceptor]',
+              time: new Date().toISOString(),
+            });
+            break;
+          }
+        }
       };
 
       const xhrErrorCallback = (
@@ -277,14 +305,21 @@ export function useLogRecorder(
         },
         error: Error
       ) => {
-        addLog({
-          type: 'XHR_ERR',
-          id: generateRequestId(),
-          url: xhrConfig.url,
-          error: error.message,
-          duration: '[unknown]ms',
-          time: new Date().toISOString(),
-        });
+        // Find matching request by URL and method
+        for (const [requestId, reqInfo] of xhrRequestIdMap.entries()) {
+          if (reqInfo.url === xhrConfig.url && reqInfo.method === xhrConfig.method) {
+            xhrRequestIdMap.delete(requestId);
+            addLog({
+              type: 'XHR_ERR',
+              id: requestId,
+              url: xhrConfig.url,
+              error: error.message,
+              duration: '[unknown]ms',
+              time: new Date().toISOString(),
+            });
+            break;
+          }
+        }
       };
 
       xhrInterceptor.onXHRRequest(xhrRequestCallback);
