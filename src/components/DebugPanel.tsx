@@ -370,11 +370,14 @@ timestamp=${new Date().toISOString()}
                   networkErrorCount={metadata.networkErrorCount}
                 />
 
-                {/* Test Button - For debugging interceptor only */}
+                {/* Test Buttons - For debugging interceptor only */}
                 <div
                   style={{
                     padding: '8px 16px',
                     borderBottom: '1px solid var(--color-border, #e2e8f0)',
+                    display: 'flex',
+                    gap: '8px',
+                    flexWrap: 'wrap',
                   }}
                 >
                   <button
@@ -396,7 +399,158 @@ timestamp=${new Date().toISOString()}
                       fontWeight: 500,
                     }}
                   >
-                    🧪 Test Logs (4x)
+                    🧪 Console
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      // Test successful fetch
+                      try {
+                        await fetch('https://jsonplaceholder.typicode.com/posts/1');
+                      } catch {
+                        // Ignore errors for test
+                      }
+                    }}
+                    style={{
+                      background: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    🌐 Fetch (200)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      // Test failed fetch
+                      try {
+                        await fetch('https://httpstat.us/404');
+                      } catch {
+                        // Ignore errors for test
+                      }
+                    }}
+                    style={{
+                      background: '#f59e0b',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    ⚠️ Fetch (404)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      // Test failed fetch (network error)
+                      try {
+                        await fetch('https://this-domain-definitely-does-not-exist-12345.com');
+                      } catch {
+                        // Ignore errors for test
+                      }
+                    }}
+                    style={{
+                      background: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    🔥 Fetch (Err)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Test successful XHR
+                      const xhr = new XMLHttpRequest();
+                      xhr.open('GET', 'https://jsonplaceholder.typicode.com/users/1');
+                      xhr.onload = () => {
+                        console.log('[TEST] XHR completed:', xhr.status);
+                      };
+                      xhr.onerror = () => {
+                        console.error('[TEST] XHR error');
+                      };
+                      xhr.send();
+                    }}
+                    style={{
+                      background: '#8b5cf6',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    📡 XHR (200)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Test failed XHR
+                      const xhr = new XMLHttpRequest();
+                      xhr.open('GET', 'https://httpstat.us/500');
+                      xhr.onload = () => {
+                        console.log('[TEST] XHR completed:', xhr.status);
+                      };
+                      xhr.onerror = () => {
+                        console.error('[TEST] XHR error');
+                      };
+                      xhr.send();
+                    }}
+                    style={{
+                      background: '#ec4899',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    📡 XHR (500)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Test XHR network error
+                      const xhr = new XMLHttpRequest();
+                      xhr.open('GET', 'https://non-existent-domain-xyz-123.com');
+                      xhr.timeout = 5000;
+                      xhr.ontimeout = () => {
+                        console.error('[TEST] XHR timeout');
+                      };
+                      xhr.onerror = () => {
+                        console.error('[TEST] XHR network error');
+                      };
+                      xhr.send();
+                    }}
+                    style={{
+                      background: '#6366f1',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    💥 XHR (Err)
                   </button>
                 </div>
 
