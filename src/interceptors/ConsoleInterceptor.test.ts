@@ -6,7 +6,8 @@ describe('ConsoleInterceptor', () => {
   let interceptor: ConsoleInterceptor;
 
   beforeEach(() => {
-    interceptor = new ConsoleInterceptor();
+    ConsoleInterceptor.resetInstance();
+    interceptor = ConsoleInterceptor.createNew();
   });
 
   afterEach(() => {

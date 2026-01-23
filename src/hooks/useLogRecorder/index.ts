@@ -22,9 +22,6 @@ export function useLogRecorder(
   const configRef = useRef(config);
   configRef.current = config;
 
-  // Track if interceptors have been set up (run once pattern)
-  const isSetupRef = useRef(false);
-
   const logsRef = useRef<LogEntry[]>([]);
   const sessionIdRef = useRef(config.sessionId || generateSessionId());
   const metadataRef = useRef<LogMetadata>(
@@ -80,12 +77,6 @@ export function useLogRecorder(
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // Only run setup once - skip if already set up
-    if (isSetupRef.current) {
-      return;
-    }
-    isSetupRef.current = true;
 
     const currentConfig = configRef.current;
 
@@ -239,7 +230,13 @@ export function useLogRecorder(
     if (currentConfig.captureXHR) {
       const xhrRequestIdMap = new Map<
         string,
-        { url: string; method: string; headers: Record<string, string>; body: unknown }
+        {
+          url: string;
+          method: string;
+          headers: Record<string, string>;
+          body: unknown;
+          timeoutId: number;
+        }
       >();
 
       const xhrRequestCallback = (xhrConfig: {
@@ -247,18 +244,24 @@ export function useLogRecorder(
         url: string;
         headers: Record<string, string>;
         body: unknown;
+        requestId: string;
       }) => {
-        const requestId = generateRequestId();
-        xhrRequestIdMap.set(requestId, {
+        // Cleanup after 30s if no response comes (prevents memory leak)
+        const timeoutId = window.setTimeout(() => {
+          xhrRequestIdMap.delete(xhrConfig.requestId);
+        }, 30000);
+
+        xhrRequestIdMap.set(xhrConfig.requestId, {
           url: xhrConfig.url,
           method: xhrConfig.method,
           headers: xhrConfig.headers,
           body: xhrConfig.body,
+          timeoutId,
         });
 
         addLog({
           type: 'XHR_REQ',
-          id: requestId,
+          id: xhrConfig.requestId,
           url: xhrConfig.url,
           method: xhrConfig.method,
           headers: xhrConfig.headers as Record<string, string>,
@@ -273,26 +276,25 @@ export function useLogRecorder(
           url: string;
           headers: Record<string, string>;
           body: unknown;
+          requestId: string;
         },
         status: number,
         duration: number
       ) => {
-        // Find matching request by URL and method
-        for (const [requestId, reqInfo] of xhrRequestIdMap.entries()) {
-          if (reqInfo.url === xhrConfig.url && reqInfo.method === xhrConfig.method) {
-            xhrRequestIdMap.delete(requestId);
-            addLog({
-              type: 'XHR_RES',
-              id: requestId,
-              url: xhrConfig.url,
-              status,
-              statusText: '',
-              duration: `${duration}ms`,
-              body: '[Response captured by interceptor]',
-              time: new Date().toISOString(),
-            });
-            break;
-          }
+        const reqInfo = xhrRequestIdMap.get(xhrConfig.requestId);
+        if (reqInfo) {
+          clearTimeout(reqInfo.timeoutId); // Clear timeout on response
+          xhrRequestIdMap.delete(xhrConfig.requestId);
+          addLog({
+            type: 'XHR_RES',
+            id: xhrConfig.requestId,
+            url: xhrConfig.url,
+            status,
+            statusText: '',
+            duration: `${duration}ms`,
+            body: '[Response captured by interceptor]',
+            time: new Date().toISOString(),
+          });
         }
       };
 
@@ -302,23 +304,22 @@ export function useLogRecorder(
           url: string;
           headers: Record<string, string>;
           body: unknown;
+          requestId: string;
         },
         error: Error
       ) => {
-        // Find matching request by URL and method
-        for (const [requestId, reqInfo] of xhrRequestIdMap.entries()) {
-          if (reqInfo.url === xhrConfig.url && reqInfo.method === xhrConfig.method) {
-            xhrRequestIdMap.delete(requestId);
-            addLog({
-              type: 'XHR_ERR',
-              id: requestId,
-              url: xhrConfig.url,
-              error: error.message,
-              duration: '[unknown]ms',
-              time: new Date().toISOString(),
-            });
-            break;
-          }
+        const reqInfo = xhrRequestIdMap.get(xhrConfig.requestId);
+        if (reqInfo) {
+          clearTimeout(reqInfo.timeoutId); // Clear timeout on error
+          xhrRequestIdMap.delete(xhrConfig.requestId);
+          addLog({
+            type: 'XHR_ERR',
+            id: xhrConfig.requestId,
+            url: xhrConfig.url,
+            error: error.message,
+            duration: '[unknown]ms',
+            time: new Date().toISOString(),
+          });
         }
       };
 

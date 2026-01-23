@@ -561,6 +561,18 @@ describe('onXHRError()', () => {
 });
 
 describe('removeXHRRequest()', () => {
+  let interceptor: XHRInterceptor;
+  let originalXHR: typeof XMLHttpRequest;
+
+  beforeEach(() => {
+    originalXHR = window.XMLHttpRequest;
+    interceptor = new XHRInterceptor();
+  });
+
+  afterEach(() => {
+    window.XMLHttpRequest = originalXHR;
+  });
+
   it('should remove a registered request callback', () => {
     const callback = vi.fn();
     interceptor.onXHRRequest(callback);
@@ -606,6 +618,18 @@ describe('removeXHRRequest()', () => {
 });
 
 describe('removeXHRResponse()', () => {
+  let interceptor: XHRInterceptor;
+  let originalXHR: typeof XMLHttpRequest;
+
+  beforeEach(() => {
+    originalXHR = window.XMLHttpRequest;
+    interceptor = new XHRInterceptor();
+  });
+
+  afterEach(() => {
+    window.XMLHttpRequest = originalXHR;
+  });
+
   it('should remove a registered response callback', () => {
     const callback = vi.fn();
     interceptor.onXHRResponse(callback);
@@ -660,6 +684,18 @@ describe('removeXHRResponse()', () => {
 });
 
 describe('removeXHRError()', () => {
+  let interceptor: XHRInterceptor;
+  let originalXHR: typeof XMLHttpRequest;
+
+  beforeEach(() => {
+    originalXHR = window.XMLHttpRequest;
+    interceptor = new XHRInterceptor();
+  });
+
+  afterEach(() => {
+    window.XMLHttpRequest = originalXHR;
+  });
+
   it('should remove a registered error callback', () => {
     const callback = vi.fn();
     interceptor.onXHRError(callback);

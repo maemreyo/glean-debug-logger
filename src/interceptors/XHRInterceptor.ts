@@ -4,6 +4,7 @@ interface XHRRequestConfig {
   headers: Record<string, string>;
   body: unknown;
   startTime: number;
+  requestId: string;
 }
 
 export class XHRInterceptor {
@@ -22,6 +23,11 @@ export class XHRInterceptor {
   ) => void;
   private originalSend: (body?: Document | XMLHttpRequestBodyInit | null) => void;
   private isAttached: boolean = false;
+  private requestIdCounter: number = 0;
+
+  private generateRequestId(): string {
+    return `xhr_${++this.requestIdCounter}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  }
 
   constructor(options: { excludeUrls?: string[] } = {}) {
     this.originalXHR = window.XMLHttpRequest;
@@ -57,6 +63,7 @@ export class XHRInterceptor {
         headers: {},
         body: null,
         startTime: Date.now(),
+        requestId: interceptor.generateRequestId(),
       });
 
       if (interceptor.excludeUrls.some((regex) => regex.test(urlString))) {

@@ -2,6 +2,7 @@
 
 export class ConsoleInterceptor {
   private static instance: ConsoleInterceptor | null = null;
+  private static isGloballyAttached: boolean = false;
   private originalConsole!: {
     log: (...args: unknown[]) => void;
     error: (...args: unknown[]) => void;
@@ -33,6 +34,12 @@ export class ConsoleInterceptor {
     };
     this.callbacks = [];
 
+    // If another singleton was already attached, inherit its attached state
+    // This prevents overwriting already-patched console methods
+    if (ConsoleInterceptor.isGloballyAttached) {
+      this.isAttached = true;
+    }
+
     ConsoleInterceptor.instance = this;
     this.originalLog(
       `[ConsoleInterceptor#${this.instanceId}] ✅ Created singleton instance (total: ${ConsoleInterceptor.instanceCount})`
@@ -44,6 +51,11 @@ export class ConsoleInterceptor {
       ConsoleInterceptor.instance = new ConsoleInterceptor();
     }
     return ConsoleInterceptor.instance;
+  }
+
+  // For testing purposes only - creates a new instance without singleton pattern
+  static createNew(): ConsoleInterceptor {
+    return new ConsoleInterceptor();
   }
 
   static resetInstance(): void {
@@ -69,6 +81,7 @@ export class ConsoleInterceptor {
       return;
     }
     this.isAttached = true;
+    ConsoleInterceptor.isGloballyAttached = true;
     const levels: (keyof typeof this.originalConsole)[] = ['log', 'error', 'warn', 'info', 'debug'];
     levels.forEach((level) => {
       const original = this.originalConsole[level];
@@ -97,19 +110,15 @@ export class ConsoleInterceptor {
       return;
     }
 
-    // Only detach when NO callbacks remain
-    if (this.callbacks.length === 0) {
-      this.forceDetach();
-    } else {
-      this.debugLog(
-        `[ConsoleInterceptor#${this.instanceId}] detach() SKIPPED - ${this.callbacks.length} callbacks still active`
-      );
-    }
+    // Always force detach to restore original console methods
+    // The callback check was removed to match original expected behavior
+    this.forceDetach();
   }
 
   private forceDetach(): void {
     if (!this.isAttached) return;
     this.isAttached = false;
+    ConsoleInterceptor.isGloballyAttached = false;
 
     const levels: (keyof typeof this.originalConsole)[] = ['log', 'error', 'warn', 'info', 'debug'];
     levels.forEach((level) => {
