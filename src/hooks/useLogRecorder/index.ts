@@ -34,11 +34,11 @@ export function useLogRecorder(
 
   const consoleInterceptor = useMemo(() => ConsoleInterceptor.getInstance(), []);
   const networkInterceptor = useMemo(
-    () => NetworkInterceptor.getInstance({ excludeUrls: config.excludeUrls }),
+    () => NetworkInterceptor.getInstance(),
     []
   );
   const xhrInterceptor = useMemo(
-    () => XHRInterceptor.getInstance({ excludeUrls: config.excludeUrls }),
+    () => XHRInterceptor.getInstance(),
     []
   );
 
@@ -82,6 +82,11 @@ export function useLogRecorder(
     if (typeof window === 'undefined') return;
 
     const currentConfig = configRef.current;
+
+    // Update interceptor config with latest excludeUrls
+    // This ensures the singleton interceptors always have the current config
+    NetworkInterceptor.getInstance({ excludeUrls: currentConfig.excludeUrls });
+    XHRInterceptor.getInstance({ excludeUrls: currentConfig.excludeUrls });
 
     if (currentConfig.enablePersistence) {
       try {

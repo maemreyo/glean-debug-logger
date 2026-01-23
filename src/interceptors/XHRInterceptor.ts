@@ -118,20 +118,34 @@ export class XHRInterceptor {
       if (config) {
         config.body = body;
 
-        // Use addEventListener instead of overwriting onload/onerror
-        // This prevents conflicts with app code that sets these handlers
-        this.addEventListener('load', function (this: XMLHttpRequest) {
+        // Store original handlers
+        const originalOnLoad = this.onload;
+        const originalOnError = this.onerror;
+
+        // Override onload to intercept response
+        this.onload = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
           const duration = Date.now() - config.startTime;
+          // Call interceptor callbacks first
           for (const cb of interceptor.onResponse) {
             cb(config, this.status, duration);
           }
-        });
+          // Call original handler if exists
+          if (originalOnLoad) {
+            originalOnLoad.call(this, ev);
+          }
+        };
 
-        this.addEventListener('error', function (this: XMLHttpRequest) {
+        // Override onerror to intercept errors
+        this.onerror = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+          // Call interceptor callbacks first
           for (const cb of interceptor.onError) {
             cb(config, new Error('XHR Error'));
           }
-        });
+          // Call original handler if exists
+          if (originalOnError) {
+            originalOnError.call(this, ev);
+          }
+        };
       }
 
       return interceptor.originalSend.call(this, body);
