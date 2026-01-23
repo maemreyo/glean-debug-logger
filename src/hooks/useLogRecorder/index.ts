@@ -352,5 +352,6 @@ export function useLogRecorder(
     getLogCount,
     getMetadata,
     sessionId: sessionIdRef.current,
+    _logCount, // Expose state for triggering re-renders in DebugPanel
   };
 }

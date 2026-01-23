@@ -82,6 +82,10 @@ export class ConsoleInterceptor {
 
   // Only detach if no callbacks remain - prevents breaking other consumers
   detach(): void {
+    // Clear singleton instance so next mount creates a fresh one
+    // This handles React.StrictMode double-mount and HMR scenarios
+    singletonInstance = null;
+
     if (this.callbacks.length > 0) {
       this.debugLog(
         `[ConsoleInterceptor#${this.instanceId}] detach() SKIPPED - ${this.callbacks.length} callbacks still active`

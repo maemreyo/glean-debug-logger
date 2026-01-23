@@ -143,14 +143,20 @@ function useConsoleCommands() {
 }
 
 export default function GleanDebugger(props: GleanDebuggerProps) {
+  console.log('[GleanDebugger] Mounting with props:', props);
   const isActivated = useGleanActivation(props);
+  console.log('[GleanDebugger] isActivated:', isActivated);
 
   // Initialize console commands API
   useConsoleCommands();
 
   // Don't render if not activated
-  if (!isActivated) return null;
+  if (!isActivated) {
+    console.log('[GleanDebugger] Not activated, returning null');
+    return null;
+  }
 
+  console.log('[GleanDebugger] Rendering DebugPanel');
   // Render DebugPanel with all props
   return <DebugPanel {...props} />;
 }

@@ -90,23 +90,21 @@ export function DebugPanel({
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { downloadLogs, uploadLogs, clearLogs, getLogs, getLogCount, getMetadata } = useLogRecorder(
-    {
-      fileNameTemplate,
-      environment,
-      userId: user?.id || user?.email || 'guest',
-      includeMetadata: true,
-      uploadEndpoint,
-      maxLogs,
-      captureConsole: true,
-      captureFetch: true,
-      captureXHR: true,
-      sanitizeKeys: ['password', 'token', 'apiKey', 'secret', 'authorization', 'creditCard'],
-      excludeUrls: ['/api/analytics', 'google-analytics.com', 'facebook.com', 'vercel.com'],
-    }
-  );
+  const { downloadLogs, uploadLogs, clearLogs, getLogs, getMetadata, _logCount } = useLogRecorder({
+    fileNameTemplate,
+    environment,
+    userId: user?.id || user?.email || 'guest',
+    includeMetadata: true,
+    uploadEndpoint,
+    maxLogs,
+    captureConsole: true,
+    captureFetch: true,
+    captureXHR: true,
+    sanitizeKeys: ['password', 'token', 'apiKey', 'secret', 'authorization', 'creditCard'],
+    excludeUrls: ['/api/analytics', 'google-analytics.com', 'facebook.com', 'vercel.com'],
+  });
 
-  const logCount = getLogCount();
+  const logCount = _logCount; // Use state value for re-renders
   const metadata = getMetadata();
 
   // Auto-upload on error threshold

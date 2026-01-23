@@ -158,6 +158,8 @@ export interface UseLogRecorderReturn {
   getLogCount: () => number;
   getMetadata: () => LogMetadata;
   sessionId: string;
+  /** @internal Used for triggering re-renders in DebugPanel */
+  _logCount: number;
 }
 
 // Filename Template Placeholders
