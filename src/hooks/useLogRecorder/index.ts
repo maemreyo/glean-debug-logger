@@ -62,8 +62,11 @@ export function useLogRecorder(
     [config, safeStringify]
   );
 
-  const addLog = logOperations.addLog;
   const updateMetadata = logOperations.updateMetadata;
+
+  // Use ref for addLog to avoid closure staleness in interceptor callbacks
+  const addLogRef = useRef(logOperations.addLog);
+  addLogRef.current = logOperations.addLog;
 
   const downloadLogs = useMemo(
     () => createExportHandler(logsRef, metadataRef, safeStringify, updateMetadata),
@@ -111,7 +114,7 @@ export function useLogRecorder(
           })
           .join(' ');
 
-        addLog({
+        addLogRef.current({
           type: 'CONSOLE',
           level: level.toUpperCase(),
           time: new Date().toISOString(),
@@ -162,7 +165,7 @@ export function useLogRecorder(
           timeoutId,
         });
 
-        addLog({
+        addLogRef.current({
           type: 'FETCH_REQ',
           id: requestId,
           url,
@@ -181,7 +184,7 @@ export function useLogRecorder(
           if (reqInfo.url === url) {
             clearTimeout(reqInfo.timeoutId); // Clear timeout on response
             requestIdMap.delete(requestId);
-            addLog({
+            addLogRef.current({
               type: 'FETCH_RES',
               id: requestId,
               url,
@@ -201,7 +204,7 @@ export function useLogRecorder(
           if (reqInfo.url === url) {
             clearTimeout(reqInfo.timeoutId); // Clear timeout on error
             requestIdMap.delete(requestId);
-            addLog({
+            addLogRef.current({
               type: 'FETCH_ERR',
               id: requestId,
               url,
@@ -259,7 +262,7 @@ export function useLogRecorder(
           timeoutId,
         });
 
-        addLog({
+        addLogRef.current({
           type: 'XHR_REQ',
           id: xhrConfig.requestId,
           url: xhrConfig.url,
@@ -285,7 +288,7 @@ export function useLogRecorder(
         if (reqInfo) {
           clearTimeout(reqInfo.timeoutId); // Clear timeout on response
           xhrRequestIdMap.delete(xhrConfig.requestId);
-          addLog({
+          addLogRef.current({
             type: 'XHR_RES',
             id: xhrConfig.requestId,
             url: xhrConfig.url,
@@ -312,7 +315,7 @@ export function useLogRecorder(
         if (reqInfo) {
           clearTimeout(reqInfo.timeoutId); // Clear timeout on error
           xhrRequestIdMap.delete(xhrConfig.requestId);
-          addLog({
+          addLogRef.current({
             type: 'XHR_ERR',
             id: xhrConfig.requestId,
             url: xhrConfig.url,
