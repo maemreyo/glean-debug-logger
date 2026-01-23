@@ -1,3 +1,48 @@
+# [5.0.0](https://github.com/maemreyo/glean-debug-logger/compare/v4.0.0...v5.0.0) (2026-01-23)
+
+
+### Bug Fixes
+
+* **lint:** resolve eslint errors in test files ([99ed259](https://github.com/maemreyo/glean-debug-logger/commit/99ed259d5cd82b4660a5f8cad530b20b6c092e0a))
+* **xhr:** prevent duplicate event handler calls and improve cleanup ([5ae345e](https://github.com/maemreyo/glean-debug-logger/commit/5ae345eef8a78c6e05cac5d540f896cc54d715d5))
+
+
+### Code Refactoring
+
+* **logger:** implement singleton console interceptor and improve request tracking ([1166e6f](https://github.com/maemreyo/glean-debug-logger/commit/1166e6f7d8d800fe0d59cfc498082eca7dc9f8fb))
+* **logger:** implement singleton console interceptor and improve request tracking ([21fa145](https://github.com/maemreyo/glean-debug-logger/commit/21fa145c61fa6790246426df082f602558a8089e))
+* **logger:** implement singleton interceptors and improve memory management ([ed092a4](https://github.com/maemreyo/glean-debug-logger/commit/ed092a4a4666683372a05694ec6149f57b0b8a0a))
+* **logger:** update singleton interceptors with current config ([4aa06f9](https://github.com/maemreyo/glean-debug-logger/commit/4aa06f9eb6acc41694370a23582dfe483f303652))
+
+
+### Features
+
+* **config:** add persistAcrossReloads option to control log persistence behavior ([f4f3600](https://github.com/maemreyo/glean-debug-logger/commit/f4f36006224d437c616bf47840dffe478af4065b))
+* **interceptors:** add callback removal methods to prevent memory leaks ([bc3f596](https://github.com/maemreyo/glean-debug-logger/commit/bc3f5963d551f80d4aedca75d9be737f4e0fc4cc))
+* **interceptors:** add callback removal methods to prevent memory leaks ([2527714](https://github.com/maemreyo/glean-debug-logger/commit/2527714bf26a8918be42c198c2d274398e165b8f))
+* **test:** expand network request testing capabilities ([a7815c4](https://github.com/maemreyo/glean-debug-logger/commit/a7815c4cd0a6de45c5d01d9aa9946b07c1272b5e))
+* **ui:** add settings dropdown management and improve panel interactions ([4420577](https://github.com/maemreyo/glean-debug-logger/commit/44205776bf7b54093224d34d3118d840dc77a733))
+* **ui:** enhance debug panel interactions and settings dropdown ([f8eb811](https://github.com/maemreyo/glean-debug-logger/commit/f8eb81184a01169bd0c30e4f3acad1eed7b08ffd))
+* **ui:** enhance debug panel with refined dropdown styling and improved session details ([f0bdb4e](https://github.com/maemreyo/glean-debug-logger/commit/f0bdb4e0a0812edd6f7070fd0691ed299dd94586))
+* **ui:** enhance debug panel with session details dropdown and warm editorial styling ([d80a67a](https://github.com/maemreyo/glean-debug-logger/commit/d80a67a565ad00f8b8f8410f44f98068f9fd47cb))
+* **ui:** migrate to Radix UI components and enhance debug panel ([033c7a0](https://github.com/maemreyo/glean-debug-logger/commit/033c7a06abfecd7d86d45d19047b93eb5b38e9b0))
+* **ui:** migrate to Radix UI components and enhance debug panel ([4c39f86](https://github.com/maemreyo/glean-debug-logger/commit/4c39f86d7e346b2f5162b1f1e2c4a07fd9bc5de6))
+
+
+### BREAKING CHANGES
+
+* **test:** Removed simple XHR simulation functions in favor of
+comprehensive test suite with multiple scenarios
+* **xhr:** The XHR interceptor now uses both property overrides and event listeners for better compatibility. Tests that rely on specific event handling behavior may need updates.
+* **logger:** Interceptors now require explicit config updates in useEffect
+* **logger:** NetworkInterceptor and XHRInterceptor now use singleton pattern
+* **logger:** ConsoleInterceptor now uses singleton pattern by default. Use `createNew()` for testing to create isolated instances.
+* **logger:** ConsoleInterceptor constructor is now private. Use ConsoleInterceptor.getInstance() instead of new ConsoleInterceptor().
+* **interceptors:** Interceptor cleanup behavior has changed. Components using
+interceptors must now explicitly remove callbacks to prevent memory leaks.
+* **ui:** The click-outside behavior for closing the debug panel has been moved from DebugPanel to DebugPanelHeader component. This changes the component interaction flow and may require updates to any custom implementations that rely on the previous behavior.
+* **ui:** The custom dropdown and scroll implementations have been replaced with Radix UI components. If you were relying on the specific DOM structure or CSS classes of the previous implementation, you may need to update your code.
+
 # [4.0.0](https://github.com/maemreyo/glean-debug-logger/compare/v3.1.0...v4.0.0) (2026-01-22)
 
 
