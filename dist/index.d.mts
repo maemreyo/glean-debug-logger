@@ -102,6 +102,8 @@ interface LogRecorderConfig {
     uploadOnError: boolean;
     /** Number of consecutive errors before auto-upload triggers */
     uploadOnErrorCount?: number;
+    /** When false, logs are cleared on page refresh/unload (default: true) */
+    persistAcrossReloads?: boolean;
 }
 interface UseLogRecorderReturn {
     downloadLogs: (format?: ExportFormat, customFilename?: string | null, options?: DownloadOptions) => string | null;

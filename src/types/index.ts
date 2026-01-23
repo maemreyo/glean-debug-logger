@@ -139,6 +139,8 @@ export interface LogRecorderConfig {
   uploadOnError: boolean;
   /** Number of consecutive errors before auto-upload triggers */
   uploadOnErrorCount?: number;
+  /** When false, logs are cleared on page refresh/unload (default: true) */
+  persistAcrossReloads?: boolean;
 }
 
 // Hook Return Type

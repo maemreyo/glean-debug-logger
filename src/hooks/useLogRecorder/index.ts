@@ -29,6 +29,7 @@ export function useLogRecorder(
     includeMetadata: config.includeMetadata,
     uploadEndpoint: config.uploadEndpoint,
     uploadOnErrorCount: config.uploadOnErrorCount,
+    persistAcrossReloads: config.persistAcrossReloads,
   });
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export function useLogRecorder(
       includeMetadata: config.includeMetadata,
       uploadEndpoint: config.uploadEndpoint,
       uploadOnErrorCount: config.uploadOnErrorCount,
+      persistAcrossReloads: config.persistAcrossReloads,
     };
   }, [config]);
 
@@ -51,7 +53,7 @@ export function useLogRecorder(
   const metadataRef = useRef<LogMetadata>(
     collectMetadata(sessionIdRef.current, config.environment, config.userId, 0)
   );
-  const [logCount, setLogCount] = useState(0);
+  const [_logCount, setLogCount] = useState(0);
   const errorCountRef = useRef(0);
   const isInitialized = useRef(false);
 
@@ -270,6 +272,19 @@ export function useLogRecorder(
       cleanupFns.push(() => xhrInterceptor.detach());
     }
 
+    // Clear persisted logs on page unload if persistAcrossReloads is false
+    if (config.enablePersistence && config.persistAcrossReloads === false) {
+      const clearOnUnload = () => {
+        try {
+          localStorage.removeItem(config.persistenceKey);
+        } catch {
+          // Silently fail
+        }
+      };
+      window.addEventListener('beforeunload', clearOnUnload);
+      cleanupFns.push(() => window.removeEventListener('beforeunload', clearOnUnload));
+    }
+
     return () => {
       cleanupFns.forEach((fn) => fn());
       isInitialized.current = false;
@@ -295,8 +310,8 @@ export function useLogRecorder(
   }, []);
 
   const getLogCount = useCallback(() => {
-    return logCount;
-  }, [logCount]);
+    return logsRef.current.length;
+  }, []);
 
   const getMetadata = useCallback(() => {
     updateMetadata();
