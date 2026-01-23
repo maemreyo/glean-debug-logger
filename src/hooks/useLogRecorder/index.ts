@@ -18,35 +18,12 @@ export function useLogRecorder(
 ): UseLogRecorderReturn {
   const config = { ...DEFAULT_CONFIG, ...customConfig };
 
-  const configRef = useRef({
-    maxLogs: config.maxLogs,
-    enablePersistence: config.enablePersistence,
-    persistenceKey: config.persistenceKey,
-    captureConsole: config.captureConsole,
-    captureFetch: config.captureFetch,
-    captureXHR: config.captureXHR,
-    sanitizeKeys: config.sanitizeKeys,
-    includeMetadata: config.includeMetadata,
-    uploadEndpoint: config.uploadEndpoint,
-    uploadOnErrorCount: config.uploadOnErrorCount,
-    persistAcrossReloads: config.persistAcrossReloads,
-  });
+  // Store config in ref to avoid useEffect re-runs when config object changes
+  const configRef = useRef(config);
+  configRef.current = config;
 
-  useEffect(() => {
-    configRef.current = {
-      maxLogs: config.maxLogs,
-      enablePersistence: config.enablePersistence,
-      persistenceKey: config.persistenceKey,
-      captureConsole: config.captureConsole,
-      captureFetch: config.captureFetch,
-      captureXHR: config.captureXHR,
-      sanitizeKeys: config.sanitizeKeys,
-      includeMetadata: config.includeMetadata,
-      uploadEndpoint: config.uploadEndpoint,
-      uploadOnErrorCount: config.uploadOnErrorCount,
-      persistAcrossReloads: config.persistAcrossReloads,
-    };
-  }, [config]);
+  // Track if interceptors have been set up (run once pattern)
+  const isSetupRef = useRef(false);
 
   const logsRef = useRef<LogEntry[]>([]);
   const sessionIdRef = useRef(config.sessionId || generateSessionId());
@@ -104,9 +81,17 @@ export function useLogRecorder(
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    if (config.enablePersistence) {
+    // Only run setup once - skip if already set up
+    if (isSetupRef.current) {
+      return;
+    }
+    isSetupRef.current = true;
+
+    const currentConfig = configRef.current;
+
+    if (currentConfig.enablePersistence) {
       try {
-        const stored = localStorage.getItem(config.persistenceKey);
+        const stored = localStorage.getItem(currentConfig.persistenceKey);
         if (stored) {
           logsRef.current = JSON.parse(stored);
           setLogCount(logsRef.current.length);
@@ -118,7 +103,7 @@ export function useLogRecorder(
 
     const cleanupFns: (() => void)[] = [];
 
-    if (config.captureConsole) {
+    if (currentConfig.captureConsole) {
       consoleInterceptor.attach();
 
       const consoleCallback = (level: string, args: unknown[]) => {
@@ -151,7 +136,7 @@ export function useLogRecorder(
       });
     }
 
-    if (config.captureFetch) {
+    if (currentConfig.captureFetch) {
       const requestIdMap = new Map<
         string,
         { url: string; method: string; headers: unknown; body: unknown }
@@ -164,7 +149,7 @@ export function useLogRecorder(
           try {
             requestBody =
               typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
-            requestBody = sanitizeData(requestBody, { keys: config.sanitizeKeys });
+            requestBody = sanitizeData(requestBody, { keys: currentConfig.sanitizeKeys });
           } catch {
             requestBody = String(options.body).substring(0, 1000);
           }
@@ -175,7 +160,7 @@ export function useLogRecorder(
           method: options?.method || 'GET',
           headers: sanitizeHeaders(
             options?.headers as Record<string, unknown>,
-            config.sanitizeKeys
+            currentConfig.sanitizeKeys
           ),
           body: requestBody,
         });
@@ -187,7 +172,7 @@ export function useLogRecorder(
           method: options?.method || 'GET',
           headers: sanitizeHeaders(
             options?.headers as Record<string, unknown>,
-            config.sanitizeKeys
+            currentConfig.sanitizeKeys
           ),
           body: requestBody,
           time: new Date().toISOString(),
@@ -243,7 +228,7 @@ export function useLogRecorder(
       });
     }
 
-    if (config.captureXHR) {
+    if (currentConfig.captureXHR) {
       const xhrRequestCallback = (xhrConfig: {
         method: string;
         url: string;
@@ -315,10 +300,10 @@ export function useLogRecorder(
       });
     }
 
-    if (config.enablePersistence && config.persistAcrossReloads === false) {
+    if (currentConfig.enablePersistence && currentConfig.persistAcrossReloads === false) {
       const clearOnUnload = () => {
         try {
-          localStorage.removeItem(config.persistenceKey);
+          localStorage.removeItem(currentConfig.persistenceKey);
         } catch {
           // Silently fail
         }
@@ -330,7 +315,7 @@ export function useLogRecorder(
     return () => {
       cleanupFns.forEach((fn) => fn());
     };
-  }, [config, addLog, safeStringify]);
+  }, []); // Empty deps - run once on mount
 
   const clearLogs = useCallback(() => {
     logsRef.current = [];
