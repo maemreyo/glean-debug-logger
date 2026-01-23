@@ -1,5 +1,4 @@
-import { forwardRef, useState, useRef, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
+import { forwardRef } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
   headerStyles,
@@ -8,17 +7,12 @@ import {
   closeButtonStyles,
   deleteButtonStyles,
   iconButtonStyles,
-  sessionTooltipStyles,
-  sessionTooltipRowStyles,
-  sessionTooltipLabelStyles,
-  sessionTooltipValueStyles,
 } from './DebugPanel.styles';
 import { useCopyFormat, CopyFormat } from '../hooks/useCopyFormat';
 import { Settings, FileJson, FileText, Save, Trash2, X, Info } from 'lucide-react';
 import type { LogMetadata } from '../types';
 
 interface DebugPanelHeaderProps {
-  sessionId: string;
   metadata: LogMetadata;
   onClose: () => void;
   onSaveToDirectory: () => void;
@@ -26,6 +20,110 @@ interface DebugPanelHeaderProps {
   isSettingsOpen: boolean;
   openSettings: () => void;
   closeSettings: () => void;
+  isSessionDetailsOpen: boolean;
+  openSessionDetails: () => void;
+  closeSessionDetails: () => void;
+}
+
+// Session details dropdown content
+function SessionDetailsDropdownContent({ metadata }: { metadata: LogMetadata }) {
+  const infoRowStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    gap: '12px',
+    padding: '4px 0',
+    fontSize: 13,
+    lineHeight: 1.6,
+  };
+
+  const infoLabelStyle = {
+    fontWeight: 600,
+    color: '#8a857f',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px',
+    fontSize: 13,
+    minWidth: 100,
+  };
+
+  const infoValueStyle = {
+    fontWeight: 500,
+    color: '#4a4543',
+    textAlign: 'right' as const,
+    flex: 1,
+    fontSize: 14,
+  };
+
+  const sessionIdValueStyle = {
+    fontWeight: 500,
+    color: '#4a4543',
+    textAlign: 'right' as const,
+    flex: 1,
+    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+    fontSize: 13,
+    background: 'rgba(0, 0, 0, 0.03)',
+    padding: '3px 8px',
+    borderRadius: 4,
+  };
+
+  return (
+    <div
+      style={{
+        minWidth: 220,
+        background: 'var(--glass-bg, rgba(255,255,255,0.95))',
+        backdropFilter: 'blur(20px)',
+        borderRadius: 10,
+        padding: 12,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05)',
+        animation: 'gleanDropdownIn 0.15s ease-out',
+      }}
+    >
+      <div
+        style={{
+          padding: '6px 8px 8px',
+          fontSize: 10,
+          fontWeight: 600,
+          color: 'var(--muted, #a0aec0)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+        }}
+      >
+        Session Details
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={infoRowStyle}>
+          <span style={infoLabelStyle}>User</span>
+          <span style={infoValueStyle}>{metadata.userId || 'Anonymous'}</span>
+        </div>
+        <div style={infoRowStyle}>
+          <span style={infoLabelStyle}>Session ID</span>
+          <span style={sessionIdValueStyle}>{metadata.sessionId || 'N/A'}</span>
+        </div>
+        <div style={infoRowStyle}>
+          <span style={infoLabelStyle}>Browser</span>
+          <span style={infoValueStyle}>
+            {metadata.browser} · {metadata.platform}
+          </span>
+        </div>
+        <div style={infoRowStyle}>
+          <span style={infoLabelStyle}>Screen</span>
+          <span style={infoValueStyle}>{metadata.screenResolution}</span>
+        </div>
+        <div style={infoRowStyle}>
+          <span style={infoLabelStyle}>Timezone</span>
+          <span style={infoValueStyle}>{metadata.timezone}</span>
+        </div>
+        <div style={infoRowStyle}>
+          <span style={infoLabelStyle}>Language</span>
+          <span style={infoValueStyle}>{metadata.language}</span>
+        </div>
+        <div style={infoRowStyle}>
+          <span style={infoLabelStyle}>Viewport</span>
+          <span style={infoValueStyle}>{metadata.viewport}</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // Custom styled dropdown content component
@@ -148,7 +246,6 @@ function SettingsDropdownContent({
 export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderProps>(
   function DebugPanelHeader(
     {
-      sessionId,
       metadata,
       onClose,
       onSaveToDirectory,
@@ -156,131 +253,19 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
       isSettingsOpen,
       openSettings,
       closeSettings,
+      isSessionDetailsOpen,
+      openSessionDetails,
+      closeSessionDetails,
     },
     closeButtonRef
   ) {
     const { copyFormat, setCopyFormat } = useCopyFormat();
-    const [showSessionTooltip, setShowSessionTooltip] = useState(false);
-    const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
-    const tooltipRef = useRef<HTMLDivElement>(null);
-    const iconButtonRef = useRef<HTMLButtonElement>(null);
-
-    const updateTooltipPosition = useCallback(() => {
-      if (iconButtonRef.current) {
-        const rect = iconButtonRef.current.getBoundingClientRect();
-        const tooltipWidth = 200;
-        const tooltipHeight = 140;
-
-        let left = rect.right - tooltipWidth + 20;
-        let top = rect.top - tooltipHeight - 8;
-
-        if (left + tooltipWidth > window.innerWidth - 10) {
-          left = window.innerWidth - tooltipWidth - 10;
-        }
-        if (left < 10) {
-          left = 10;
-        }
-        if (top < 10) {
-          top = rect.bottom + 8;
-        }
-
-        setTooltipPosition({ top, left });
-      }
-    }, []);
-
-    useEffect(() => {
-      const handleClickOutside = (e: MouseEvent) => {
-        if (tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
-          setShowSessionTooltip(false);
-        }
-      };
-
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    useEffect(() => {
-      if (showSessionTooltip) {
-        updateTooltipPosition();
-        window.addEventListener('resize', updateTooltipPosition);
-        window.addEventListener('scroll', updateTooltipPosition, true);
-        return () => {
-          window.removeEventListener('resize', updateTooltipPosition);
-          window.removeEventListener('scroll', updateTooltipPosition, true);
-        };
-      }
-      return undefined;
-    }, [showSessionTooltip, updateTooltipPosition]);
-
-    const shortSessionId =
-      sessionId.length > 16
-        ? `${sessionId.substring(0, 8)}...${sessionId.substring(sessionId.length - 6)}`
-        : sessionId;
-
-    const tooltipElement = showSessionTooltip ? (
-      <div
-        ref={tooltipRef}
-        className={sessionTooltipStyles}
-        style={{ top: tooltipPosition.top, left: tooltipPosition.left }}
-      >
-        <div className={sessionTooltipRowStyles}>
-          <span className={sessionTooltipLabelStyles}>User</span>
-          <span className={sessionTooltipValueStyles}>{metadata.userId || 'Anonymous'}</span>
-        </div>
-        <div className={sessionTooltipRowStyles}>
-          <span className={sessionTooltipLabelStyles}>Browser</span>
-          <span className={sessionTooltipValueStyles}>{metadata.browser}</span>
-        </div>
-        <div className={sessionTooltipRowStyles}>
-          <span className={sessionTooltipLabelStyles}>OS</span>
-          <span className={sessionTooltipValueStyles}>{metadata.platform}</span>
-        </div>
-        <div className={sessionTooltipRowStyles}>
-          <span className={sessionTooltipLabelStyles}>Screen</span>
-          <span className={sessionTooltipValueStyles}>{metadata.screenResolution}</span>
-        </div>
-        <div className={sessionTooltipRowStyles}>
-          <span className={sessionTooltipLabelStyles}>TZ</span>
-          <span className={sessionTooltipValueStyles}>{metadata.timezone}</span>
-        </div>
-      </div>
-    ) : null;
 
     return (
       <>
         <div className={headerStyles}>
           <div className={headerTitleWrapperStyles}>
             <h3 className={headerTitleStyles}>Debug</h3>
-            <div
-              style={{
-                position: 'relative',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              <span className="font-mono text-[10px]" style={{ color: 'var(--muted, #a0aec0)' }}>
-                {shortSessionId}
-              </span>
-              <button
-                ref={iconButtonRef}
-                type="button"
-                onMouseEnter={() => {
-                  setShowSessionTooltip(true);
-                  updateTooltipPosition();
-                }}
-                onMouseLeave={() => setShowSessionTooltip(false)}
-                onClick={() => {
-                  setShowSessionTooltip(!showSessionTooltip);
-                  updateTooltipPosition();
-                }}
-                className={closeButtonStyles}
-                aria-label="Session info"
-                style={{ width: '18px', height: '18px' }}
-              >
-                <Info size={12} />
-              </button>
-            </div>
           </div>
           <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
             <button
@@ -292,6 +277,38 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
             >
               <Trash2 size={16} />
             </button>
+            <DropdownMenu.Root
+              open={isSessionDetailsOpen}
+              onOpenChange={(open) => {
+                open ? openSessionDetails() : closeSessionDetails();
+              }}
+            >
+              <DropdownMenu.Trigger asChild>
+                <button
+                  type="button"
+                  className={iconButtonStyles}
+                  aria-label="Session details"
+                  title="Session details"
+                >
+                  <Info size={16} />
+                </button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  sideOffset={6}
+                  align="end"
+                  style={{ zIndex: 100000 }}
+                  onPointerDownOutside={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.closest('#debug-panel')) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  <SessionDetailsDropdownContent metadata={metadata} />
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
             <DropdownMenu.Root
               open={isSettingsOpen}
               onOpenChange={(open) => {
@@ -345,7 +362,6 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
             </button>
           </div>
         </div>
-        {typeof document !== 'undefined' && createPortal(tooltipElement, document.body)}
       </>
     );
   }

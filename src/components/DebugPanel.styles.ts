@@ -399,56 +399,151 @@ export const networkErrorValueStyles = css`
 `;
 
 // ============================================
-// DETAILS & SESSION INFO
+// SESSION DETAILS - Warm Editorial Accordion
 // ============================================
+
+const editorialTheme = {
+  warmCream: 'rgba(255, 252, 245, 0.85)',
+  warmGray: '#4a4543',
+  warmMuted: '#8a857f',
+  copperAccent: '#c17f59',
+  copperHover: '#a86a44',
+  copperSubtle: 'rgba(193, 127, 89, 0.12)',
+  warmShadow: '0 2px 8px rgba(74, 69, 67, 0.06), 0 0 0 1px rgba(74, 69, 67, 0.02)',
+};
+
 export const detailsStyles = css`
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Source+Sans+3:wght@400;500;600&display=swap');
+
+  font-family: 'Source Sans 3', ${theme.fonts.display};
   padding: ${theme.space.md} ${theme.space.lg};
-  background: rgba(255, 255, 255, 0.4);
-  border-bottom: 1px solid ${theme.colors.border};
+  background: ${editorialTheme.warmCream};
+  border-bottom: 1px solid rgba(74, 69, 67, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 `;
 
 export const summaryStyles = css`
+  position: relative;
   display: flex;
   align-items: center;
   gap: ${theme.space.sm};
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  color: ${theme.colors.secondary};
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  list-style: none;
+  width: 100%;
   padding: ${theme.space.sm} 0;
-
-  &::-webkit-details-marker {
-    display: none;
-  }
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: ${editorialTheme.warmGray};
+  text-transform: none;
+  letter-spacing: 0.02em;
+  transition: color ${theme.transitions.normal};
 
   &:hover {
-    color: ${theme.colors.primary};
+    color: ${editorialTheme.copperAccent};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${editorialTheme.copperAccent};
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 `;
 
+export const sessionIconWrapperStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: ${editorialTheme.copperSubtle};
+  border-radius: ${theme.radius.sm};
+  color: ${editorialTheme.copperAccent};
+  transition: all ${theme.transitions.normal};
+
+  ${summaryStyles}:hover & {
+    background: ${editorialTheme.copperAccent};
+    color: #ffffff;
+  }
+`;
+
+export const sessionChevronStyles = css`
+  transition: transform ${theme.transitions.slow};
+
+  &.glean-open {
+    transform: rotate(180deg);
+  }
+`;
+
+export const sessionLabelStyles = css`
+  flex: 1;
+`;
+
+export const sessionDividerStyles = css`
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(74, 69, 67, 0.15) 20%,
+    rgba(74, 69, 67, 0.15) 80%,
+    transparent 100%
+  );
+  margin-left: ${theme.space.md};
+  transition: opacity ${theme.transitions.normal};
+`;
+
+export const sessionContentStyles = css`
+  overflow: hidden;
+  transition:
+    height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease;
+`;
+
 export const sessionInfoStyles = css`
-  margin-top: ${theme.space.md};
-  padding: ${theme.space.md};
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: ${theme.radius.md};
-  font-size: 11px;
-  color: ${theme.colors.secondary};
-  line-height: 1.7;
+  padding-top: ${theme.space.md};
+`;
 
-  & > div {
-    display: flex;
-    gap: ${theme.space.sm};
-    margin-bottom: ${theme.space.xs};
-  }
+export const infoRowStyles = css`
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: ${theme.space.md};
+  padding: ${theme.space.xs} 0;
+  font-size: 13px;
+  line-height: 1.6;
+`;
 
-  strong {
-    color: ${theme.colors.primary};
-    font-weight: 600;
-    min-width: 70px;
-  }
+export const infoLabelStyles = css`
+  font-weight: 600;
+  color: ${editorialTheme.warmMuted};
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-size: 13px;
+  min-width: 100px;
+`;
+
+export const infoValueStyles = css`
+  font-weight: 500;
+  color: ${editorialTheme.warmGray};
+  text-align: right;
+  flex: 1;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px;
+`;
+
+export const sessionIdValueStyles = css`
+  font-weight: 500;
+  color: ${editorialTheme.warmGray};
+  text-align: right;
+  flex: 1;
+  font-family: ${theme.fonts.mono};
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 3px 8px;
+  border-radius: 4px;
 `;
 
 // ============================================
@@ -1033,6 +1128,42 @@ export const darkModeStyles = css`
     ${settingsDropdownItemSelectedStyles} {
       background: rgba(255, 255, 255, 0.08);
       color: rgba(255, 255, 255, 0.95);
+    }
+
+    ${detailsStyles} {
+      background: rgba(40, 40, 60, 0.5);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    ${summaryStyles} {
+      color: rgba(255, 255, 255, 0.75);
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.95);
+      }
+    }
+
+    ${sessionIconWrapperStyles} {
+      background: rgba(193, 127, 89, 0.18);
+      color: rgba(193, 127, 89, 0.9);
+
+      ${summaryStyles}:hover & {
+        background: rgba(193, 127, 89, 0.9);
+        color: #ffffff;
+      }
+    }
+
+    ${infoLabelStyles} {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    ${infoValueStyles} {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    ${sessionIdValueStyles} {
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.06);
     }
   }
 `;

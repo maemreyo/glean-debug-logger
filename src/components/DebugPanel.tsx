@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { useLogRecorder } from '../hooks/useLogRecorder/index';
@@ -68,6 +68,16 @@ export function DebugPanel({
   const { isOpen, open, close } = useDebugPanelControls();
   const { isSettingsOpen, openSettings, closeSettings } = useSettingsDropdown();
   const { copyFormat } = useCopyFormat();
+  const [isSessionDetailsOpen, setIsSessionDetailsOpen] = useState(false);
+
+  const openSessionDetails = useCallback(() => {
+    setIsSessionDetailsOpen(true);
+  }, []);
+
+  const closeSessionDetails = useCallback(() => {
+    setIsSessionDetailsOpen(false);
+  }, []);
+
   const {
     uploadStatus,
     setUploadStatus,
@@ -80,8 +90,8 @@ export function DebugPanel({
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { downloadLogs, uploadLogs, clearLogs, getLogs, getLogCount, getMetadata, sessionId } =
-    useLogRecorder({
+  const { downloadLogs, uploadLogs, clearLogs, getLogs, getLogCount, getMetadata } = useLogRecorder(
+    {
       fileNameTemplate,
       environment,
       userId: user?.id || user?.email || 'guest',
@@ -93,7 +103,8 @@ export function DebugPanel({
       captureXHR: true,
       sanitizeKeys: ['password', 'token', 'apiKey', 'secret', 'authorization', 'creditCard'],
       excludeUrls: ['/api/analytics', 'google-analytics.com', 'facebook.com', 'vercel.com'],
-    });
+    }
+  );
 
   const logCount = getLogCount();
   const metadata = getMetadata();
@@ -338,7 +349,6 @@ timestamp=${new Date().toISOString()}
                 style={{ width: '100%', height: '100%' }}
               >
                 <DebugPanelHeader
-                  sessionId={sessionId}
                   metadata={metadata}
                   onClose={close}
                   onSaveToDirectory={handleSaveToDirectory}
@@ -351,6 +361,9 @@ timestamp=${new Date().toISOString()}
                   isSettingsOpen={isSettingsOpen}
                   openSettings={openSettings}
                   closeSettings={closeSettings}
+                  isSessionDetailsOpen={isSessionDetailsOpen}
+                  openSessionDetails={openSessionDetails}
+                  closeSessionDetails={closeSessionDetails}
                 />
 
                 <DebugPanelStats
