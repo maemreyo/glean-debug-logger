@@ -346,6 +346,7 @@ timestamp=${new Date().toISOString()}
                 className="glean-scroll-viewport"
                 style={{ width: '100%', height: '100%' }}
               >
+                
                 <DebugPanelHeader
                   metadata={metadata}
                   onClose={close}
