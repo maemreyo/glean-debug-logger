@@ -2,8 +2,6 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { setupBrowserMocks, teardownBrowserMocks } from '../hooks/__mocks__/browser';
 
 // Create mock localStorage similar to GleanDebugger.test.tsx
@@ -30,17 +28,17 @@ function createMockLocalStorage() {
 }
 
 // Event listeners storage for mock window
-const eventListeners: Record<string, Function[]> = {};
+const eventListeners: Record<string, ((event: Event) => void)[]> = {};
 
 // Create mock window with addEventListener/removeEventListener support
 function createMockWindow() {
   return {
     location: new URL('http://localhost?debug=true'),
-    addEventListener: vi.fn((type: string, handler: Function) => {
+    addEventListener: vi.fn((type: string, handler: (event: Event) => void) => {
       if (!eventListeners[type]) eventListeners[type] = [];
       eventListeners[type].push(handler);
     }),
-    removeEventListener: vi.fn((type: string, handler: Function) => {
+    removeEventListener: vi.fn((type: string, handler: (event: Event) => void) => {
       if (eventListeners[type]) {
         eventListeners[type] = eventListeners[type].filter((h) => h !== handler);
       }
@@ -138,7 +136,7 @@ describe('DebugPanel Toggle Behavior - Event-Based Tests', () => {
     });
 
     it('should handle rapid toggle events correctly', () => {
-      let visibilityHistory: boolean[] = [];
+      const visibilityHistory: boolean[] = [];
 
       const handleToggle = (event: Event) => {
         const customEvent = event as CustomEvent;
