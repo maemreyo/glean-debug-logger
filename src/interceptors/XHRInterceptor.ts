@@ -118,34 +118,54 @@ export class XHRInterceptor {
       if (config) {
         config.body = body;
 
+        // Use a flag to prevent duplicate calls from both manual handler calls
+        // and addEventListener
+        let loadCalled = false;
+        let errorCalled = false;
+
         // Store original handlers
         const originalOnLoad = this.onload;
         const originalOnError = this.onerror;
 
-        // Override onload to intercept response
-        this.onload = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+        // Create wrapper handlers that prevent duplicate calls
+        const loadHandler = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+          if (loadCalled) {
+            if (originalOnLoad) originalOnLoad.call(this, ev);
+            return;
+          }
+          loadCalled = true;
+
           const duration = Date.now() - config.startTime;
-          // Call interceptor callbacks first
           for (const cb of interceptor.onResponse) {
             cb(config, this.status, duration);
           }
-          // Call original handler if exists
           if (originalOnLoad) {
             originalOnLoad.call(this, ev);
           }
         };
 
-        // Override onerror to intercept errors
-        this.onerror = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
-          // Call interceptor callbacks first
+        const errorHandler = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+          if (errorCalled) {
+            if (originalOnError) originalOnError.call(this, ev);
+            return;
+          }
+          errorCalled = true;
+
           for (const cb of interceptor.onError) {
             cb(config, new Error('XHR Error'));
           }
-          // Call original handler if exists
           if (originalOnError) {
             originalOnError.call(this, ev);
           }
         };
+
+        // Override the properties
+        this.onload = loadHandler;
+        this.onerror = errorHandler;
+
+        // Also add event listeners for dispatchEvent compatibility
+        this.addEventListener('load', loadHandler);
+        this.addEventListener('error', errorHandler);
       }
 
       return interceptor.originalSend.call(this, body);
