@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useDebugPanelControls } from './useDebugPanelControls';
-import { FileService } from '../services/FileService';
 
 // Mock FileService
 vi.mock('../services/FileService', () => ({

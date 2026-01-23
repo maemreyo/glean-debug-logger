@@ -19,6 +19,7 @@ export const DEFAULT_CONFIG: LogRecorderConfig = {
   uploadEndpoint: null,
   uploadOnError: false,
   uploadOnErrorCount: 5,
+  persistAcrossReloads: false,
 };
 
 export function generateRequestId(): string {

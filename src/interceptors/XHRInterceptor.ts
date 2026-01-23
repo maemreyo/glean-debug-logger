@@ -4,9 +4,12 @@ interface XHRRequestConfig {
   headers: Record<string, string>;
   body: unknown;
   startTime: number;
+  requestId: string;
 }
 
 export class XHRInterceptor {
+  private static instance: XHRInterceptor | null = null;
+
   private originalXHR: typeof XMLHttpRequest;
   private onRequest: ((config: XHRRequestConfig) => void)[];
   private onResponse: ((config: XHRRequestConfig, status: number, duration: number) => void)[];
@@ -22,6 +25,11 @@ export class XHRInterceptor {
   ) => void;
   private originalSend: (body?: Document | XMLHttpRequestBodyInit | null) => void;
   private isAttached: boolean = false;
+  private requestIdCounter: number = 0;
+
+  private generateRequestId(): string {
+    return `xhr_${++this.requestIdCounter}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  }
 
   constructor(options: { excludeUrls?: string[] } = {}) {
     this.originalXHR = window.XMLHttpRequest;
@@ -32,6 +40,36 @@ export class XHRInterceptor {
     this.excludeUrls = (options.excludeUrls || []).map((url) => new RegExp(url));
     this.originalOpen = this.originalXHR.prototype.open;
     this.originalSend = this.originalXHR.prototype.send;
+  }
+
+  static getInstance(options?: { excludeUrls?: string[] }): XHRInterceptor {
+    if (!XHRInterceptor.instance) {
+      XHRInterceptor.instance = new XHRInterceptor(options);
+    } else if (options?.excludeUrls) {
+      // Update excludeUrls if provided
+      XHRInterceptor.instance.excludeUrls = options.excludeUrls.map((url) => new RegExp(url));
+    }
+    return XHRInterceptor.instance;
+  }
+
+  /**
+   * Reset the singleton instance.
+   * This is primarily intended for testing purposes to ensure clean state between tests.
+   */
+  static resetInstance(): void {
+    if (XHRInterceptor.instance) {
+      // Forcefully restore original XHR prototype even if callbacks remain
+      // This is critical for test isolation
+      XHRInterceptor.instance.originalXHR.prototype.open = XHRInterceptor.instance.originalOpen;
+      XHRInterceptor.instance.originalXHR.prototype.send = XHRInterceptor.instance.originalSend;
+      XHRInterceptor.instance.isAttached = false;
+
+      // Clear all callbacks
+      XHRInterceptor.instance.onRequest = [];
+      XHRInterceptor.instance.onResponse = [];
+      XHRInterceptor.instance.onError = [];
+    }
+    XHRInterceptor.instance = null;
   }
 
   attach(): void {
@@ -57,6 +95,7 @@ export class XHRInterceptor {
         headers: {},
         body: null,
         startTime: Date.now(),
+        requestId: interceptor.generateRequestId(),
       });
 
       if (interceptor.excludeUrls.some((regex) => regex.test(urlString))) {
@@ -79,10 +118,23 @@ export class XHRInterceptor {
       if (config) {
         config.body = body;
 
+        // Use a flag to prevent duplicate calls from both manual handler calls
+        // and addEventListener
+        let loadCalled = false;
+        let errorCalled = false;
+
+        // Store original handlers
         const originalOnLoad = this.onload;
         const originalOnError = this.onerror;
 
-        this.onload = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+        // Create wrapper handlers that prevent duplicate calls
+        const loadHandler = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+          if (loadCalled) {
+            if (originalOnLoad) originalOnLoad.call(this, ev);
+            return;
+          }
+          loadCalled = true;
+
           const duration = Date.now() - config.startTime;
           for (const cb of interceptor.onResponse) {
             cb(config, this.status, duration);
@@ -92,7 +144,13 @@ export class XHRInterceptor {
           }
         };
 
-        this.onerror = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+        const errorHandler = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+          if (errorCalled) {
+            if (originalOnError) originalOnError.call(this, ev);
+            return;
+          }
+          errorCalled = true;
+
           for (const cb of interceptor.onError) {
             cb(config, new Error('XHR Error'));
           }
@@ -100,6 +158,14 @@ export class XHRInterceptor {
             originalOnError.call(this, ev);
           }
         };
+
+        // Override the properties
+        this.onload = loadHandler;
+        this.onerror = errorHandler;
+
+        // Also add event listeners for dispatchEvent compatibility
+        this.addEventListener('load', loadHandler);
+        this.addEventListener('error', errorHandler);
       }
 
       return interceptor.originalSend.call(this, body);
@@ -107,14 +173,26 @@ export class XHRInterceptor {
   }
 
   detach(): void {
-    if (!this.isAttached) return;
-    this.isAttached = false;
-    this.originalXHR.prototype.open = this.originalOpen;
-    this.originalXHR.prototype.send = this.originalSend;
+    // Only detach if no callbacks remain
+    if (
+      this.onRequest.length === 0 &&
+      this.onResponse.length === 0 &&
+      this.onError.length === 0
+    ) {
+      if (!this.isAttached) return;
+      this.isAttached = false;
+      this.originalXHR.prototype.open = this.originalOpen;
+      this.originalXHR.prototype.send = this.originalSend;
+    }
   }
 
   onXHRRequest(callback: (config: XHRRequestConfig) => void): void {
     this.onRequest.push(callback);
+  }
+
+  removeXHRRequest(callback: (config: XHRRequestConfig) => void): void {
+    const index = this.onRequest.indexOf(callback);
+    if (index > -1) this.onRequest.splice(index, 1);
   }
 
   onXHRResponse(
@@ -123,7 +201,19 @@ export class XHRInterceptor {
     this.onResponse.push(callback);
   }
 
+  removeXHRResponse(
+    callback: (config: XHRRequestConfig, status: number, duration: number) => void
+  ): void {
+    const index = this.onResponse.indexOf(callback);
+    if (index > -1) this.onResponse.splice(index, 1);
+  }
+
   onXHRError(callback: (config: XHRRequestConfig, error: Error) => void): void {
     this.onError.push(callback);
+  }
+
+  removeXHRError(callback: (config: XHRRequestConfig, error: Error) => void): void {
+    const index = this.onError.indexOf(callback);
+    if (index > -1) this.onError.splice(index, 1);
   }
 }

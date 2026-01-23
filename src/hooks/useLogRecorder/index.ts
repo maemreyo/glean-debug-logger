@@ -18,53 +18,28 @@ export function useLogRecorder(
 ): UseLogRecorderReturn {
   const config = { ...DEFAULT_CONFIG, ...customConfig };
 
-  const configRef = useRef({
-    maxLogs: config.maxLogs,
-    enablePersistence: config.enablePersistence,
-    persistenceKey: config.persistenceKey,
-    captureConsole: config.captureConsole,
-    captureFetch: config.captureFetch,
-    captureXHR: config.captureXHR,
-    sanitizeKeys: config.sanitizeKeys,
-    includeMetadata: config.includeMetadata,
-    uploadEndpoint: config.uploadEndpoint,
-    uploadOnErrorCount: config.uploadOnErrorCount,
-  });
-
-  useEffect(() => {
-    configRef.current = {
-      maxLogs: config.maxLogs,
-      enablePersistence: config.enablePersistence,
-      persistenceKey: config.persistenceKey,
-      captureConsole: config.captureConsole,
-      captureFetch: config.captureFetch,
-      captureXHR: config.captureXHR,
-      sanitizeKeys: config.sanitizeKeys,
-      includeMetadata: config.includeMetadata,
-      uploadEndpoint: config.uploadEndpoint,
-      uploadOnErrorCount: config.uploadOnErrorCount,
-    };
-  }, [config]);
+  // Store config in ref to avoid useEffect re-runs when config object changes
+  const configRef = useRef(config);
+  configRef.current = config;
 
   const logsRef = useRef<LogEntry[]>([]);
   const sessionIdRef = useRef(config.sessionId || generateSessionId());
   const metadataRef = useRef<LogMetadata>(
     collectMetadata(sessionIdRef.current, config.environment, config.userId, 0)
   );
-  const [logCount, setLogCount] = useState(0);
+  const [_logCount, setLogCount] = useState(0);
   const errorCountRef = useRef(0);
-  const isInitialized = useRef(false);
 
   const safeStringify = useMemo(() => createSafeStringify(), []);
 
-  const consoleInterceptor = useMemo(() => new ConsoleInterceptor(), []);
+  const consoleInterceptor = useMemo(() => ConsoleInterceptor.getInstance(), []);
   const networkInterceptor = useMemo(
-    () => new NetworkInterceptor({ excludeUrls: config.excludeUrls }),
-    [config.excludeUrls]
+    () => NetworkInterceptor.getInstance(),
+    []
   );
   const xhrInterceptor = useMemo(
-    () => new XHRInterceptor({ excludeUrls: config.excludeUrls }),
-    [config.excludeUrls]
+    () => XHRInterceptor.getInstance(),
+    []
   );
 
   const logOperations = useMemo(
@@ -84,11 +59,14 @@ export function useLogRecorder(
         safeStringify,
         setLogCount
       ),
-    [config, safeStringify, setLogCount]
+    [config, safeStringify]
   );
 
-  const addLog = logOperations.addLog;
   const updateMetadata = logOperations.updateMetadata;
+
+  // Use ref for addLog to avoid closure staleness in interceptor callbacks
+  const addLogRef = useRef(logOperations.addLog);
+  addLogRef.current = logOperations.addLog;
 
   const downloadLogs = useMemo(
     () => createExportHandler(logsRef, metadataRef, safeStringify, updateMetadata),
@@ -101,27 +79,33 @@ export function useLogRecorder(
   );
 
   useEffect(() => {
-    if (typeof window === 'undefined' || isInitialized.current) return;
-    isInitialized.current = true;
+    if (typeof window === 'undefined') return;
 
-    if (config.enablePersistence) {
+    const currentConfig = configRef.current;
+
+    // Update interceptor config with latest excludeUrls
+    // This ensures the singleton interceptors always have the current config
+    NetworkInterceptor.getInstance({ excludeUrls: currentConfig.excludeUrls });
+    XHRInterceptor.getInstance({ excludeUrls: currentConfig.excludeUrls });
+
+    if (currentConfig.enablePersistence) {
       try {
-        const stored = localStorage.getItem(config.persistenceKey);
+        const stored = localStorage.getItem(currentConfig.persistenceKey);
         if (stored) {
           logsRef.current = JSON.parse(stored);
           setLogCount(logsRef.current.length);
         }
       } catch {
-        console.warn('[useLogRecorder] Failed to load persisted logs');
+        // Silently fail
       }
     }
 
     const cleanupFns: (() => void)[] = [];
 
-    if (config.captureConsole) {
+    if (currentConfig.captureConsole) {
       consoleInterceptor.attach();
 
-      consoleInterceptor.onLog((level, args) => {
+      const consoleCallback = (level: string, args: unknown[]) => {
         const data = args
           .map((arg) => {
             if (typeof arg === 'object') {
@@ -135,65 +119,77 @@ export function useLogRecorder(
           })
           .join(' ');
 
-        addLog({
+        addLogRef.current({
           type: 'CONSOLE',
           level: level.toUpperCase(),
           time: new Date().toISOString(),
           data: data.substring(0, 5000),
         });
-      });
+      };
 
-      cleanupFns.push(() => consoleInterceptor.detach());
+      consoleInterceptor.onLog(consoleCallback);
+
+      cleanupFns.push(() => {
+        consoleInterceptor.removeLog(consoleCallback);
+        consoleInterceptor.detach();
+      });
     }
 
-    if (config.captureFetch) {
+    if (currentConfig.captureFetch) {
       const requestIdMap = new Map<
         string,
-        { url: string; method: string; headers: unknown; body: unknown }
+        { url: string; method: string; headers: unknown; body: unknown; timeoutId: number }
       >();
 
-      networkInterceptor.onFetchRequest((url, options) => {
+      const fetchRequestCallback = (url: string, options: RequestInit) => {
         const requestId = generateRequestId();
         let requestBody: unknown = null;
         if (options?.body) {
           try {
             requestBody =
               typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
-            requestBody = sanitizeData(requestBody, { keys: config.sanitizeKeys });
+            requestBody = sanitizeData(requestBody, { keys: currentConfig.sanitizeKeys });
           } catch {
             requestBody = String(options.body).substring(0, 1000);
           }
         }
+
+        // Cleanup after 30s if no response comes (prevents memory leak)
+        const timeoutId = window.setTimeout(() => {
+          requestIdMap.delete(requestId);
+        }, 30000);
 
         requestIdMap.set(requestId, {
           url,
           method: options?.method || 'GET',
           headers: sanitizeHeaders(
             options?.headers as Record<string, unknown>,
-            config.sanitizeKeys
+            currentConfig.sanitizeKeys
           ),
           body: requestBody,
+          timeoutId,
         });
 
-        addLog({
+        addLogRef.current({
           type: 'FETCH_REQ',
           id: requestId,
           url,
           method: options?.method || 'GET',
           headers: sanitizeHeaders(
             options?.headers as Record<string, unknown>,
-            config.sanitizeKeys
+            currentConfig.sanitizeKeys
           ),
           body: requestBody,
           time: new Date().toISOString(),
         });
-      });
+      };
 
-      networkInterceptor.onFetchResponse((url, status, duration) => {
+      const fetchResponseCallback = (url: string, status: number, duration: number) => {
         for (const [requestId, reqInfo] of requestIdMap.entries()) {
           if (reqInfo.url === url) {
+            clearTimeout(reqInfo.timeoutId); // Clear timeout on response
             requestIdMap.delete(requestId);
-            addLog({
+            addLogRef.current({
               type: 'FETCH_RES',
               id: requestId,
               url,
@@ -206,13 +202,14 @@ export function useLogRecorder(
             break;
           }
         }
-      });
+      };
 
-      networkInterceptor.onFetchError((url, error) => {
+      const fetchErrorCallback = (url: string, error: Error) => {
         for (const [requestId, reqInfo] of requestIdMap.entries()) {
           if (reqInfo.url === url) {
+            clearTimeout(reqInfo.timeoutId); // Clear timeout on error
             requestIdMap.delete(requestId);
-            addLog({
+            addLogRef.current({
               type: 'FETCH_ERR',
               id: requestId,
               url,
@@ -223,58 +220,154 @@ export function useLogRecorder(
             break;
           }
         }
-      });
+      };
+
+      networkInterceptor.onFetchRequest(fetchRequestCallback);
+      networkInterceptor.onFetchResponse(fetchResponseCallback);
+      networkInterceptor.onFetchError(fetchErrorCallback);
 
       networkInterceptor.attach();
-      cleanupFns.push(() => networkInterceptor.detach());
+      cleanupFns.push(() => {
+        // Clear all pending timeouts and the map to prevent memory leaks
+        requestIdMap.forEach((req) => clearTimeout(req.timeoutId));
+        requestIdMap.clear();
+
+        networkInterceptor.removeFetchRequest(fetchRequestCallback);
+        networkInterceptor.removeFetchResponse(fetchResponseCallback);
+        networkInterceptor.removeFetchError(fetchErrorCallback);
+        networkInterceptor.detach();
+      });
     }
 
-    if (config.captureXHR) {
-      xhrInterceptor.onXHRRequest((xhrConfig) => {
-        addLog({
+    if (currentConfig.captureXHR) {
+      const xhrRequestIdMap = new Map<
+        string,
+        {
+          url: string;
+          method: string;
+          headers: Record<string, string>;
+          body: unknown;
+          timeoutId: number;
+        }
+      >();
+
+      const xhrRequestCallback = (xhrConfig: {
+        method: string;
+        url: string;
+        headers: Record<string, string>;
+        body: unknown;
+        requestId: string;
+      }) => {
+        // Cleanup after 30s if no response comes (prevents memory leak)
+        const timeoutId = window.setTimeout(() => {
+          xhrRequestIdMap.delete(xhrConfig.requestId);
+        }, 30000);
+
+        xhrRequestIdMap.set(xhrConfig.requestId, {
+          url: xhrConfig.url,
+          method: xhrConfig.method,
+          headers: xhrConfig.headers,
+          body: xhrConfig.body,
+          timeoutId,
+        });
+
+        addLogRef.current({
           type: 'XHR_REQ',
-          id: generateRequestId(),
+          id: xhrConfig.requestId,
           url: xhrConfig.url,
           method: xhrConfig.method,
           headers: xhrConfig.headers as Record<string, string>,
           body: xhrConfig.body,
           time: new Date().toISOString(),
         });
-      });
+      };
 
-      xhrInterceptor.onXHRResponse((xhrConfig, status, duration) => {
-        addLog({
-          type: 'XHR_RES',
-          id: generateRequestId(),
-          url: xhrConfig.url,
-          status,
-          statusText: '',
-          duration: `${duration}ms`,
-          body: '[Response captured by interceptor]',
-          time: new Date().toISOString(),
-        });
-      });
+      const xhrResponseCallback = (
+        xhrConfig: {
+          method: string;
+          url: string;
+          headers: Record<string, string>;
+          body: unknown;
+          requestId: string;
+        },
+        status: number,
+        duration: number
+      ) => {
+        const reqInfo = xhrRequestIdMap.get(xhrConfig.requestId);
+        if (reqInfo) {
+          clearTimeout(reqInfo.timeoutId); // Clear timeout on response
+          xhrRequestIdMap.delete(xhrConfig.requestId);
+          addLogRef.current({
+            type: 'XHR_RES',
+            id: xhrConfig.requestId,
+            url: xhrConfig.url,
+            status,
+            statusText: '',
+            duration: `${duration}ms`,
+            body: '[Response captured by interceptor]',
+            time: new Date().toISOString(),
+          });
+        }
+      };
 
-      xhrInterceptor.onXHRError((xhrConfig, error) => {
-        addLog({
-          type: 'XHR_ERR',
-          id: generateRequestId(),
-          url: xhrConfig.url,
-          error: error.message,
-          duration: '[unknown]ms',
-          time: new Date().toISOString(),
-        });
-      });
+      const xhrErrorCallback = (
+        xhrConfig: {
+          method: string;
+          url: string;
+          headers: Record<string, string>;
+          body: unknown;
+          requestId: string;
+        },
+        error: Error
+      ) => {
+        const reqInfo = xhrRequestIdMap.get(xhrConfig.requestId);
+        if (reqInfo) {
+          clearTimeout(reqInfo.timeoutId); // Clear timeout on error
+          xhrRequestIdMap.delete(xhrConfig.requestId);
+          addLogRef.current({
+            type: 'XHR_ERR',
+            id: xhrConfig.requestId,
+            url: xhrConfig.url,
+            error: error.message,
+            duration: '[unknown]ms',
+            time: new Date().toISOString(),
+          });
+        }
+      };
+
+      xhrInterceptor.onXHRRequest(xhrRequestCallback);
+      xhrInterceptor.onXHRResponse(xhrResponseCallback);
+      xhrInterceptor.onXHRError(xhrErrorCallback);
 
       xhrInterceptor.attach();
-      cleanupFns.push(() => xhrInterceptor.detach());
+      cleanupFns.push(() => {
+        // Clear all pending timeouts and the map to prevent memory leaks
+        xhrRequestIdMap.forEach((req) => clearTimeout(req.timeoutId));
+        xhrRequestIdMap.clear();
+
+        xhrInterceptor.removeXHRRequest(xhrRequestCallback);
+        xhrInterceptor.removeXHRResponse(xhrResponseCallback);
+        xhrInterceptor.removeXHRError(xhrErrorCallback);
+        xhrInterceptor.detach();
+      });
+    }
+
+    if (currentConfig.enablePersistence && currentConfig.persistAcrossReloads === false) {
+      const clearOnUnload = () => {
+        try {
+          localStorage.removeItem(currentConfig.persistenceKey);
+        } catch {
+          // Silently fail
+        }
+      };
+      window.addEventListener('beforeunload', clearOnUnload);
+      cleanupFns.push(() => window.removeEventListener('beforeunload', clearOnUnload));
     }
 
     return () => {
       cleanupFns.forEach((fn) => fn());
-      isInitialized.current = false;
     };
-  }, [config, addLog, safeStringify, consoleInterceptor, networkInterceptor, xhrInterceptor]);
+  }, []); // Empty deps - run once on mount
 
   const clearLogs = useCallback(() => {
     logsRef.current = [];
@@ -285,7 +378,7 @@ export function useLogRecorder(
       try {
         localStorage.removeItem(config.persistenceKey);
       } catch {
-        console.warn('[useLogRecorder] Failed to clear persisted logs');
+        // Silently fail
       }
     }
   }, [config.enablePersistence, config.persistenceKey]);
@@ -295,8 +388,8 @@ export function useLogRecorder(
   }, []);
 
   const getLogCount = useCallback(() => {
-    return logCount;
-  }, [logCount]);
+    return logsRef.current.length;
+  }, []);
 
   const getMetadata = useCallback(() => {
     updateMetadata();
@@ -311,5 +404,6 @@ export function useLogRecorder(
     getLogCount,
     getMetadata,
     sessionId: sessionIdRef.current,
+    _logCount, // Expose state for triggering re-renders in DebugPanel
   };
 }

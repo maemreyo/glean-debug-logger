@@ -25,6 +25,13 @@ const config: StorybookConfig = {
           '@': '/src',
         },
       },
+      // Fix for Radix UI ESM issues in Storybook
+      esbuild: {
+        ...config.esbuild,
+        supported: {
+          'top-level-await': true,
+        },
+      },
     };
   },
 };

@@ -6,7 +6,8 @@ describe('ConsoleInterceptor', () => {
   let interceptor: ConsoleInterceptor;
 
   beforeEach(() => {
-    interceptor = new ConsoleInterceptor();
+    ConsoleInterceptor.resetInstance();
+    interceptor = ConsoleInterceptor.createNew();
   });
 
   afterEach(() => {
@@ -47,6 +48,73 @@ describe('ConsoleInterceptor', () => {
       interceptor.onLog(callback2);
 
       expect((interceptor as any).callbacks).toHaveLength(2);
+    });
+  });
+
+  describe('removeLog', () => {
+    it('should remove a registered callback', () => {
+      const callback = vi.fn();
+      interceptor.onLog(callback);
+      expect((interceptor as any).callbacks).toHaveLength(1);
+
+      interceptor.removeLog(callback);
+      expect((interceptor as any).callbacks).toHaveLength(0);
+    });
+
+    it('should not affect other callbacks when removing one', () => {
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
+
+      interceptor.onLog(callback1);
+      interceptor.onLog(callback2);
+      expect((interceptor as any).callbacks).toHaveLength(2);
+
+      interceptor.removeLog(callback1);
+      expect((interceptor as any).callbacks).toHaveLength(1);
+      expect((interceptor as any).callbacks[0]).toBe(callback2);
+    });
+
+    it('should handle removing non-existent callback gracefully', () => {
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
+
+      interceptor.onLog(callback1);
+      expect((interceptor as any).callbacks).toHaveLength(1);
+
+      expect(() => interceptor.removeLog(callback2)).not.toThrow();
+      expect((interceptor as any).callbacks).toHaveLength(1);
+    });
+
+    it('should stop calling removed callback after detach', () => {
+      const callback = vi.fn();
+      interceptor.onLog(callback);
+      interceptor.attach();
+
+      console.log('test1');
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      interceptor.removeLog(callback);
+      callback.mockClear();
+
+      console.log('test2');
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should only remove the specific callback instance', () => {
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
+
+      interceptor.onLog(callback1);
+      interceptor.onLog(callback2);
+      interceptor.attach();
+
+      interceptor.removeLog(callback1);
+      callback1.mockClear();
+      callback2.mockClear();
+
+      console.log('test');
+      expect(callback1).not.toHaveBeenCalled();
+      expect(callback2).toHaveBeenCalledTimes(1);
     });
   });
 

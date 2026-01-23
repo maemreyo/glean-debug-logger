@@ -399,56 +399,151 @@ export const networkErrorValueStyles = css`
 `;
 
 // ============================================
-// DETAILS & SESSION INFO
+// SESSION DETAILS - Warm Editorial Accordion
 // ============================================
+
+const editorialTheme = {
+  warmCream: 'rgba(255, 252, 245, 0.85)',
+  warmGray: '#4a4543',
+  warmMuted: '#8a857f',
+  copperAccent: '#c17f59',
+  copperHover: '#a86a44',
+  copperSubtle: 'rgba(193, 127, 89, 0.12)',
+  warmShadow: '0 2px 8px rgba(74, 69, 67, 0.06), 0 0 0 1px rgba(74, 69, 67, 0.02)',
+};
+
 export const detailsStyles = css`
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Source+Sans+3:wght@400;500;600&display=swap');
+
+  font-family: 'Source Sans 3', ${theme.fonts.display};
   padding: ${theme.space.md} ${theme.space.lg};
-  background: rgba(255, 255, 255, 0.4);
-  border-bottom: 1px solid ${theme.colors.border};
+  background: ${editorialTheme.warmCream};
+  border-bottom: 1px solid rgba(74, 69, 67, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 `;
 
 export const summaryStyles = css`
+  position: relative;
   display: flex;
   align-items: center;
   gap: ${theme.space.sm};
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
-  color: ${theme.colors.secondary};
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  list-style: none;
+  width: 100%;
   padding: ${theme.space.sm} 0;
-
-  &::-webkit-details-marker {
-    display: none;
-  }
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: ${editorialTheme.warmGray};
+  text-transform: none;
+  letter-spacing: 0.02em;
+  transition: color ${theme.transitions.normal};
 
   &:hover {
-    color: ${theme.colors.primary};
+    color: ${editorialTheme.copperAccent};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${editorialTheme.copperAccent};
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 `;
 
+export const sessionIconWrapperStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: ${editorialTheme.copperSubtle};
+  border-radius: ${theme.radius.sm};
+  color: ${editorialTheme.copperAccent};
+  transition: all ${theme.transitions.normal};
+
+  ${summaryStyles}:hover & {
+    background: ${editorialTheme.copperAccent};
+    color: #ffffff;
+  }
+`;
+
+export const sessionChevronStyles = css`
+  transition: transform ${theme.transitions.slow};
+
+  &.glean-open {
+    transform: rotate(180deg);
+  }
+`;
+
+export const sessionLabelStyles = css`
+  flex: 1;
+`;
+
+export const sessionDividerStyles = css`
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(74, 69, 67, 0.15) 20%,
+    rgba(74, 69, 67, 0.15) 80%,
+    transparent 100%
+  );
+  margin-left: ${theme.space.md};
+  transition: opacity ${theme.transitions.normal};
+`;
+
+export const sessionContentStyles = css`
+  overflow: hidden;
+  transition:
+    height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease;
+`;
+
 export const sessionInfoStyles = css`
-  margin-top: ${theme.space.md};
-  padding: ${theme.space.md};
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: ${theme.radius.md};
-  font-size: 11px;
-  color: ${theme.colors.secondary};
-  line-height: 1.7;
+  padding-top: ${theme.space.md};
+`;
 
-  & > div {
-    display: flex;
-    gap: ${theme.space.sm};
-    margin-bottom: ${theme.space.xs};
-  }
+export const infoRowStyles = css`
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: ${theme.space.md};
+  padding: ${theme.space.xs} 0;
+  font-size: 13px;
+  line-height: 1.6;
+`;
 
-  strong {
-    color: ${theme.colors.primary};
-    font-weight: 600;
-    min-width: 70px;
-  }
+export const infoLabelStyles = css`
+  font-weight: 600;
+  color: ${editorialTheme.warmMuted};
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-size: 13px;
+  min-width: 100px;
+`;
+
+export const infoValueStyles = css`
+  font-weight: 500;
+  color: ${editorialTheme.warmGray};
+  text-align: right;
+  flex: 1;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px;
+`;
+
+export const sessionIdValueStyles = css`
+  font-weight: 500;
+  color: ${editorialTheme.warmGray};
+  text-align: right;
+  flex: 1;
+  font-family: ${theme.fonts.mono};
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 3px 8px;
+  border-radius: 4px;
 `;
 
 // ============================================
@@ -747,58 +842,226 @@ export const footerTipStyles = css`
 `;
 
 // ============================================
+// DROPDOWN - Soft, Refined, Elegant
+// ============================================
+
+const dropdownShadow = `
+  0 0 0 1px rgba(0, 0, 0, 0.04),
+  0 2px 8px rgba(0, 0, 0, 0.06),
+  0 8px 24px rgba(0, 0, 0, 0.08)
+`;
+
+// Base dropdown content
+export const dropdownContentStyles = css`
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: ${dropdownShadow};
+  padding: 12px;
+  animation: dropdownIn 0.2s cubic-bezier(0.2, 0.08, 0.15, 0.95);
+  transform-origin: top right;
+
+  @keyframes dropdownIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+`;
+
+export const dropdownArrowStyles = css`
+  fill: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.06));
+`;
+
+// Dropdown section header
+export const dropdownSectionStyles = css`
+  padding: 8px 10px 6px 0px;
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: ${theme.fonts.display};
+`;
+
+// Info row - compact label-value pair, left-aligned for better reading flow
+export const dropdownInfoRowStyles = css`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  line-height: 1.5;
+`;
+
+export const dropdownInfoLabelStyles = css`
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+  min-width: 70px;
+  font-family: ${theme.fonts.display};
+`;
+
+export const dropdownInfoValueStyles = css`
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.75);
+  font-size: 12px;
+  font-family: ${theme.fonts.display};
+`;
+
+export const dropdownMonoValueStyles = css`
+  ${dropdownInfoValueStyles}
+  font-family: ${theme.fonts.mono};
+  font-size: 11px;
+  letter-spacing: -0.02em;
+  color: rgba(0, 0, 0, 0.65);
+`;
+
+// Dropdown item button
+export const dropdownItemStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: ${theme.fonts.display};
+  transition: all 0.12s ease;
+
+  & svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.4;
+    transition: all 0.12s ease;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.85);
+
+    & svg {
+      opacity: 0.7;
+    }
+  }
+`;
+
+export const dropdownItemCheckStyles = css`
+  margin-left: auto;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: 600;
+`;
+
+// Divider within dropdown
+export const dropdownDividerStyles = css`
+  height: 1px;
+  background: rgba(0, 0, 0, 0.05);
+  margin: 8px 0;
+  border-radius: 1px;
+`;
+
+// ============================================
 // SETTINGS DROPDOWN
 // ============================================
 export const settingsDropdownStyles = css`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: ${theme.space.sm};
-  min-width: 160px;
-  background: ${theme.glassBg};
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid ${theme.glassBorder};
-  border-radius: ${theme.radius.md};
-  box-shadow: ${theme.glassShadow};
-  z-index: 10000;
-  overflow: hidden;
+  min-width: 180px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: ${dropdownShadow};
+  padding: 6px;
+  animation: dropdownIn 0.2s cubic-bezier(0.2, 0.08, 0.15, 0.95);
+  transform-origin: top right;
+
+  @keyframes dropdownIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
 `;
 
 export const settingsDropdownHeaderStyles = css`
-  padding: ${theme.space.sm} ${theme.space.md};
-  font-size: 10px;
+  padding: 8px 10px 6px;
+  font-size: 9px;
   font-weight: 600;
-  color: ${theme.colors.muted};
+  color: rgba(0, 0, 0, 0.35);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
+  font-family: ${theme.fonts.display};
   background: rgba(0, 0, 0, 0.02);
-  border-bottom: 1px solid ${theme.colors.border};
+  margin: -6px -6px 6px -6px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 `;
 
 export const settingsDropdownItemStyles = css`
   display: flex;
   align-items: center;
-  gap: ${theme.space.sm};
+  gap: 10px;
   width: 100%;
-  padding: ${theme.space.sm} ${theme.space.md};
+  padding: 10px 12px;
   text-align: left;
   background: transparent;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
-  color: ${theme.colors.secondary};
-  transition: all ${theme.transitions.fast};
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.65);
+  font-family: ${theme.fonts.display};
+  transition: all 0.15s ease;
+
+  & svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.6;
+    transition: all 0.15s ease;
+  }
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.85);
+
+    & svg {
+      opacity: 1;
+      transform: scale(1.05);
+    }
   }
 `;
 
 export const settingsDropdownItemSelectedStyles = css`
   ${settingsDropdownItemStyles}
   background: rgba(0, 0, 0, 0.04);
-  color: ${theme.colors.primary};
+  color: rgba(0, 0, 0, 0.9);
+
+  & svg {
+    opacity: 1;
+  }
 `;
 
 // ============================================
@@ -1011,9 +1274,69 @@ export const darkModeStyles = css`
       }
     }
 
-    ${settingsDropdownStyles} {
+    ${settingsDropdownStyles},
+    ${dropdownContentStyles} {
       background: rgba(30, 30, 46, 0.95);
       border-color: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        0 12px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    ${dropdownInfoLabelStyles} {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    ${dropdownInfoValueStyles} {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    ${dropdownMonoValueStyles} {
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    ${dropdownSectionStyles},
+    ${settingsDropdownHeaderStyles} {
+      color: rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    ${dropdownItemStyles},
+    ${settingsDropdownItemStyles} {
+      color: rgba(255, 255, 255, 0.7);
+
+      & svg {
+        opacity: 0.5;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.95);
+
+        & svg {
+          opacity: 1;
+        }
+      }
+    }
+
+    ${settingsDropdownItemSelectedStyles} {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.95);
+
+      & svg {
+        opacity: 1;
+      }
+    }
+
+    ${dropdownDividerStyles} {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    ${dropdownItemCheckStyles} {
+      color: rgba(255, 255, 255, 0.5);
     }
 
     ${settingsDropdownHeaderStyles} {
@@ -1033,6 +1356,42 @@ export const darkModeStyles = css`
     ${settingsDropdownItemSelectedStyles} {
       background: rgba(255, 255, 255, 0.08);
       color: rgba(255, 255, 255, 0.95);
+    }
+
+    ${detailsStyles} {
+      background: rgba(40, 40, 60, 0.5);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    ${summaryStyles} {
+      color: rgba(255, 255, 255, 0.75);
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.95);
+      }
+    }
+
+    ${sessionIconWrapperStyles} {
+      background: rgba(193, 127, 89, 0.18);
+      color: rgba(193, 127, 89, 0.9);
+
+      ${summaryStyles}:hover & {
+        background: rgba(193, 127, 89, 0.9);
+        color: #ffffff;
+      }
+    }
+
+    ${infoLabelStyles} {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    ${infoValueStyles} {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    ${sessionIdValueStyles} {
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.06);
     }
   }
 `;

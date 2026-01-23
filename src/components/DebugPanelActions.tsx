@@ -1,3 +1,4 @@
+import * as Tooltip from '@radix-ui/react-tooltip';
 import {
   actionsStyles,
   actionGroupStyles,
@@ -31,6 +32,55 @@ interface DebugPanelActionsProps {
   onUpload: () => void;
 }
 
+function TooltipButton({
+  children,
+  content,
+  disabled,
+  ...props
+}: {
+  children: React.ReactNode;
+  content: string;
+  disabled?: boolean;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <Tooltip.Provider delayDuration={200} skipDelayDuration={100}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button type="button" disabled={disabled} {...props}>
+            {children}
+          </button>
+        </Tooltip.Trigger>
+        {!disabled && (
+          <Tooltip.Portal>
+            <Tooltip.Content
+              side="top"
+              sideOffset={6}
+              align="center"
+              style={{
+                background: 'var(--color-primary, #1a1a2e)',
+                color: 'white',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: 500,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                zIndex: 100000,
+              }}
+            >
+              {content}
+              <Tooltip.Arrow
+                style={{
+                  fill: 'var(--color-primary, #1a1a2e)',
+                }}
+              />
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        )}
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
+
 export function DebugPanelActions({
   logCount,
   hasUploadEndpoint,
@@ -48,109 +98,109 @@ export function DebugPanelActions({
       <div className={actionGroupStyles}>
         <div className={labelStyles}>Copy Filtered</div>
         <div className={buttonGrid3Styles}>
-          <button
-            type="button"
+          <TooltipButton
+            content="Copy only console logs"
+            disabled={isDisabled || getFilteredLogCount('logs') === 0}
             onClick={() => onCopyFiltered('logs')}
             className={actionButtonStyles}
-            disabled={isDisabled || getFilteredLogCount('logs') === 0}
             aria-label="Copy only console logs"
           >
             <Terminal size={18} />
             Logs
-          </button>
-          <button
-            type="button"
+          </TooltipButton>
+          <TooltipButton
+            content="Copy only errors"
+            disabled={isDisabled || getFilteredLogCount('errors') === 0}
             onClick={() => onCopyFiltered('errors')}
             className={actionButtonStyles}
-            disabled={isDisabled || getFilteredLogCount('errors') === 0}
             aria-label="Copy only errors"
           >
             <AlertCircle size={18} />
             Errors
-          </button>
-          <button
-            type="button"
+          </TooltipButton>
+          <TooltipButton
+            content="Copy only network requests"
+            disabled={isDisabled || getFilteredLogCount('network') === 0}
             onClick={() => onCopyFiltered('network')}
             className={actionButtonStyles}
-            disabled={isDisabled || getFilteredLogCount('network') === 0}
             aria-label="Copy only network requests"
           >
             <Globe size={18} />
             Network
-          </button>
+          </TooltipButton>
         </div>
       </div>
 
       <div className={actionGroupStyles}>
         <div className={labelStyles}>Export</div>
         <div className={buttonGrid3Styles}>
-          <button
-            type="button"
+          <TooltipButton
+            content="Download as JSON"
+            disabled={isDisabled}
             onClick={() => onDownload('json')}
             className={actionButtonStyles}
-            disabled={isDisabled}
             aria-label="Download as JSON"
           >
             <FileJson size={18} />
             JSON
-          </button>
-          <button
-            type="button"
+          </TooltipButton>
+          <TooltipButton
+            content="Download as TXT"
+            disabled={isDisabled}
             onClick={() => onDownload('txt')}
             className={actionButtonStyles}
-            disabled={isDisabled}
             aria-label="Download as TXT"
           >
             <FileText size={18} />
             TXT
-          </button>
-          <button
-            type="button"
+          </TooltipButton>
+          <TooltipButton
+            content="Download as JSONL"
+            disabled={isDisabled}
             onClick={() => onDownload('jsonl')}
             className={actionButtonStyles}
-            disabled={isDisabled}
             aria-label="Download as JSONL"
           >
             <Database size={18} />
             JSONL
-          </button>
+          </TooltipButton>
         </div>
       </div>
 
       <div className={actionGroupStyles}>
         <div className={labelStyles}>Actions</div>
         <div className={buttonGrid3Styles}>
-          <button
-            type="button"
+          <TooltipButton
+            content="Copy all to clipboard"
+            disabled={isDisabled}
             onClick={onCopy}
             className={actionButtonStyles}
-            disabled={isDisabled}
             aria-label="Copy all to clipboard"
           >
             <Copy size={18} />
             Copy
-          </button>
-          <button
-            type="button"
+          </TooltipButton>
+          <TooltipButton
+            content="Download AI-optimized format"
+            disabled={isDisabled}
             onClick={() => onDownload('ai.txt')}
             className={actionButtonStyles}
-            disabled={isDisabled}
             aria-label="Download AI-optimized format"
           >
             <FileText size={18} />
             AI-TXT
-          </button>
+          </TooltipButton>
           {hasUploadEndpoint ? (
-            <button
-              type="button"
+            <TooltipButton
+              content="Upload logs to server"
+              disabled={isUploading}
               onClick={onUpload}
               className={uploadButtonStyles}
-              disabled={isUploading}
               aria-label="Upload logs to server"
             >
               <CloudUpload size={18} />
               {isUploading ? 'Uploading...' : 'Upload'}
-            </button>
+            </TooltipButton>
           ) : (
             <div />
           )}

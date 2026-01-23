@@ -43,13 +43,9 @@ export function createLogOperations(
       const consoleEntry = logEntry as { level: string };
       if (consoleEntry.level === 'ERROR') {
         stateRefs.errorCountRef.current++;
-      } else {
-        stateRefs.errorCountRef.current = 0;
       }
     } else if (logEntry.type === 'FETCH_ERR' || logEntry.type === 'XHR_ERR') {
       stateRefs.errorCountRef.current++;
-    } else {
-      stateRefs.errorCountRef.current = 0;
     }
 
     // Auto-upload check

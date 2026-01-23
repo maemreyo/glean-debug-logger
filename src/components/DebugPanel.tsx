@@ -1,11 +1,13 @@
 'use client';
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as ScrollArea from '@radix-ui/react-scroll-area';
 import { useLogRecorder } from '../hooks/useLogRecorder/index';
 import { useDebugPanelControls } from '../hooks/useDebugPanelControls';
 import { useCopyFormat } from '../hooks/useCopyFormat';
 import { useStatusMessages } from '../hooks/useStatusMessages';
+import { useSettingsDropdown } from '../hooks/useSettingsDropdown';
 import { LogEntry, ConsoleLogEntry, ExportFormat } from '../types';
 import { transformToECS, transformMetadataToECS } from '../utils/ecsTransform';
 import { toggleButtonStyles, panelStyles, indicatorDotStyles } from './DebugPanel.styles';
@@ -64,7 +66,18 @@ export function DebugPanel({
   showInProduction = false,
 }: DebugPanelProps) {
   const { isOpen, open, close } = useDebugPanelControls();
+  const { isSettingsOpen, openSettings, closeSettings } = useSettingsDropdown();
   const { copyFormat } = useCopyFormat();
+  const [isSessionDetailsOpen, setIsSessionDetailsOpen] = useState(false);
+
+  const openSessionDetails = useCallback(() => {
+    setIsSessionDetailsOpen(true);
+  }, []);
+
+  const closeSessionDetails = useCallback(() => {
+    setIsSessionDetailsOpen(false);
+  }, []);
+
   const {
     uploadStatus,
     setUploadStatus,
@@ -77,22 +90,21 @@ export function DebugPanel({
   const panelRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { downloadLogs, uploadLogs, clearLogs, getLogs, getLogCount, getMetadata, sessionId } =
-    useLogRecorder({
-      fileNameTemplate,
-      environment,
-      userId: user?.id || user?.email || 'guest',
-      includeMetadata: true,
-      uploadEndpoint,
-      maxLogs,
-      captureConsole: true,
-      captureFetch: true,
-      captureXHR: true,
-      sanitizeKeys: ['password', 'token', 'apiKey', 'secret', 'authorization', 'creditCard'],
-      excludeUrls: ['/api/analytics', 'google-analytics.com', 'facebook.com', 'vercel.com'],
-    });
+  const { downloadLogs, uploadLogs, clearLogs, getLogs, getMetadata, _logCount } = useLogRecorder({
+    fileNameTemplate,
+    environment,
+    userId: user?.id || user?.email || 'guest',
+    includeMetadata: true,
+    uploadEndpoint,
+    maxLogs,
+    captureConsole: true,
+    captureFetch: true,
+    captureXHR: true,
+    sanitizeKeys: ['password', 'token', 'apiKey', 'secret', 'authorization', 'creditCard'],
+    excludeUrls: ['/api/analytics', 'google-analytics.com', 'facebook.com', 'vercel.com'],
+  });
 
-  const logCount = getLogCount();
+  const logCount = _logCount; // Use state value for re-renders
   const metadata = getMetadata();
 
   // Auto-upload on error threshold
@@ -110,26 +122,6 @@ export function DebugPanel({
     }
     return undefined;
   }, [metadata.errorCount, uploadEndpoint, uploadLogs]);
-
-  // Close panel when clicking outside (exclude toggle button to prevent race with its onClick)
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      // Skip if clicking the toggle button (check by aria-label)
-      const target = e.target as HTMLElement;
-      if (
-        target.closest('[aria-label="Open debug panel"]') ||
-        target.closest('[aria-label="Close debug panel"]')
-      ) {
-        return;
-      }
-      if (isOpen && panelRef.current && !panelRef.current.contains(target)) {
-        close();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, close]);
 
   const generateCopyContent = useCallback(
     (logs: LogEntry[], meta: ReturnType<typeof getMetadata>): string => {
@@ -349,43 +341,261 @@ timestamp=${new Date().toISOString()}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
-            <DebugPanelHeader
-              sessionId={sessionId}
-              metadata={metadata}
-              onClose={close}
-              onSaveToDirectory={handleSaveToDirectory}
-              onClear={() => {
-                if (confirm('Clear all logs?')) {
-                  clearLogs();
-                }
-              }}
-              ref={closeButtonRef}
-            />
+            <ScrollArea.Root className="glean-scroll-area" style={{ flex: 1, overflow: 'hidden' }}>
+              <ScrollArea.Viewport
+                className="glean-scroll-viewport"
+                style={{ width: '100%', height: '100%' }}
+              >
+                <DebugPanelHeader
+                  metadata={metadata}
+                  onClose={close}
+                  onSaveToDirectory={handleSaveToDirectory}
+                  onClear={() => {
+                    if (confirm('Clear all logs?')) {
+                      clearLogs();
+                    }
+                  }}
+                  ref={closeButtonRef}
+                  isSettingsOpen={isSettingsOpen}
+                  openSettings={openSettings}
+                  closeSettings={closeSettings}
+                  isSessionDetailsOpen={isSessionDetailsOpen}
+                  openSessionDetails={openSessionDetails}
+                  closeSessionDetails={closeSessionDetails}
+                />
 
-            <DebugPanelStats
-              logCount={logCount}
-              errorCount={metadata.errorCount}
-              networkErrorCount={metadata.networkErrorCount}
-            />
+                <DebugPanelStats
+                  logCount={logCount}
+                  errorCount={metadata.errorCount}
+                  networkErrorCount={metadata.networkErrorCount}
+                />
 
-            <DebugPanelActions
-              logCount={logCount}
-              hasUploadEndpoint={!!uploadEndpoint}
-              isUploading={false}
-              getFilteredLogCount={getFilteredLogCount}
-              onCopyFiltered={handleCopyFiltered}
-              onDownload={handleDownload}
-              onCopy={handleCopy}
-              onUpload={handleUpload}
-            />
+                {/* Test Buttons - For debugging interceptor only */}
+                <div
+                  style={{
+                    padding: '8px 16px',
+                    borderBottom: '1px solid var(--color-border, #e2e8f0)',
+                    display: 'flex',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      console.log('[TEST] Console log test message');
+                      console.error('[TEST] Console error test message');
+                      console.warn('[TEST] Console warn test message');
+                      console.info('[TEST] Console info test message');
+                    }}
+                    style={{
+                      background: 'var(--color-primary, #6366f1)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    🧪 Console
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      // Test successful fetch
+                      try {
+                        await fetch('https://jsonplaceholder.typicode.com/posts/1');
+                      } catch {
+                        // Ignore errors for test
+                      }
+                    }}
+                    style={{
+                      background: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    🌐 Fetch (200)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      // Test failed fetch
+                      try {
+                        await fetch('https://httpstat.us/404');
+                      } catch {
+                        // Ignore errors for test
+                      }
+                    }}
+                    style={{
+                      background: '#f59e0b',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    ⚠️ Fetch (404)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      // Test failed fetch (network error)
+                      try {
+                        await fetch('https://this-domain-definitely-does-not-exist-12345.com');
+                      } catch {
+                        // Ignore errors for test
+                      }
+                    }}
+                    style={{
+                      background: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    🔥 Fetch (Err)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Test successful XHR
+                      const xhr = new XMLHttpRequest();
+                      xhr.open('GET', 'https://jsonplaceholder.typicode.com/users/1');
+                      xhr.onload = () => {
+                        console.log('[TEST] XHR completed:', xhr.status);
+                      };
+                      xhr.onerror = () => {
+                        console.error('[TEST] XHR error');
+                      };
+                      xhr.send();
+                    }}
+                    style={{
+                      background: '#8b5cf6',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    📡 XHR (200)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Test failed XHR
+                      const xhr = new XMLHttpRequest();
+                      xhr.open('GET', 'https://httpstat.us/500');
+                      xhr.onload = () => {
+                        console.log('[TEST] XHR completed:', xhr.status);
+                      };
+                      xhr.onerror = () => {
+                        console.error('[TEST] XHR error');
+                      };
+                      xhr.send();
+                    }}
+                    style={{
+                      background: '#ec4899',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    📡 XHR (500)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Test XHR network error
+                      const xhr = new XMLHttpRequest();
+                      xhr.open('GET', 'https://non-existent-domain-xyz-123.com');
+                      xhr.timeout = 5000;
+                      xhr.ontimeout = () => {
+                        console.error('[TEST] XHR timeout');
+                      };
+                      xhr.onerror = () => {
+                        console.error('[TEST] XHR network error');
+                      };
+                      xhr.send();
+                    }}
+                    style={{
+                      background: '#6366f1',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                    }}
+                  >
+                    💥 XHR (Err)
+                  </button>
+                </div>
 
-            <DebugPanelStatus
-              uploadStatus={uploadStatus}
-              directoryStatus={directoryStatus}
-              copyStatus={copyStatus}
-            />
+                <DebugPanelActions
+                  logCount={logCount}
+                  hasUploadEndpoint={!!uploadEndpoint}
+                  isUploading={false}
+                  getFilteredLogCount={getFilteredLogCount}
+                  onCopyFiltered={handleCopyFiltered}
+                  onDownload={handleDownload}
+                  onCopy={handleCopy}
+                  onUpload={handleUpload}
+                />
 
-            <DebugPanelFooter />
+                <DebugPanelStatus
+                  uploadStatus={uploadStatus}
+                  directoryStatus={directoryStatus}
+                  copyStatus={copyStatus}
+                />
+
+                <DebugPanelFooter />
+              </ScrollArea.Viewport>
+              <ScrollArea.Scrollbar
+                className="glean-scrollbar"
+                orientation="vertical"
+                style={{
+                  display: 'flex',
+                  width: '6px',
+                  userSelect: 'none',
+                  touchAction: 'none',
+                  padding: '2px',
+                  background: 'transparent',
+                }}
+              >
+                <ScrollArea.Thumb
+                  className="glean-scrollbar-thumb"
+                  style={{
+                    flex: 1,
+                    background: 'rgba(0, 0, 0, 0.15)',
+                    borderRadius: '3px',
+                    transition: 'background 0.15s ease',
+                  }}
+                />
+              </ScrollArea.Scrollbar>
+            </ScrollArea.Root>
           </motion.div>
         )}
       </AnimatePresence>

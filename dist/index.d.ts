@@ -1,4 +1,5 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
+import { ReactNode } from 'react';
 
 type LogType = 'CONSOLE' | 'FETCH_REQ' | 'FETCH_RES' | 'FETCH_ERR' | 'XHR_REQ' | 'XHR_RES' | 'XHR_ERR';
 type ConsoleLevel = 'log' | 'error' | 'warn' | 'info' | 'debug';
@@ -101,6 +102,8 @@ interface LogRecorderConfig {
     uploadOnError: boolean;
     /** Number of consecutive errors before auto-upload triggers */
     uploadOnErrorCount?: number;
+    /** When false, logs are cleared on page refresh/unload (default: true) */
+    persistAcrossReloads?: boolean;
 }
 interface UseLogRecorderReturn {
     downloadLogs: (format?: ExportFormat, customFilename?: string | null, options?: DownloadOptions) => string | null;
@@ -114,6 +117,8 @@ interface UseLogRecorderReturn {
     getLogCount: () => number;
     getMetadata: () => LogMetadata;
     sessionId: string;
+    /** @internal Used for triggering re-renders in DebugPanel */
+    _logCount: number;
 }
 type FilenamePlaceholder = '{env}' | '{userId}' | '{sessionId}' | '{timestamp}' | '{date}' | '{time}' | '{errorCount}' | '{logCount}' | '{browser}' | '{platform}' | '{url}';
 interface ExportOutput {
@@ -224,6 +229,7 @@ interface GleanDebuggerProps {
     fileNameTemplate?: string;
     maxLogs?: number;
     showInProduction?: boolean;
+    children?: ReactNode;
 }
 interface GleanConsoleAPI {
     show: () => void;
