@@ -7,6 +7,15 @@ import {
   closeButtonStyles,
   deleteButtonStyles,
   iconButtonStyles,
+  dropdownContentStyles,
+  dropdownSectionStyles,
+  dropdownInfoRowStyles,
+  dropdownInfoLabelStyles,
+  dropdownInfoValueStyles,
+  dropdownMonoValueStyles,
+  dropdownItemStyles,
+  dropdownItemCheckStyles,
+  dropdownDividerStyles,
 } from './DebugPanel.styles';
 import { useCopyFormat, CopyFormat } from '../hooks/useCopyFormat';
 import { Settings, FileJson, FileText, Save, Trash2, X, Info } from 'lucide-react';
@@ -27,106 +36,44 @@ interface DebugPanelHeaderProps {
 
 // Session details dropdown content
 function SessionDetailsDropdownContent({ metadata }: { metadata: LogMetadata }) {
-  const infoRowStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    gap: '12px',
-    padding: '4px 0',
-    fontSize: 13,
-    lineHeight: 1.6,
-  };
-
-  const infoLabelStyle = {
-    fontWeight: 600,
-    color: '#8a857f',
-    textTransform: 'uppercase',
-    letterSpacing: '0.3px',
-    fontSize: 13,
-    minWidth: 100,
-  };
-
-  const infoValueStyle = {
-    fontWeight: 500,
-    color: '#4a4543',
-    textAlign: 'right' as const,
-    flex: 1,
-    fontSize: 14,
-  };
-
-  const sessionIdValueStyle = {
-    fontWeight: 500,
-    color: '#4a4543',
-    textAlign: 'right' as const,
-    flex: 1,
-    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-    fontSize: 13,
-    background: 'rgba(0, 0, 0, 0.03)',
-    padding: '3px 8px',
-    borderRadius: 4,
-  };
-
   return (
-    <div
-      style={{
-        minWidth: 220,
-        background: 'var(--glass-bg, rgba(255,255,255,0.95))',
-        backdropFilter: 'blur(20px)',
-        borderRadius: 10,
-        padding: 12,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05)',
-        animation: 'gleanDropdownIn 0.15s ease-out',
-      }}
-    >
-      <div
-        style={{
-          padding: '6px 8px 8px',
-          fontSize: 10,
-          fontWeight: 600,
-          color: 'var(--muted, #a0aec0)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-        }}
-      >
-        Session Details
+    <div className={dropdownContentStyles}>
+      <div className={dropdownSectionStyles}>Session Details</div>
+      <div className={dropdownInfoRowStyles}>
+        <span className={dropdownInfoLabelStyles}>User</span>
+        <span className={dropdownInfoValueStyles}>{metadata.userId || 'Anonymous'}</span>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div style={infoRowStyle}>
-          <span style={infoLabelStyle}>User</span>
-          <span style={infoValueStyle}>{metadata.userId || 'Anonymous'}</span>
-        </div>
-        <div style={infoRowStyle}>
-          <span style={infoLabelStyle}>Session ID</span>
-          <span style={sessionIdValueStyle}>{metadata.sessionId || 'N/A'}</span>
-        </div>
-        <div style={infoRowStyle}>
-          <span style={infoLabelStyle}>Browser</span>
-          <span style={infoValueStyle}>
-            {metadata.browser} · {metadata.platform}
-          </span>
-        </div>
-        <div style={infoRowStyle}>
-          <span style={infoLabelStyle}>Screen</span>
-          <span style={infoValueStyle}>{metadata.screenResolution}</span>
-        </div>
-        <div style={infoRowStyle}>
-          <span style={infoLabelStyle}>Timezone</span>
-          <span style={infoValueStyle}>{metadata.timezone}</span>
-        </div>
-        <div style={infoRowStyle}>
-          <span style={infoLabelStyle}>Language</span>
-          <span style={infoValueStyle}>{metadata.language}</span>
-        </div>
-        <div style={infoRowStyle}>
-          <span style={infoLabelStyle}>Viewport</span>
-          <span style={infoValueStyle}>{metadata.viewport}</span>
-        </div>
+      <div className={dropdownInfoRowStyles}>
+        <span className={dropdownInfoLabelStyles}>Session ID</span>
+        <span className={dropdownMonoValueStyles}>{metadata.sessionId || 'N/A'}</span>
+      </div>
+      <div className={dropdownInfoRowStyles}>
+        <span className={dropdownInfoLabelStyles}>Browser</span>
+        <span className={dropdownInfoValueStyles}>
+          {metadata.browser} · {metadata.platform}
+        </span>
+      </div>
+      <div className={dropdownInfoRowStyles}>
+        <span className={dropdownInfoLabelStyles}>Screen</span>
+        <span className={dropdownInfoValueStyles}>{metadata.screenResolution}</span>
+      </div>
+      <div className={dropdownInfoRowStyles}>
+        <span className={dropdownInfoLabelStyles}>Timezone</span>
+        <span className={dropdownInfoValueStyles}>{metadata.timezone}</span>
+      </div>
+      <div className={dropdownInfoRowStyles}>
+        <span className={dropdownInfoLabelStyles}>Language</span>
+        <span className={dropdownInfoValueStyles}>{metadata.language}</span>
+      </div>
+      <div className={dropdownInfoRowStyles}>
+        <span className={dropdownInfoLabelStyles}>Viewport</span>
+        <span className={dropdownInfoValueStyles}>{metadata.viewport}</span>
       </div>
     </div>
   );
 }
 
-// Custom styled dropdown content component
+// Settings dropdown content
 function SettingsDropdownContent({
   copyFormat,
   setCopyFormat,
@@ -147,53 +94,25 @@ function SettingsDropdownContent({
   };
 
   return (
-    <div
-      style={{
-        minWidth: 180,
-        background: 'var(--glass-bg, rgba(255,255,255,0.95))',
-        backdropFilter: 'blur(20px)',
-        borderRadius: 10,
-        padding: 8,
-        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05)',
-        animation: 'gleanDropdownIn 0.15s ease-out',
-      }}
-    >
-      <div
-        style={{
-          padding: '8px 10px 6px',
-          fontSize: 10,
-          fontWeight: 600,
-          color: 'var(--muted, #a0aec0)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-        }}
-      >
-        Copy Format
-      </div>
+    <div className={dropdownContentStyles}>
+      <div className={dropdownSectionStyles}>Export format</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {formatOptions.map((format) => (
           <button
             key={format}
             type="button"
+            className={dropdownItemStyles}
+            style={
+              copyFormat === format
+                ? {
+                    background: 'rgba(0, 0, 0, 0.06)',
+                    color: 'rgba(0, 0, 0, 0.9)',
+                  }
+                : undefined
+            }
             onClick={() => {
               setCopyFormat(format);
               onCloseDropdown();
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              width: '100%',
-              padding: '10px 12px',
-              textAlign: 'left',
-              background:
-                copyFormat === format ? 'var(--primary-bg, rgba(14,165,233,0.08))' : 'transparent',
-              border: 'none',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: 12,
-              color: copyFormat === format ? 'var(--accent, #0ea5e9)' : 'var(--secondary, #4a5568)',
-              transition: 'all 0.12s ease',
             }}
           >
             {formatIcons[format]}
@@ -202,42 +121,24 @@ function SettingsDropdownContent({
               {format === 'ecs.json' && 'ECS (AI)'}
               {format === 'ai.txt' && 'AI-TXT'}
             </span>
-            {copyFormat === format && <span>✓</span>}
+            {copyFormat === format && <span className={dropdownItemCheckStyles}>✓</span>}
           </button>
         ))}
       </div>
 
-      <div
-        style={{
-          borderTop: '1px solid var(--border-color, rgba(0,0,0,0.06))',
-          margin: '8px 0',
-        }}
-      />
+      <div className={dropdownDividerStyles} />
 
+      <div className={dropdownSectionStyles}>Actions</div>
       <button
         type="button"
+        className={dropdownItemStyles}
         onClick={() => {
           onSaveToDirectory();
           onCloseDropdown();
         }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          width: '100%',
-          padding: '10px 12px',
-          textAlign: 'left',
-          background: 'transparent',
-          border: 'none',
-          borderRadius: 6,
-          cursor: 'pointer',
-          fontSize: 12,
-          color: 'var(--secondary, #4a5568)',
-          transition: 'all 0.12s ease',
-        }}
       >
         <Save size={14} />
-        <span>Save to Folder</span>
+        <span>Save to folder</span>
       </button>
     </div>
   );

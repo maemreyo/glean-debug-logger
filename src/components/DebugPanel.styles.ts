@@ -842,58 +842,226 @@ export const footerTipStyles = css`
 `;
 
 // ============================================
+// DROPDOWN - Soft, Refined, Elegant
+// ============================================
+
+const dropdownShadow = `
+  0 0 0 1px rgba(0, 0, 0, 0.04),
+  0 2px 8px rgba(0, 0, 0, 0.06),
+  0 8px 24px rgba(0, 0, 0, 0.08)
+`;
+
+// Base dropdown content
+export const dropdownContentStyles = css`
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: ${dropdownShadow};
+  padding: 12px;
+  animation: dropdownIn 0.2s cubic-bezier(0.2, 0.08, 0.15, 0.95);
+  transform-origin: top right;
+
+  @keyframes dropdownIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+`;
+
+export const dropdownArrowStyles = css`
+  fill: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.06));
+`;
+
+// Dropdown section header
+export const dropdownSectionStyles = css`
+  padding: 8px 10px 6px 0px;
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: ${theme.fonts.display};
+`;
+
+// Info row - compact label-value pair, left-aligned for better reading flow
+export const dropdownInfoRowStyles = css`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  line-height: 1.5;
+`;
+
+export const dropdownInfoLabelStyles = css`
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+  min-width: 70px;
+  font-family: ${theme.fonts.display};
+`;
+
+export const dropdownInfoValueStyles = css`
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.75);
+  font-size: 12px;
+  font-family: ${theme.fonts.display};
+`;
+
+export const dropdownMonoValueStyles = css`
+  ${dropdownInfoValueStyles}
+  font-family: ${theme.fonts.mono};
+  font-size: 11px;
+  letter-spacing: -0.02em;
+  color: rgba(0, 0, 0, 0.65);
+`;
+
+// Dropdown item button
+export const dropdownItemStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: ${theme.fonts.display};
+  transition: all 0.12s ease;
+
+  & svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.4;
+    transition: all 0.12s ease;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.85);
+
+    & svg {
+      opacity: 0.7;
+    }
+  }
+`;
+
+export const dropdownItemCheckStyles = css`
+  margin-left: auto;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: 600;
+`;
+
+// Divider within dropdown
+export const dropdownDividerStyles = css`
+  height: 1px;
+  background: rgba(0, 0, 0, 0.05);
+  margin: 8px 0;
+  border-radius: 1px;
+`;
+
+// ============================================
 // SETTINGS DROPDOWN
 // ============================================
 export const settingsDropdownStyles = css`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: ${theme.space.sm};
-  min-width: 160px;
-  background: ${theme.glassBg};
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid ${theme.glassBorder};
-  border-radius: ${theme.radius.md};
-  box-shadow: ${theme.glassShadow};
-  z-index: 10000;
-  overflow: hidden;
+  min-width: 180px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: ${dropdownShadow};
+  padding: 6px;
+  animation: dropdownIn 0.2s cubic-bezier(0.2, 0.08, 0.15, 0.95);
+  transform-origin: top right;
+
+  @keyframes dropdownIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
 `;
 
 export const settingsDropdownHeaderStyles = css`
-  padding: ${theme.space.sm} ${theme.space.md};
-  font-size: 10px;
+  padding: 8px 10px 6px;
+  font-size: 9px;
   font-weight: 600;
-  color: ${theme.colors.muted};
+  color: rgba(0, 0, 0, 0.35);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
+  font-family: ${theme.fonts.display};
   background: rgba(0, 0, 0, 0.02);
-  border-bottom: 1px solid ${theme.colors.border};
+  margin: -6px -6px 6px -6px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 `;
 
 export const settingsDropdownItemStyles = css`
   display: flex;
   align-items: center;
-  gap: ${theme.space.sm};
+  gap: 10px;
   width: 100%;
-  padding: ${theme.space.sm} ${theme.space.md};
+  padding: 10px 12px;
   text-align: left;
   background: transparent;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
-  color: ${theme.colors.secondary};
-  transition: all ${theme.transitions.fast};
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.65);
+  font-family: ${theme.fonts.display};
+  transition: all 0.15s ease;
+
+  & svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.6;
+    transition: all 0.15s ease;
+  }
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.85);
+
+    & svg {
+      opacity: 1;
+      transform: scale(1.05);
+    }
   }
 `;
 
 export const settingsDropdownItemSelectedStyles = css`
   ${settingsDropdownItemStyles}
   background: rgba(0, 0, 0, 0.04);
-  color: ${theme.colors.primary};
+  color: rgba(0, 0, 0, 0.9);
+
+  & svg {
+    opacity: 1;
+  }
 `;
 
 // ============================================
@@ -1106,9 +1274,69 @@ export const darkModeStyles = css`
       }
     }
 
-    ${settingsDropdownStyles} {
+    ${settingsDropdownStyles},
+    ${dropdownContentStyles} {
       background: rgba(30, 30, 46, 0.95);
       border-color: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        0 12px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    ${dropdownInfoLabelStyles} {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    ${dropdownInfoValueStyles} {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    ${dropdownMonoValueStyles} {
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    ${dropdownSectionStyles},
+    ${settingsDropdownHeaderStyles} {
+      color: rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    ${dropdownItemStyles},
+    ${settingsDropdownItemStyles} {
+      color: rgba(255, 255, 255, 0.7);
+
+      & svg {
+        opacity: 0.5;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.95);
+
+        & svg {
+          opacity: 1;
+        }
+      }
+    }
+
+    ${settingsDropdownItemSelectedStyles} {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.95);
+
+      & svg {
+        opacity: 1;
+      }
+    }
+
+    ${dropdownDividerStyles} {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    ${dropdownItemCheckStyles} {
+      color: rgba(255, 255, 255, 0.5);
     }
 
     ${settingsDropdownHeaderStyles} {
