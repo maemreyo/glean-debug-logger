@@ -1,5 +1,8 @@
+// Singleton pattern - only one instance exists even with HMR module reloads
+let singletonInstance: ConsoleInterceptor | null = null;
+
 export class ConsoleInterceptor {
-  private originalConsole: {
+  private originalConsole!: {
     log: (...args: unknown[]) => void;
     error: (...args: unknown[]) => void;
     warn: (...args: unknown[]) => void;
@@ -19,10 +22,7 @@ export class ConsoleInterceptor {
     // Store original log before any patching
     this.originalLog = console.log.bind(console);
 
-    this.originalLog(
-      `[ConsoleInterceptor#${this.instanceId}] Created (total: ${ConsoleInterceptor.instanceCount})`
-    );
-
+    // Initialize originalConsole first
     this.originalConsole = {
       log: console.log.bind(console),
       error: console.error.bind(console),
@@ -31,6 +31,20 @@ export class ConsoleInterceptor {
       debug: console.debug.bind(console),
     };
     this.callbacks = [];
+
+    // Singleton: if instance already exists, return it instead of creating new one
+    if (singletonInstance) {
+      this.originalLog(
+        `[ConsoleInterceptor#${this.instanceId}] ⚠️  Singleton violation - returning existing instance #${singletonInstance.instanceId}`
+      );
+      // Don't copy callbacks - just return early and let the singleton handle everything
+      return;
+    }
+
+    singletonInstance = this;
+    this.originalLog(
+      `[ConsoleInterceptor#${this.instanceId}] ✅ Created singleton instance (total: ${ConsoleInterceptor.instanceCount})`
+    );
   }
 
   private debugLog(...args: unknown[]): void {
@@ -66,7 +80,14 @@ export class ConsoleInterceptor {
     });
   }
 
+  // Only detach if no callbacks remain - prevents breaking other consumers
   detach(): void {
+    if (this.callbacks.length > 0) {
+      this.debugLog(
+        `[ConsoleInterceptor#${this.instanceId}] detach() SKIPPED - ${this.callbacks.length} callbacks still active`
+      );
+      return;
+    }
     this.debugLog(
       `[ConsoleInterceptor#${this.instanceId}] detach() - isAttached=${this.isAttached}`
     );
@@ -79,7 +100,7 @@ export class ConsoleInterceptor {
     this.isAttached = false;
     const levels: (keyof typeof this.originalConsole)[] = ['log', 'error', 'warn', 'info', 'debug'];
     levels.forEach((level) => {
-      (console as Record<string, (...args: unknown[]) => void>)[level] =
+      (console as unknown as Record<string, (...args: unknown[]) => void>)[level] =
         this.originalConsole[level];
     });
   }
