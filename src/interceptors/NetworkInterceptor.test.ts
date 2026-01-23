@@ -4,6 +4,8 @@ import { NetworkInterceptor } from './NetworkInterceptor';
 describe('NetworkInterceptor', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', window.fetch);
+    // Reset singleton to ensure clean state for each test
+    NetworkInterceptor.resetInstance();
   });
 
   afterEach(() => {
@@ -17,7 +19,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test response', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.onFetchResponse(onResponse);
       interceptor.attach();
@@ -35,7 +37,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test response', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchResponse(onResponse);
       interceptor.attach();
 
@@ -92,7 +94,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockRejectedValue(mockError);
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.onFetchResponse(onResponse);
       interceptor.onFetchError(onError);
@@ -115,7 +117,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 201 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.attach();
 
@@ -132,7 +134,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.attach();
 
@@ -148,7 +150,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.attach();
 
@@ -169,7 +171,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.attach();
 
@@ -184,7 +186,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(callback1);
       interceptor.onFetchRequest(callback2);
       interceptor.attach();
@@ -202,7 +204,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchResponse(onResponse);
       interceptor.attach();
 
@@ -222,7 +224,7 @@ describe('NetworkInterceptor', () => {
       });
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchResponse(onResponse);
       interceptor.attach();
 
@@ -238,7 +240,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchResponse(callback1);
       interceptor.onFetchResponse(callback2);
       interceptor.attach();
@@ -257,7 +259,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockRejectedValue(mockError);
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchError(onError);
       interceptor.attach();
 
@@ -273,7 +275,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockRejectedValue(mockError);
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchError(callback1);
       interceptor.onFetchError(callback2);
       interceptor.attach();
@@ -291,7 +293,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(callback);
       expect((interceptor as any).onRequest).toHaveLength(1);
 
@@ -304,7 +306,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(callback);
       interceptor.attach();
 
@@ -324,7 +326,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(callback1);
       interceptor.onFetchRequest(callback2);
       interceptor.attach();
@@ -345,7 +347,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchResponse(callback);
       expect((interceptor as any).onResponse).toHaveLength(1);
 
@@ -358,7 +360,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchResponse(callback);
       interceptor.attach();
 
@@ -380,7 +382,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockRejectedValue(mockError);
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchError(callback);
       expect((interceptor as any).onError).toHaveLength(1);
 
@@ -394,7 +396,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockRejectedValue(mockError);
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchError(callback);
       interceptor.attach();
 
@@ -415,7 +417,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.attach();
 
@@ -445,7 +447,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.attach();
 
@@ -460,7 +462,7 @@ describe('NetworkInterceptor', () => {
       const mockFetch = vi.fn().mockResolvedValue(new Response('test', { status: 200 }));
 
       vi.stubGlobal('fetch', mockFetch);
-      const interceptor = new NetworkInterceptor();
+      const interceptor = NetworkInterceptor.getInstance();
       interceptor.onFetchRequest(onRequest);
       interceptor.attach();
 

@@ -8,7 +8,9 @@ describe('XHRInterceptor', () => {
 
   beforeEach(() => {
     originalXHR = window.XMLHttpRequest;
-    interceptor = new XHRInterceptor();
+    // Reset singleton to ensure clean state for each test
+    XHRInterceptor.resetInstance();
+    interceptor = XHRInterceptor.getInstance();
   });
 
   afterEach(() => {
@@ -75,7 +77,7 @@ describe('XHRInterceptor', () => {
         xhrInstance.send();
         // Manually trigger onload for test
         setTimeout(() => {
-          if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+          xhrInstance.dispatchEvent(new ProgressEvent('load'));
         }, 10);
       });
     });
@@ -394,7 +396,7 @@ describe('XHRInterceptor', () => {
       // Manually trigger load after delay
       xhrInstance.send();
       setTimeout(() => {
-        if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+        xhrInstance.dispatchEvent(new ProgressEvent('load'));
       }, delay + 10);
 
       await loadPromise;
@@ -422,7 +424,7 @@ describe('XHRInterceptor', () => {
 
       xhrInstance.send();
       setTimeout(() => {
-        if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+        xhrInstance.dispatchEvent(new ProgressEvent('load'));
       }, 10);
 
       await loadPromise;
@@ -461,7 +463,7 @@ describe('XHRInterceptor', () => {
           setTimeout(
             () => {
               (xhrInstance as any).status = testCase.status;
-              if (xhrInstance.onload) xhrInstance.onload(new ProgressEvent('load'));
+              xhrInstance.dispatchEvent(new ProgressEvent('load'));
             },
             10,
             testCase
@@ -501,7 +503,7 @@ describe('onXHRError()', () => {
     xhrInstance.send();
     // Manually trigger error
     setTimeout(() => {
-      if (xhrInstance.onerror) xhrInstance.onerror(new ProgressEvent('error'));
+      xhrInstance.dispatchEvent(new ProgressEvent('error'));
     }, 10);
 
     await errorPromise;
@@ -529,7 +531,7 @@ describe('onXHRError()', () => {
 
     xhrInstance.send();
     setTimeout(() => {
-      if (xhrInstance.onerror) xhrInstance.onerror(new ProgressEvent('error'));
+      xhrInstance.dispatchEvent(new ProgressEvent('error'));
     }, 1);
 
     await errorPromise;
@@ -555,7 +557,7 @@ describe('onXHRError()', () => {
     };
     xhrInstance.send('{"test":"data"}');
     setTimeout(() => {
-      if (xhrInstance.onerror) xhrInstance.onerror(new ProgressEvent('error'));
+      xhrInstance.dispatchEvent(new ProgressEvent('error'));
     }, 1);
   });
 });
@@ -656,7 +658,7 @@ describe('removeXHRResponse()', () => {
 
     xhr1.send();
     setTimeout(() => {
-      if (xhr1.onload) xhr1.onload(new ProgressEvent('load'));
+      xhr1.dispatchEvent(new ProgressEvent('load'));
     }, 10);
 
     await responsePromise1;
@@ -676,7 +678,7 @@ describe('removeXHRResponse()', () => {
 
     xhr2.send();
     setTimeout(() => {
-      if (xhr2.onload) xhr2.onload(new ProgressEvent('load'));
+      xhr2.dispatchEvent(new ProgressEvent('load'));
     }, 10);
 
     await responsePromise2;
@@ -722,7 +724,7 @@ describe('removeXHRError()', () => {
 
     xhr1.send();
     setTimeout(() => {
-      if (xhr1.onerror) xhr1.onerror(new ProgressEvent('error'));
+      xhr1.dispatchEvent(new ProgressEvent('error'));
     }, 10);
 
     await errorPromise1;
@@ -742,7 +744,7 @@ describe('removeXHRError()', () => {
 
     xhr2.send();
     setTimeout(() => {
-      if (xhr2.onerror) xhr2.onerror(new ProgressEvent('error'));
+      xhr2.dispatchEvent(new ProgressEvent('error'));
     }, 10);
 
     await errorPromise2;

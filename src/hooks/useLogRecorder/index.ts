@@ -34,12 +34,12 @@ export function useLogRecorder(
 
   const consoleInterceptor = useMemo(() => ConsoleInterceptor.getInstance(), []);
   const networkInterceptor = useMemo(
-    () => new NetworkInterceptor({ excludeUrls: config.excludeUrls }),
-    [config.excludeUrls]
+    () => NetworkInterceptor.getInstance({ excludeUrls: config.excludeUrls }),
+    []
   );
   const xhrInterceptor = useMemo(
-    () => new XHRInterceptor({ excludeUrls: config.excludeUrls }),
-    [config.excludeUrls]
+    () => XHRInterceptor.getInstance({ excludeUrls: config.excludeUrls }),
+    []
   );
 
   const logOperations = useMemo(
@@ -223,6 +223,10 @@ export function useLogRecorder(
 
       networkInterceptor.attach();
       cleanupFns.push(() => {
+        // Clear all pending timeouts and the map to prevent memory leaks
+        requestIdMap.forEach((req) => clearTimeout(req.timeoutId));
+        requestIdMap.clear();
+
         networkInterceptor.removeFetchRequest(fetchRequestCallback);
         networkInterceptor.removeFetchResponse(fetchResponseCallback);
         networkInterceptor.removeFetchError(fetchErrorCallback);
@@ -332,6 +336,10 @@ export function useLogRecorder(
 
       xhrInterceptor.attach();
       cleanupFns.push(() => {
+        // Clear all pending timeouts and the map to prevent memory leaks
+        xhrRequestIdMap.forEach((req) => clearTimeout(req.timeoutId));
+        xhrRequestIdMap.clear();
+
         xhrInterceptor.removeXHRRequest(xhrRequestCallback);
         xhrInterceptor.removeXHRResponse(xhrResponseCallback);
         xhrInterceptor.removeXHRError(xhrErrorCallback);

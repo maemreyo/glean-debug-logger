@@ -8,6 +8,8 @@ interface XHRRequestConfig {
 }
 
 export class XHRInterceptor {
+  private static instance: XHRInterceptor | null = null;
+
   private originalXHR: typeof XMLHttpRequest;
   private onRequest: ((config: XHRRequestConfig) => void)[];
   private onResponse: ((config: XHRRequestConfig, status: number, duration: number) => void)[];
@@ -38,6 +40,36 @@ export class XHRInterceptor {
     this.excludeUrls = (options.excludeUrls || []).map((url) => new RegExp(url));
     this.originalOpen = this.originalXHR.prototype.open;
     this.originalSend = this.originalXHR.prototype.send;
+  }
+
+  static getInstance(options?: { excludeUrls?: string[] }): XHRInterceptor {
+    if (!XHRInterceptor.instance) {
+      XHRInterceptor.instance = new XHRInterceptor(options);
+    } else if (options?.excludeUrls) {
+      // Update excludeUrls if provided
+      XHRInterceptor.instance.excludeUrls = options.excludeUrls.map((url) => new RegExp(url));
+    }
+    return XHRInterceptor.instance;
+  }
+
+  /**
+   * Reset the singleton instance.
+   * This is primarily intended for testing purposes to ensure clean state between tests.
+   */
+  static resetInstance(): void {
+    if (XHRInterceptor.instance) {
+      // Forcefully restore original XHR prototype even if callbacks remain
+      // This is critical for test isolation
+      XHRInterceptor.instance.originalXHR.prototype.open = XHRInterceptor.instance.originalOpen;
+      XHRInterceptor.instance.originalXHR.prototype.send = XHRInterceptor.instance.originalSend;
+      XHRInterceptor.instance.isAttached = false;
+
+      // Clear all callbacks
+      XHRInterceptor.instance.onRequest = [];
+      XHRInterceptor.instance.onResponse = [];
+      XHRInterceptor.instance.onError = [];
+    }
+    XHRInterceptor.instance = null;
   }
 
   attach(): void {
@@ -86,27 +118,20 @@ export class XHRInterceptor {
       if (config) {
         config.body = body;
 
-        const originalOnLoad = this.onload;
-        const originalOnError = this.onerror;
-
-        this.onload = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+        // Use addEventListener instead of overwriting onload/onerror
+        // This prevents conflicts with app code that sets these handlers
+        this.addEventListener('load', function (this: XMLHttpRequest) {
           const duration = Date.now() - config.startTime;
           for (const cb of interceptor.onResponse) {
             cb(config, this.status, duration);
           }
-          if (originalOnLoad) {
-            originalOnLoad.call(this, ev);
-          }
-        };
+        });
 
-        this.onerror = function (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) {
+        this.addEventListener('error', function (this: XMLHttpRequest) {
           for (const cb of interceptor.onError) {
             cb(config, new Error('XHR Error'));
           }
-          if (originalOnError) {
-            originalOnError.call(this, ev);
-          }
-        };
+        });
       }
 
       return interceptor.originalSend.call(this, body);
@@ -114,10 +139,17 @@ export class XHRInterceptor {
   }
 
   detach(): void {
-    if (!this.isAttached) return;
-    this.isAttached = false;
-    this.originalXHR.prototype.open = this.originalOpen;
-    this.originalXHR.prototype.send = this.originalSend;
+    // Only detach if no callbacks remain
+    if (
+      this.onRequest.length === 0 &&
+      this.onResponse.length === 0 &&
+      this.onError.length === 0
+    ) {
+      if (!this.isAttached) return;
+      this.isAttached = false;
+      this.originalXHR.prototype.open = this.originalOpen;
+      this.originalXHR.prototype.send = this.originalSend;
+    }
   }
 
   onXHRRequest(callback: (config: XHRRequestConfig) => void): void {
