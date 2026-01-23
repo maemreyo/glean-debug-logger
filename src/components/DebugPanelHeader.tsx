@@ -213,7 +213,6 @@ export const DebugPanelHeader = forwardRef<HTMLButtonElement, DebugPanelHeaderPr
             <DropdownMenu.Root
               open={isSettingsOpen}
               onOpenChange={(open) => {
-                console.log('[DebugPanelHeader] Dropdown onOpenChange:', open);
                 open ? openSettings() : closeSettings();
               }}
             >
