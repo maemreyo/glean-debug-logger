@@ -37,4 +37,11 @@ export class ConsoleInterceptor {
   onLog(callback: (level: string, args: unknown[]) => void): void {
     this.callbacks.push(callback);
   }
+
+  removeLog(callback: (level: string, args: unknown[]) => void): void {
+    const index = this.callbacks.indexOf(callback);
+    if (index > -1) {
+      this.callbacks.splice(index, 1);
+    }
+  }
 }

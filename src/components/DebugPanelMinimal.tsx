@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLogRecorder } from '../hooks/useLogRecorder/index';
 
 interface DebugPanelMinimalProps {
@@ -11,11 +11,18 @@ export function DebugPanelMinimal({
   fileNameTemplate = 'debug_{timestamp}',
 }: DebugPanelMinimalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [logCount, setLogCount] = useState(0);
   const { downloadLogs, clearLogs, getLogCount } = useLogRecorder({
     fileNameTemplate,
   });
 
-  const logCount = getLogCount();
+  useEffect(() => {
+    setLogCount(getLogCount());
+    const interval = setInterval(() => {
+      setLogCount(getLogCount());
+    }, 100);
+    return () => clearInterval(interval);
+  }, [getLogCount]);
 
   return (
     <>

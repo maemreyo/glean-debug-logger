@@ -46,11 +46,26 @@ export class NetworkInterceptor {
     this.onRequest.push(callback);
   }
 
+  removeFetchRequest(callback: (url: string, options: RequestInit) => void): void {
+    const index = this.onRequest.indexOf(callback);
+    if (index > -1) this.onRequest.splice(index, 1);
+  }
+
   onFetchResponse(callback: (url: string, status: number, duration: number) => void): void {
     this.onResponse.push(callback);
   }
 
+  removeFetchResponse(callback: (url: string, status: number, duration: number) => void): void {
+    const index = this.onResponse.indexOf(callback);
+    if (index > -1) this.onResponse.splice(index, 1);
+  }
+
   onFetchError(callback: (url: string, error: Error) => void): void {
     this.onError.push(callback);
+  }
+
+  removeFetchError(callback: (url: string, error: Error) => void): void {
+    const index = this.onError.indexOf(callback);
+    if (index > -1) this.onError.splice(index, 1);
   }
 }

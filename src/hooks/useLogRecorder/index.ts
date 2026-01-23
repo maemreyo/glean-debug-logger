@@ -123,7 +123,7 @@ export function useLogRecorder(
     if (config.captureConsole) {
       consoleInterceptor.attach();
 
-      consoleInterceptor.onLog((level, args) => {
+      const consoleCallback = (level: string, args: unknown[]) => {
         const data = args
           .map((arg) => {
             if (typeof arg === 'object') {
@@ -143,9 +143,14 @@ export function useLogRecorder(
           time: new Date().toISOString(),
           data: data.substring(0, 5000),
         });
-      });
+      };
 
-      cleanupFns.push(() => consoleInterceptor.detach());
+      consoleInterceptor.onLog(consoleCallback);
+
+      cleanupFns.push(() => {
+        consoleInterceptor.removeLog(consoleCallback);
+        consoleInterceptor.detach();
+      });
     }
 
     if (config.captureFetch) {
@@ -154,7 +159,7 @@ export function useLogRecorder(
         { url: string; method: string; headers: unknown; body: unknown }
       >();
 
-      networkInterceptor.onFetchRequest((url, options) => {
+      const fetchRequestCallback = (url: string, options: RequestInit) => {
         const requestId = generateRequestId();
         let requestBody: unknown = null;
         if (options?.body) {
@@ -189,9 +194,9 @@ export function useLogRecorder(
           body: requestBody,
           time: new Date().toISOString(),
         });
-      });
+      };
 
-      networkInterceptor.onFetchResponse((url, status, duration) => {
+      const fetchResponseCallback = (url: string, status: number, duration: number) => {
         for (const [requestId, reqInfo] of requestIdMap.entries()) {
           if (reqInfo.url === url) {
             requestIdMap.delete(requestId);
@@ -208,9 +213,9 @@ export function useLogRecorder(
             break;
           }
         }
-      });
+      };
 
-      networkInterceptor.onFetchError((url, error) => {
+      const fetchErrorCallback = (url: string, error: Error) => {
         for (const [requestId, reqInfo] of requestIdMap.entries()) {
           if (reqInfo.url === url) {
             requestIdMap.delete(requestId);
@@ -225,14 +230,28 @@ export function useLogRecorder(
             break;
           }
         }
-      });
+      };
+
+      networkInterceptor.onFetchRequest(fetchRequestCallback);
+      networkInterceptor.onFetchResponse(fetchResponseCallback);
+      networkInterceptor.onFetchError(fetchErrorCallback);
 
       networkInterceptor.attach();
-      cleanupFns.push(() => networkInterceptor.detach());
+      cleanupFns.push(() => {
+        networkInterceptor.removeFetchRequest(fetchRequestCallback);
+        networkInterceptor.removeFetchResponse(fetchResponseCallback);
+        networkInterceptor.removeFetchError(fetchErrorCallback);
+        networkInterceptor.detach();
+      });
     }
 
     if (config.captureXHR) {
-      xhrInterceptor.onXHRRequest((xhrConfig) => {
+      const xhrRequestCallback = (xhrConfig: {
+        method: string;
+        url: string;
+        headers: Record<string, string>;
+        body: unknown;
+      }) => {
         addLog({
           type: 'XHR_REQ',
           id: generateRequestId(),
@@ -242,9 +261,18 @@ export function useLogRecorder(
           body: xhrConfig.body,
           time: new Date().toISOString(),
         });
-      });
+      };
 
-      xhrInterceptor.onXHRResponse((xhrConfig, status, duration) => {
+      const xhrResponseCallback = (
+        xhrConfig: {
+          method: string;
+          url: string;
+          headers: Record<string, string>;
+          body: unknown;
+        },
+        status: number,
+        duration: number
+      ) => {
         addLog({
           type: 'XHR_RES',
           id: generateRequestId(),
@@ -255,9 +283,17 @@ export function useLogRecorder(
           body: '[Response captured by interceptor]',
           time: new Date().toISOString(),
         });
-      });
+      };
 
-      xhrInterceptor.onXHRError((xhrConfig, error) => {
+      const xhrErrorCallback = (
+        xhrConfig: {
+          method: string;
+          url: string;
+          headers: Record<string, string>;
+          body: unknown;
+        },
+        error: Error
+      ) => {
         addLog({
           type: 'XHR_ERR',
           id: generateRequestId(),
@@ -266,10 +302,19 @@ export function useLogRecorder(
           duration: '[unknown]ms',
           time: new Date().toISOString(),
         });
-      });
+      };
+
+      xhrInterceptor.onXHRRequest(xhrRequestCallback);
+      xhrInterceptor.onXHRResponse(xhrResponseCallback);
+      xhrInterceptor.onXHRError(xhrErrorCallback);
 
       xhrInterceptor.attach();
-      cleanupFns.push(() => xhrInterceptor.detach());
+      cleanupFns.push(() => {
+        xhrInterceptor.removeXHRRequest(xhrRequestCallback);
+        xhrInterceptor.removeXHRResponse(xhrResponseCallback);
+        xhrInterceptor.removeXHRError(xhrErrorCallback);
+        xhrInterceptor.detach();
+      });
     }
 
     // Clear persisted logs on page unload if persistAcrossReloads is false

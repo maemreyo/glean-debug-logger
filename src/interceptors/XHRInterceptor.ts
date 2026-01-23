@@ -117,13 +117,30 @@ export class XHRInterceptor {
     this.onRequest.push(callback);
   }
 
+  removeXHRRequest(callback: (config: XHRRequestConfig) => void): void {
+    const index = this.onRequest.indexOf(callback);
+    if (index > -1) this.onRequest.splice(index, 1);
+  }
+
   onXHRResponse(
     callback: (config: XHRRequestConfig, status: number, duration: number) => void
   ): void {
     this.onResponse.push(callback);
   }
 
+  removeXHRResponse(
+    callback: (config: XHRRequestConfig, status: number, duration: number) => void
+  ): void {
+    const index = this.onResponse.indexOf(callback);
+    if (index > -1) this.onResponse.splice(index, 1);
+  }
+
   onXHRError(callback: (config: XHRRequestConfig, error: Error) => void): void {
     this.onError.push(callback);
+  }
+
+  removeXHRError(callback: (config: XHRRequestConfig, error: Error) => void): void {
+    const index = this.onError.indexOf(callback);
+    if (index > -1) this.onError.splice(index, 1);
   }
 }
